@@ -15,6 +15,7 @@ def main():
     parser.add_argument('--arch', dest='architecture', default='amd64')
     parser.add_argument('--password', dest='root_password')  # TODO
     parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--quiet', action='store_true')
 
     distros = parser.add_argument_group('Choice of distribution')
     distros.add_argument('--debian', dest='distribution', action='store_const', const=DISTRO_KEY, required=True)
@@ -32,7 +33,13 @@ def main():
     options = parser.parse_args()
 
     messenger = Messenger(bool(options.verbose))
-    executor = Executor(messenger)
+
+    if options.quiet:
+        child_process_stdout = open('/dev/null', 'w')
+    else:
+        child_process_stdout = None
+
+    executor = Executor(messenger, stdout=child_process_stdout)
 
     bootstrap = BootstrapDebian(
             messenger,
@@ -48,6 +55,9 @@ def main():
             os.path.abspath(options.target_path),
             )
     bootstrap.run()
+
+    if options.quiet:
+        child_process_stdout.close()
 
 
 if __name__ == '__main__':
