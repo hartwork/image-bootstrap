@@ -17,6 +17,9 @@ def main():
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--quiet', action='store_true')
 
+    commands = parser.add_argument_group('Command names')
+    commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install', default='grub2-install')
+
     distros = parser.add_argument_group('Choice of distribution')
     distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True)
 
@@ -53,6 +56,7 @@ def main():
             options.scripts_dir_chroot and os.path.abspath(options.scripts_dir_chroot),
             options.scripts_dir_post and os.path.abspath(options.scripts_dir_post),
             os.path.abspath(options.target_path),
+            options.command_grub2_install,
             )
     bootstrap.check_for_commands()
     bootstrap.run()

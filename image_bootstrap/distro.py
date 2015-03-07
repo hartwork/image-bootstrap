@@ -28,7 +28,6 @@ _COMMAND_BLKID = 'blkid'
 _COMMAND_CHMOD = 'chmod'
 COMMAND_CHROOT = 'chroot'
 _COMMAND_CP = 'cp'
-_COMMAND_GRUB_INSTALL = 'grub-install'
 _COMMAND_KPARTX = 'kpartx'
 _COMMAND_MKDIR = 'mkdir'
 _COMMAND_MKFS_EXT4 = 'mkfs.ext4'
@@ -51,6 +50,7 @@ class BootstrapDistroAgnostic(object):
             abs_scripts_dir_chroot,
             abs_scripts_dir_post,
             abs_target_path,
+            command_grub2_install,
             ):
         self._messenger = messenger
         self._executor = executor
@@ -62,6 +62,8 @@ class BootstrapDistroAgnostic(object):
         self._abs_scripts_dir_post = abs_scripts_dir_post
         self._abs_target_path = abs_target_path
 
+        self._command_grub2_install = command_grub2_install
+
         self._abs_mountpoint = None
         self._abs_first_partition_device = None
         self._first_partition_uuid = None
@@ -72,7 +74,6 @@ class BootstrapDistroAgnostic(object):
                 _COMMAND_CHMOD,
                 COMMAND_CHROOT,
                 _COMMAND_CP,
-                _COMMAND_GRUB_INSTALL,
                 _COMMAND_KPARTX,
                 _COMMAND_MKDIR,
                 _COMMAND_MKFS_EXT4,
@@ -82,12 +83,20 @@ class BootstrapDistroAgnostic(object):
                 _COMMAND_RMDIR,
                 _COMMAND_SED,
                 _COMMAND_UMOUNT,
+                self._command_grub2_install,
                 ))
 
     def check_for_commands(self):
+        missing_files = []
         missing_commands = []
         dirs = os.environ['PATH'].split(':')
         for command in sorted(set(self.get_commands_to_check_for())):
+            if command.startswith('/'):
+                abs_path = command
+                if not os.path.exists(abs_path):
+                    missing_files.append(abs_path)
+                continue
+
             assert not command.startswith('/')
             for _dir in dirs:
                 abs_path = os.path.join(_dir, command)
@@ -97,6 +106,11 @@ class BootstrapDistroAgnostic(object):
             else:
                 missing_commands.append(command)
                 self._messenger.error('Checking for %s... NOT FOUND' % command)
+
+        if missing_files:
+            raise OSError(errno.ENOENT, 'File "%s" not found.' \
+                % missing_files[0])
+
         if missing_commands:
             raise OSError(errno.ENOENT, 'Command "%s" not found in PATH.' \
                 % missing_commands[0])
@@ -227,7 +241,7 @@ class BootstrapDistroAgnostic(object):
 
     def _install_grub(self):
         cmd = [
-                _COMMAND_GRUB_INSTALL,
+                self._command_grub2_install,
                 '--boot-directory',
                 os.path.join(self._abs_mountpoint, 'boot'),
                 self._abs_target_path,

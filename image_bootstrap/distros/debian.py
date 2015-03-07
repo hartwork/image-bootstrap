@@ -24,6 +24,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
             abs_scripts_dir_chroot,
             abs_scripts_dir_post,
             abs_target_path,
+            command_grub2_install,
             ):
         super(BootstrapDebian, self).__init__(
                 messenger,
@@ -35,6 +36,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 abs_scripts_dir_chroot,
                 abs_scripts_dir_post,
                 abs_target_path,
+                command_grub2_install,
                 )
         self._release = debian_release
         self._mirror_url = debian_mirror_url
