@@ -49,9 +49,9 @@ def main():
             options.root_password,
             options.debian_release,
             options.debian_mirror_url,
-            os.path.abspath(options.scripts_dir_pre),
-            os.path.abspath(options.scripts_dir_chroot),
-            os.path.abspath(options.scripts_dir_post),
+            options.scripts_dir_pre and os.path.abspath(options.scripts_dir_pre),
+            options.scripts_dir_chroot and os.path.abspath(options.scripts_dir_chroot),
+            options.scripts_dir_post and os.path.abspath(options.scripts_dir_post),
             os.path.abspath(options.target_path),
             )
     bootstrap.check_for_commands()
