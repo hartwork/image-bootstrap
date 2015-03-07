@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+import errno
 import os
 import re
 import subprocess
@@ -21,6 +22,22 @@ _NON_DISK_MOUNT_TASKS = (
         )
 
 _SANE_UUID_CHECKER = re.compile('^[a-f0-9][a-f0-9-]{34}[a-f0-9]$')
+
+
+_COMMAND_BLKID = 'blkid'
+_COMMAND_CHMOD = 'chmod'
+COMMAND_CHROOT = 'chroot'
+_COMMAND_CP = 'cp'
+_COMMAND_GRUB_INSTALL = 'grub-install'
+_COMMAND_KPARTX = 'kpartx'
+_COMMAND_MKDIR = 'mkdir'
+_COMMAND_MKFS_EXT4 = 'mkfs.ext4'
+_COMMAND_MOUNT = 'mount'
+_COMMAND_PARTED = 'parted'
+_COMMAND_RM = 'rm'
+_COMMAND_RMDIR = 'rmdir'
+_COMMAND_SED = 'sed'
+_COMMAND_UMOUNT = 'umount'
 
 
 class BootstrapDistroAgnostic(object):
@@ -49,9 +66,44 @@ class BootstrapDistroAgnostic(object):
         self._abs_first_partition_device = None
         self._first_partition_uuid = None
 
+    def get_commands_to_check_for(self):
+        return iter((
+                _COMMAND_BLKID,
+                _COMMAND_CHMOD,
+                COMMAND_CHROOT,
+                _COMMAND_CP,
+                _COMMAND_GRUB_INSTALL,
+                _COMMAND_KPARTX,
+                _COMMAND_MKDIR,
+                _COMMAND_MKFS_EXT4,
+                _COMMAND_MOUNT,
+                _COMMAND_PARTED,
+                _COMMAND_RM,
+                _COMMAND_RMDIR,
+                _COMMAND_SED,
+                _COMMAND_UMOUNT,
+                ))
+
+    def check_for_commands(self):
+        missing_commands = []
+        dirs = os.environ['PATH'].split(':')
+        for command in sorted(set(self.get_commands_to_check_for())):
+            assert not command.startswith('/')
+            for _dir in dirs:
+                abs_path = os.path.join(_dir, command)
+                if os.path.exists(abs_path):
+                    self._messenger.info('Checking for %s... %s' % (command, abs_path))
+                    break
+            else:
+                missing_commands.append(command)
+                self._messenger.error('Checking for %s... NOT FOUND' % command)
+        if missing_commands:
+            raise OSError(errno.ENOENT, 'Command "%s" not found in PATH.' \
+                % missing_commands[0])
+
     def _partition_device(self):
         cmd_mklabel = [
-                'parted',
+                _COMMAND_PARTED,
                 '--script',
                 self._abs_target_path,
                 'mklabel', 'msdos',
@@ -59,7 +111,7 @@ class BootstrapDistroAgnostic(object):
         self._executor.check_call(cmd_mklabel)
 
         cmd_mkpart = [
-                'parted',
+                _COMMAND_PARTED,
                 '--script',
                 self._abs_target_path,
                 'mkpart', 'primary', 'ext4', '0%', '100%',
@@ -67,7 +119,7 @@ class BootstrapDistroAgnostic(object):
         self._executor.check_call(cmd_mkpart)
 
         cmd_boot_flag = [
-                'parted',
+                _COMMAND_PARTED,
                 '--script',
                 self._abs_target_path,
                 'set', '1', 'boot', 'on',
@@ -76,7 +128,7 @@ class BootstrapDistroAgnostic(object):
 
     def _kpartx_minus_a(self):
         cmd_list = [
-                'kpartx',
+                _COMMAND_KPARTX,
                 '-l',
                 '-p', 'p',
                 self._abs_target_path,
@@ -89,7 +141,7 @@ class BootstrapDistroAgnostic(object):
             raise XXXXXXXXXXXXXXXXXXXXXXXXX
 
         cmd_add = [
-                'kpartx',
+                _COMMAND_KPARTX,
                 '-a',
                 '-p', 'p',
                 '-s',
@@ -102,7 +154,7 @@ class BootstrapDistroAgnostic(object):
 
     def _format_partitions(self):
         cmd = [
-                'mkfs.ext4',
+                _COMMAND_MKFS_EXT4,
                 self._abs_first_partition_device,
                 ]
         self._executor.check_call(cmd)
@@ -112,7 +164,7 @@ class BootstrapDistroAgnostic(object):
 
     def _mount_disk_chroot_mounts(self):
         cmd = [
-                'mount',
+                _COMMAND_MOUNT,
                 self._abs_first_partition_device,
                 self._abs_mountpoint,
                 ]
@@ -123,7 +175,7 @@ class BootstrapDistroAgnostic(object):
 
     def _gather_first_partition_uuid(self):
         cmd_blkid = [
-                'blkid',
+                _COMMAND_BLKID,
                 '-o', 'value',
                 '-s', 'UUID',
                 self._abs_first_partition_device,
@@ -141,7 +193,7 @@ class BootstrapDistroAgnostic(object):
 
     def _fix_grub_cfg_root_device(self):
         cmd_sed = [
-                'sed',
+                _COMMAND_SED,
                 's,root=[^ ]\+,root=UUID=%s,g' % self._first_partition_uuid,
                 '-i', os.path.join(self._abs_mountpoint, 'boot', 'grub', 'grub.cfg'),
                 ]
@@ -164,7 +216,7 @@ class BootstrapDistroAgnostic(object):
     def _mount_nondisk_chroot_mounts(self):
         for source, options, target in _NON_DISK_MOUNT_TASKS:
             cmd = [
-                    'mount',
+                    _COMMAND_MOUNT,
                     source,
                     ] \
                     + options \
@@ -175,7 +227,7 @@ class BootstrapDistroAgnostic(object):
 
     def _install_grub(self):
         cmd = [
-                'grub-install',
+                _COMMAND_GRUB_INSTALL,
                 '--boot-directory',
                 os.path.join(self._abs_mountpoint, 'boot'),
                 self._abs_target_path,
@@ -190,7 +242,7 @@ class BootstrapDistroAgnostic(object):
 
     def _copy_resolv_conf(self):
         cmd = [
-                'cp',
+                _COMMAND_CP,
                 '/etc/resolv.conf',
                 os.path.join(self._abs_mountpoint, 'etc/resolv.conf'),
                 ]
@@ -199,7 +251,7 @@ class BootstrapDistroAgnostic(object):
     def _copy_chroot_scripts(self):
         abs_path_parent = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR)
         cmd_mkdir = [
-                'mkdir',
+                _COMMAND_MKDIR,
                 abs_path_parent,
                 ]
         self._executor.check_call(cmd_mkdir)
@@ -207,13 +259,13 @@ class BootstrapDistroAgnostic(object):
             abs_path_source = os.path.join(self._abs_scripts_dir_chroot, basename)
             abs_path_target = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR, basename)
             cmd_copy = [
-                    'cp',
+                    _COMMAND_CP,
                     abs_path_source,
                     abs_path_target,
                     ]
             self._executor.check_call(cmd_copy)
             cmd_chmod = [
-                    'chmod',
+                    _COMMAND_CHMOD,
                     'a+x',
                     abs_path_target,
                     ]
@@ -226,7 +278,7 @@ class BootstrapDistroAgnostic(object):
                 }
         for basename in os.listdir(self._abs_scripts_dir_chroot):
             cmd_run = [
-                    'chroot',
+                    COMMAND_CHROOT,
                     self._abs_mountpoint,
                     os.path.join('/', _CHROOT_SCRIPT_TARGET_DIR, basename),
                     ]
@@ -236,21 +288,21 @@ class BootstrapDistroAgnostic(object):
         for basename in os.listdir(self._abs_scripts_dir_chroot):
             abs_path_target = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR, basename)
             cmd_rm = [
-                    'rm',
+                    _COMMAND_RM,
                     abs_path_target,
                     ]
             self._executor.check_call(cmd_rm)
 
         abs_path_parent = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR)
         cmd_rmdir = [
-                'rmdir',
+                _COMMAND_RMDIR,
                 abs_path_parent,
                 ]
         self._executor.check_call(cmd_rmdir)
 
     def _try_unmounting(self, abs_path):
         cmd = [
-                'umount',
+                _COMMAND_UMOUNT,
                 abs_path,
                 ]
         for i in range(3):
@@ -281,7 +333,7 @@ class BootstrapDistroAgnostic(object):
 
     def _kpartx_minus_d(self):
         cmd = [
-                'kpartx',
+                _COMMAND_KPARTX,
                 '-d',
                 '-p', 'p',
                 self._abs_target_path,

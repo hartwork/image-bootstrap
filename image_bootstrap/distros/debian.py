@@ -3,10 +3,12 @@
 
 from __future__ import print_function
 
-from image_bootstrap.distro import BootstrapDistroAgnostic
+from image_bootstrap.distro import BootstrapDistroAgnostic, COMMAND_CHROOT
 
 
 DISTRO_KEY = 'debian'
+
+_COMMAND_DEBOOTSTRAP = 'debootstrap'
 
 
 class BootstrapDebian(BootstrapDistroAgnostic):
@@ -37,6 +39,14 @@ class BootstrapDebian(BootstrapDistroAgnostic):
         self._release = debian_release
         self._mirror_url = debian_mirror_url
 
+    def get_commands_to_check_for(self):
+        return iter(
+                list(super(BootstrapDebian, self).get_commands_to_check_for())
+                + [
+                    COMMAND_CHROOT,
+                    _COMMAND_DEBOOTSTRAP,
+                ])
+
     def run_directory_bootstrap(self):
         _extra_packages = (
                 'grub2-common',  # for update-grub
@@ -44,7 +54,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 'linux-image-%s' % self._architecture,
                 )
         cmd = [
-                'debootstrap',
+                _COMMAND_DEBOOTSTRAP,
                 '--arch', self._architecture,
                 '--include=%s' % ','.join(_extra_packages),
                 self._release,
@@ -55,7 +65,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
 
     def generate_grub_cfg_from_inside_chroot(self):
         cmd = [
-                'chroot',
+                COMMAND_CHROOT,
                 self._abs_mountpoint,
                 'update-grub',
                 ]
@@ -63,7 +73,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
 
     def generate_initramfs_from_inside_chroot(self):
         cmd = [
-                'chroot',
+                COMMAND_CHROOT,
                 self._abs_mountpoint,
                 'update-initramfs',
                 '-u',

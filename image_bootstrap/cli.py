@@ -54,6 +54,7 @@ def main():
             os.path.abspath(options.scripts_dir_post),
             os.path.abspath(options.target_path),
             )
+    bootstrap.check_for_commands()
     bootstrap.run()
 
     if options.quiet:
