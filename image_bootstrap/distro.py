@@ -76,7 +76,7 @@ class BootstrapDistroAgnostic(object):
 
     def _kpartx_minus_a(self):
         cmd_list = [
-        'sudo',    'kpartx',
+                'kpartx',
                 '-l',
                 '-p', 'p',
                 self._abs_target_path,
