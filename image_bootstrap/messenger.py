@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import re
+import sys
 
 
 _NEEDS_ESCAPING = re.compile('([!`"\'$ \\\\])')
@@ -20,3 +21,11 @@ class Messenger(object):
         if not self._verbose:
             return
         print('# %s' % ' '.join((self.escape_shell(e) for e in argv)))
+
+    def info(self, text):
+        if not self._verbose:
+            return
+        print(text)
+
+    def error(self, text):
+        print(text, file=sys.stderr)
