@@ -4,7 +4,7 @@
 import os
 from argparse import ArgumentParser
 
-from image_bootstrap.distros.debian import BootstrapDebian, DISTRO_KEY
+from image_bootstrap.distros.debian import BootstrapDebian
 from image_bootstrap.messenger import Messenger
 from image_bootstrap.executor import Executor
 
@@ -18,7 +18,7 @@ def main():
     parser.add_argument('--quiet', action='store_true')
 
     distros = parser.add_argument_group('Choice of distribution')
-    distros.add_argument('--debian', dest='distribution', action='store_const', const=DISTRO_KEY, required=True)
+    distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True)
 
     debian = parser.add_argument_group('Debian')
     debian.add_argument('--release', dest='debian_release', default='wheezy', choices=['wheezy', 'jessie', 'sid'])

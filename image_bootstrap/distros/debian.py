@@ -6,12 +6,12 @@ from __future__ import print_function
 from image_bootstrap.distro import BootstrapDistroAgnostic, COMMAND_CHROOT
 
 
-DISTRO_KEY = 'debian'
-
 _COMMAND_DEBOOTSTRAP = 'debootstrap'
 
 
 class BootstrapDebian(BootstrapDistroAgnostic):
+    DISTRO_KEY = 'debian'
+
     def __init__(self,
             messenger,
             executor,
