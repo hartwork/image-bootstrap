@@ -223,6 +223,11 @@ class BootstrapDistroAgnostic(object):
         print('/dev/disk/by-uuid/%s / auto defaults 0 1' % self._first_partition_uuid, file=f)
         f.close()
 
+    def _create_etc_hostname(self):
+        f = open(os.path.join(self._abs_mountpoint, 'etc', 'hostname'), 'w')
+        print(self._hostname, file=f)
+        f.close()
+
     def create_network_configuration(self):
         raise NotImplementedError()
 
@@ -391,6 +396,7 @@ class BootstrapDistroAgnostic(object):
                     self.run_directory_bootstrap()
                     self._set_root_password()
                     self._create_etc_fstab()
+                    self._create_etc_hostname()
                     self.create_network_configuration()
                     self._run_pre_scripts()
                     self._install_grub()
