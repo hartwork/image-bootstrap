@@ -26,6 +26,7 @@ _SANE_UUID_CHECKER = re.compile('^[a-f0-9][a-f0-9-]{34}[a-f0-9]$')
 
 _COMMAND_BLKID = 'blkid'
 _COMMAND_CHMOD = 'chmod'
+_COMMAND_CHPASSWD = 'chpasswd'
 COMMAND_CHROOT = 'chroot'
 _COMMAND_CP = 'cp'
 _COMMAND_KPARTX = 'kpartx'
@@ -72,6 +73,7 @@ class BootstrapDistroAgnostic(object):
         return iter((
                 _COMMAND_BLKID,
                 _COMMAND_CHMOD,
+                _COMMAND_CHPASSWD,
                 COMMAND_CHROOT,
                 _COMMAND_CP,
                 _COMMAND_KPARTX,
@@ -186,6 +188,22 @@ class BootstrapDistroAgnostic(object):
 
     def run_directory_bootstrap(self):
         raise NotImplementedError()
+
+    def _set_root_password(self):
+        if self._root_password is None:
+            return
+
+        cmd = [
+                _COMMAND_CHPASSWD,
+                '--root', self._abs_mountpoint,
+                ]
+        self._messenger.announce_command(cmd)
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+        p.stdin.write('root:%s' % self._root_password)
+        p.stdin.close()
+        p.wait()
+        if p.returncode:
+            raise subprocess.CalledProcessError(p.returncode, cmd)
 
     def _gather_first_partition_uuid(self):
         cmd_blkid = [
@@ -371,6 +389,7 @@ class BootstrapDistroAgnostic(object):
                 self._mount_disk_chroot_mounts()
                 try:
                     self.run_directory_bootstrap()
+                    self._set_root_password()
                     self._create_etc_fstab()
                     self.create_network_configuration()
                     self._run_pre_scripts()
