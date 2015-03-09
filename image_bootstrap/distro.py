@@ -205,6 +205,9 @@ class BootstrapDistroAgnostic(object):
         print('/dev/disk/by-uuid/%s / auto defaults 0 1' % self._first_partition_uuid, file=f)
         f.close()
 
+    def create_network_configuration(self):
+        raise NotImplementedError()
+
     def _fix_grub_cfg_root_device(self):
         cmd_sed = [
                 _COMMAND_SED,
@@ -369,6 +372,7 @@ class BootstrapDistroAgnostic(object):
                 try:
                     self.run_directory_bootstrap()
                     self._create_etc_fstab()
+                    self.create_network_configuration()
                     self._run_pre_scripts()
                     self._install_grub()
                     self._mount_nondisk_chroot_mounts()

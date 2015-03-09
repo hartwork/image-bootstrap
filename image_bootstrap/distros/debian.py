@@ -3,10 +3,22 @@
 
 from __future__ import print_function
 
+import os
+
 from image_bootstrap.distro import BootstrapDistroAgnostic, COMMAND_CHROOT
 
 
 _COMMAND_DEBOOTSTRAP = 'debootstrap'
+
+
+_ETC_NETWORK_INTERFACES_CONTENT = """\
+# interfaces(5) file used by ifup(8) and ifdown(8)
+auto lo
+iface lo inet loopback
+
+allow-hotplug eth0
+iface eth0 inet dhcp
+"""
 
 
 class BootstrapDebian(BootstrapDistroAgnostic):
@@ -64,6 +76,11 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 self._mirror_url,
                 ]
         self._executor.check_call(cmd)
+
+    def create_network_configuration(self):
+        f = open(os.path.join(self._abs_mountpoint, 'etc', 'network', 'interfaces'), 'w')
+        print(_ETC_NETWORK_INTERFACES_CONTENT, file=f)
+        f.close()
 
     def generate_grub_cfg_from_inside_chroot(self):
         cmd = [
