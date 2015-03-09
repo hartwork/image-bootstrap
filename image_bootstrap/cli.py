@@ -24,8 +24,8 @@ def main():
     distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True)
 
     debian = parser.add_argument_group('Debian')
-    debian.add_argument('--release', dest='debian_release', default='wheezy', choices=['wheezy', 'jessie', 'sid'])
-    debian.add_argument('--mirror', dest='debian_mirror_url', default='http://http.debian.net/debian')
+    debian.add_argument('--debian-release', default='wheezy', choices=['wheezy', 'jessie', 'sid'])
+    debian.add_argument('--debian-mirror', dest='debian_mirror_url', default='http://http.debian.net/debian')
 
     parser.add_argument('--scripts-pre', dest='scripts_dir_pre')
     parser.add_argument('--scripts-chroot', dest='scripts_dir_chroot')
