@@ -13,7 +13,7 @@ def main():
     parser = ArgumentParser()
     parser.add_argument('--hostname', required=True)
     parser.add_argument('--arch', dest='architecture', default='amd64')
-    parser.add_argument('--password', dest='root_password')  # TODO
+    parser.add_argument('--password', dest='root_password')
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--quiet', action='store_true')
 
