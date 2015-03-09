@@ -17,10 +17,10 @@ def main():
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--quiet', action='store_true')
 
-    commands = parser.add_argument_group('Command names')
+    commands = parser.add_argument_group('command names')
     commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install', default='grub2-install')
 
-    distros = parser.add_argument_group('Choice of distribution')
+    distros = parser.add_argument_group('choice of distribution')
     distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True)
 
     debian = parser.add_argument_group('Debian')
