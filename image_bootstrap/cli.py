@@ -11,9 +11,9 @@ from image_bootstrap.executor import Executor
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('--hostname', required=True)
+    parser.add_argument('--hostname', required=True, metavar='NAME')
     parser.add_argument('--arch', dest='architecture', default='amd64')
-    parser.add_argument('--password', dest='root_password')
+    parser.add_argument('--password', dest='root_password', metavar='PASSWORD')
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--quiet', action='store_true')
 
@@ -25,11 +25,11 @@ def main():
 
     debian = parser.add_argument_group('Debian')
     debian.add_argument('--debian-release', default='wheezy', choices=['wheezy', 'jessie', 'sid'])
-    debian.add_argument('--debian-mirror', dest='debian_mirror_url', default='http://http.debian.net/debian')
+    debian.add_argument('--debian-mirror', dest='debian_mirror_url', metavar='URL', default='http://http.debian.net/debian')
 
-    parser.add_argument('--scripts-pre', dest='scripts_dir_pre')
-    parser.add_argument('--scripts-chroot', dest='scripts_dir_chroot')
-    parser.add_argument('--scripts-post', dest='scripts_dir_post')
+    parser.add_argument('--scripts-pre', dest='scripts_dir_pre', metavar='DIRECTORY')
+    parser.add_argument('--scripts-chroot', dest='scripts_dir_chroot', metavar='DIRECTORY')
+    parser.add_argument('--scripts-post', dest='scripts_dir_post', metavar='DIRECTORY')
 
     parser.add_argument('target_path', metavar='DEVICE')
 
