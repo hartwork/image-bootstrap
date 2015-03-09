@@ -63,7 +63,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
 
     def run_directory_bootstrap(self):
         _extra_packages = (
-                'grub2-common',  # for update-grub
+                'grub-pc',  # for update-grub
                 'initramfs-tools',  # for update-initramfs
                 'linux-image-%s' % self._architecture,
                 )
