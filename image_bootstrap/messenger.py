@@ -7,7 +7,7 @@ import re
 import sys
 
 
-_NEEDS_ESCAPING = re.compile('([!`"\'$ \\\\])')
+_NEEDS_ESCAPING = re.compile('([!`"\'$ \\\\{}()?*&<>;])')
 
 _IMAGE_BOOSTRAP_PREFIX = 'ib| '
 
