@@ -9,6 +9,7 @@ from image_bootstrap.distro import BootstrapDistroAgnostic, COMMAND_CHROOT
 
 
 _COMMAND_DEBOOTSTRAP = 'debootstrap'
+_COMMAND_FIND = 'find'
 
 
 _ETC_NETWORK_INTERFACES_CONTENT = """\
@@ -59,6 +60,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 + [
                     COMMAND_CHROOT,
                     _COMMAND_DEBOOTSTRAP,
+                    _COMMAND_FIND,
                 ])
 
     def run_directory_bootstrap(self):
@@ -97,5 +99,15 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 'update-initramfs',
                 '-u',
                 '-k', 'all',
+                ]
+        self._executor.check_call(cmd)
+
+    def perform_post_chroot_clean_up(self):
+        cmd = [
+                _COMMAND_FIND,
+                os.path.join(self._abs_mountpoint, 'var', 'cache', 'apt', 'archives'),
+                '-type', 'f',
+                '-name', '*.deb',
+                '-delete',
                 ]
         self._executor.check_call(cmd)

@@ -360,6 +360,9 @@ class BootstrapDistroAgnostic(object):
             abs_path = os.path.join(self._abs_mountpoint, target)
             self._try_unmounting(abs_path)
 
+    def perform_post_chroot_clean_up(self):
+        raise NotImplementedError()
+
     def _run_post_scripts(self):
         env = {
                 'PATH': os.environ['PATH'],
@@ -414,6 +417,7 @@ class BootstrapDistroAgnostic(object):
                                 self._remove_chroot_scripts()
                     finally:
                         self._unmount_nondisk_chroot_mounts()
+                    self.perform_post_chroot_clean_up()
                     self._run_post_scripts()
                 finally:
                     self._unmount_disk_chroot_mounts()
