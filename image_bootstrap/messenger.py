@@ -9,6 +9,8 @@ import sys
 
 _NEEDS_ESCAPING = re.compile('([!`"\'$ \\\\])')
 
+_IMAGE_BOOSTRAP_PREFIX = 'ib| '
+
 
 class Messenger(object):
     def __init__(self, verbose):
@@ -20,12 +22,12 @@ class Messenger(object):
     def announce_command(self, argv):
         if not self._verbose:
             return
-        print('# %s' % ' '.join((self.escape_shell(e) for e in argv)))
+        print(_IMAGE_BOOSTRAP_PREFIX + '# %s' % ' '.join((self.escape_shell(e) for e in argv)))
 
     def info(self, text):
         if not self._verbose:
             return
-        print(text)
+        print(_IMAGE_BOOSTRAP_PREFIX + text)
 
     def error(self, text):
-        print(text, file=sys.stderr)
+        print(_IMAGE_BOOSTRAP_PREFIX + text, file=sys.stderr)
