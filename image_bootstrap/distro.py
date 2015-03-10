@@ -154,7 +154,8 @@ class BootstrapDistroAgnostic(object):
         self._abs_first_partition_device = '/dev/mapper/%s' % device_name
 
         if os.path.exists(self._abs_first_partition_device):
-            raise XXXXXXXXXXXXXXXXXXXXXXXXX
+            raise OSError(errno.EEXIST, "File exists: '%s'" \
+                    % self._abs_first_partition_device)
 
         cmd_add = [
                 _COMMAND_KPARTX,
@@ -166,7 +167,8 @@ class BootstrapDistroAgnostic(object):
         self._executor.check_call(cmd_add)
 
         if not os.path.exists(self._abs_first_partition_device):
-            raise XXXXXXXXXXXXXXXXXXXXXX
+            raise OSError(errno.ENOENT, "No such block device file: '%s'" \
+                    % self._abs_first_partition_device)
 
     def _format_partitions(self):
         cmd = [
@@ -216,7 +218,7 @@ class BootstrapDistroAgnostic(object):
         output = self._executor.check_output(cmd_blkid)
         first_partition_uuid = output.rstrip()
         if not _SANE_UUID_CHECKER.match(first_partition_uuid):
-            raise XXXXXXXXXXXXXXXXXXXXXX
+            raise ValueError('Not a well-formed UUID: "%s"' % first_partition_uuid)
         self._first_partition_uuid = first_partition_uuid
 
     def _create_etc_fstab(self):
