@@ -80,7 +80,9 @@ class BootstrapDebian(BootstrapDistroAgnostic):
         self._executor.check_call(cmd)
 
     def create_network_configuration(self):
-        f = open(os.path.join(self._abs_mountpoint, 'etc', 'network', 'interfaces'), 'w')
+        filename = os.path.join(self._abs_mountpoint, 'etc', 'network', 'interfaces')
+        self._messenger.info('Writing file "%s"...' % filename)
+        f = open(filename, 'w')
         print(_ETC_NETWORK_INTERFACES_CONTENT, file=f)
         f.close()
 

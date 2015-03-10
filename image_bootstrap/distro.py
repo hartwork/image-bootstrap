@@ -177,6 +177,7 @@ class BootstrapDistroAgnostic(object):
 
     def _mkdir_mountpount(self):
         self._abs_mountpoint = tempfile.mkdtemp(dir=_MOUNTPOINT_PARENT_DIR)
+        self._messenger.announce_command(['mkdir', self._abs_mountpoint])
 
     def _mount_disk_chroot_mounts(self):
         cmd = [
@@ -219,12 +220,16 @@ class BootstrapDistroAgnostic(object):
         self._first_partition_uuid = first_partition_uuid
 
     def _create_etc_fstab(self):
-        f = open(os.path.join(self._abs_mountpoint, 'etc', 'fstab'), 'w')
+        filename = os.path.join(self._abs_mountpoint, 'etc', 'fstab')
+        self._messenger.info('Writing file "%s"...' % filename)
+        f = open(filename, 'w')
         print('/dev/disk/by-uuid/%s / auto defaults 0 1' % self._first_partition_uuid, file=f)
         f.close()
 
     def _create_etc_hostname(self):
-        f = open(os.path.join(self._abs_mountpoint, 'etc', 'hostname'), 'w')
+        filename = os.path.join(self._abs_mountpoint, 'etc', 'hostname')
+        self._messenger.info('Writing file "%s"...' % filename)
+        f = open(filename, 'w')
         print(self._hostname, file=f)
         f.close()
 
@@ -384,6 +389,7 @@ class BootstrapDistroAgnostic(object):
         self._executor.check_call(cmd)
 
     def _rmdir_mountpount(self):
+        self._messenger.announce_command(['rmdir', self._abs_mountpoint])
         os.rmdir(self._abs_mountpoint)
 
     def run(self):
