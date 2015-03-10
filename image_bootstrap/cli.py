@@ -64,6 +64,8 @@ def main():
     if options.quiet:
         child_process_stdout.close()
 
+    messenger.info('Done.')
+
 
 if __name__ == '__main__':
     main()
