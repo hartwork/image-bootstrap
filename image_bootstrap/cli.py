@@ -2,15 +2,18 @@
 # Licensed under AGPL v3 or later
 
 import os
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from image_bootstrap.distros.debian import BootstrapDebian
-from image_bootstrap.messenger import Messenger
+from image_bootstrap.messenger import Messenger, BANNER
 from image_bootstrap.executor import Executor
+from image_bootstrap.version import VERSION_STR
 
 
 def main():
-    parser = ArgumentParser()
+    parser = ArgumentParser(epilog=BANNER, formatter_class=RawDescriptionHelpFormatter)
+    parser.add_argument('--version', action='version', version=VERSION_STR)
+
     parser.add_argument('--hostname', required=True, metavar='NAME')
     parser.add_argument('--arch', dest='architecture', default='amd64')
     parser.add_argument('--password', dest='root_password', metavar='PASSWORD')
@@ -36,6 +39,7 @@ def main():
     options = parser.parse_args()
 
     messenger = Messenger(bool(options.verbose))
+    messenger.banner()
 
     if options.quiet:
         child_process_stdout = open('/dev/null', 'w')
