@@ -265,7 +265,7 @@ class BootstrapDistroAgnostic(object):
         self._executor.check_call(cmd_sed)
 
     def _run_scripts_from(self, abs_scripts_dir, env):
-        for basename in os.listdir(abs_scripts_dir):
+        for basename in sorted(os.listdir(abs_scripts_dir)):
             cmd = [os.path.join(abs_scripts_dir, basename)]
             self._executor.check_call(cmd, env=env)
 
