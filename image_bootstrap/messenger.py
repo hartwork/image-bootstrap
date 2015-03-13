@@ -63,7 +63,10 @@ class Messenger(object):
         if not self._verbose:
             return
         text = '# %s' % ' '.join((self.escape_shell(e) for e in argv))
+
+        sys.stderr.flush()
         print(self.colorize(text, Fore.CYAN))
+        sys.stdout.flush()
 
     def info(self, text):
         if not self._verbose:
