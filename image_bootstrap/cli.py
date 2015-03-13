@@ -2,12 +2,18 @@
 # Licensed under AGPL v3 or later
 
 import os
+import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from image_bootstrap.distros.debian import BootstrapDebian
 from image_bootstrap.messenger import Messenger, BANNER
 from image_bootstrap.executor import Executor
 from image_bootstrap.version import VERSION_STR
+
+
+_COLORIZE_NEVER = 'never'
+_COLORIZE_ALWAYS = 'always'
+_COLORIZE_AUTO = 'auto'
 
 
 def main():
@@ -19,6 +25,7 @@ def main():
     parser.add_argument('--password', dest='root_password', metavar='PASSWORD')
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--quiet', action='store_true')
+    parser.add_argument('--color', default=_COLORIZE_AUTO, choices=[_COLORIZE_NEVER, _COLORIZE_ALWAYS, _COLORIZE_AUTO])
 
     commands = parser.add_argument_group('command names')
     commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install', default='grub2-install')
@@ -38,7 +45,12 @@ def main():
 
     options = parser.parse_args()
 
-    messenger = Messenger(bool(options.verbose))
+    if options.color == _COLORIZE_AUTO:
+        colorize = os.isatty(sys.stdout.fileno())
+    else:
+        colorize = options.color == _COLORIZE_ALWAYS
+
+    messenger = Messenger(bool(options.verbose), colorize)
     messenger.banner()
 
     if options.quiet:
