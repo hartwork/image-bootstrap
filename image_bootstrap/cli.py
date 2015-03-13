@@ -3,6 +3,7 @@
 
 import os
 import sys
+import subprocess
 import traceback
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
@@ -92,7 +93,15 @@ def main():
     except BaseException as e:
         if options.debug:
             traceback.print_exc(file=sys.stderr)
-        messenger.error(str(e))
+
+        if isinstance(e, subprocess.CalledProcessError):
+            # Manual work to avoid list square brackets in output
+            command_flat = ' '.join((messenger.escape_shell(e) for e in e.cmd))
+            text = 'Command "%s" returned non-zero exit status %s' % (command_flat, e.returncode)
+        else:
+            text = str(e)
+
+        messenger.error(text)
         sys.exit(1)
 
 
