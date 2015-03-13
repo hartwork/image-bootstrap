@@ -3,6 +3,7 @@
 
 import os
 import sys
+import traceback
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from image_bootstrap.distros.debian import BootstrapDebian
@@ -16,41 +17,7 @@ _COLORIZE_ALWAYS = 'always'
 _COLORIZE_AUTO = 'auto'
 
 
-def main():
-    parser = ArgumentParser(epilog=BANNER, formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('--version', action='version', version=VERSION_STR)
-
-    parser.add_argument('--hostname', required=True, metavar='NAME')
-    parser.add_argument('--arch', dest='architecture', default='amd64')
-    parser.add_argument('--password', dest='root_password', metavar='PASSWORD')
-    parser.add_argument('--verbose', action='store_true')
-    parser.add_argument('--quiet', action='store_true')
-    parser.add_argument('--color', default=_COLORIZE_AUTO, choices=[_COLORIZE_NEVER, _COLORIZE_ALWAYS, _COLORIZE_AUTO])
-
-    commands = parser.add_argument_group('command names')
-    commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install', default='grub2-install')
-
-    distros = parser.add_argument_group('choice of distribution')
-    distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True)
-
-    debian = parser.add_argument_group('Debian')
-    debian.add_argument('--debian-release', default='wheezy', choices=['wheezy', 'jessie', 'sid'])
-    debian.add_argument('--debian-mirror', dest='debian_mirror_url', metavar='URL', default='http://http.debian.net/debian')
-
-    parser.add_argument('--scripts-pre', dest='scripts_dir_pre', metavar='DIRECTORY')
-    parser.add_argument('--scripts-chroot', dest='scripts_dir_chroot', metavar='DIRECTORY')
-    parser.add_argument('--scripts-post', dest='scripts_dir_post', metavar='DIRECTORY')
-
-    parser.add_argument('target_path', metavar='DEVICE')
-
-    options = parser.parse_args()
-
-    if options.color == _COLORIZE_AUTO:
-        colorize = os.isatty(sys.stdout.fileno())
-    else:
-        colorize = options.color == _COLORIZE_ALWAYS
-
-    messenger = Messenger(bool(options.verbose), colorize)
+def _main_inner(messenger, options):
     messenger.banner()
 
     if options.quiet:
@@ -81,6 +48,51 @@ def main():
         child_process_stdout.close()
 
     messenger.info('Done.')
+
+
+def main():
+    parser = ArgumentParser(epilog=BANNER, formatter_class=RawDescriptionHelpFormatter)
+    parser.add_argument('--version', action='version', version=VERSION_STR)
+
+    parser.add_argument('--hostname', required=True, metavar='NAME')
+    parser.add_argument('--arch', dest='architecture', default='amd64')
+    parser.add_argument('--password', dest='root_password', metavar='PASSWORD')
+    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--debug', action='store_true')
+    parser.add_argument('--quiet', action='store_true')
+    parser.add_argument('--color', default=_COLORIZE_AUTO, choices=[_COLORIZE_NEVER, _COLORIZE_ALWAYS, _COLORIZE_AUTO])
+
+    commands = parser.add_argument_group('command names')
+    commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install', default='grub2-install')
+
+    distros = parser.add_argument_group('choice of distribution')
+    distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True)
+
+    debian = parser.add_argument_group('Debian')
+    debian.add_argument('--debian-release', default='wheezy', choices=['wheezy', 'jessie', 'sid'])
+    debian.add_argument('--debian-mirror', dest='debian_mirror_url', metavar='URL', default='http://http.debian.net/debian')
+
+    parser.add_argument('--scripts-pre', dest='scripts_dir_pre', metavar='DIRECTORY')
+    parser.add_argument('--scripts-chroot', dest='scripts_dir_chroot', metavar='DIRECTORY')
+    parser.add_argument('--scripts-post', dest='scripts_dir_post', metavar='DIRECTORY')
+
+    parser.add_argument('target_path', metavar='DEVICE')
+
+    options = parser.parse_args()
+
+    if options.color == _COLORIZE_AUTO:
+        colorize = os.isatty(sys.stdout.fileno())
+    else:
+        colorize = options.color == _COLORIZE_ALWAYS
+
+    messenger = Messenger(bool(options.verbose), colorize)
+    try:
+        _main_inner(messenger, options)
+    except BaseException as e:
+        if options.debug:
+            traceback.print_exc(file=sys.stderr)
+        messenger.error(str(e))
+        sys.exit(1)
 
 
 if __name__ == '__main__':
