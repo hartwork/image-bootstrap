@@ -13,6 +13,8 @@ from image_bootstrap.version import VERSION_STR, RELEASE_DATE_STR
 
 _NEEDS_ESCAPING = re.compile('([!`"\'$ \\\\{}()?*&<>;])')
 
+_GITHUB_HOME_URL = 'https://github.com/hartwork/image-bootstrap'
+
 BANNER = """\
      _                          __             __      __               
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
@@ -22,12 +24,13 @@ BANNER = """\
 
 Software libre licensed under AGPL v3 or later.
 Brought to you by Sebastian Pipping <sebastian@pipping.org>.
-Please report bugs at https://github.com/hartwork/image-bootstrap.  Thank you!\
+Please report bugs at %(github_home)s.  Thank you!\
 """ % {
     '3456789_123456789_': '%*s' \
         % (len('%(3456789_123456789_)s'),
-        'v%s :: %s' % (VERSION_STR, RELEASE_DATE_STR))
-    }
+        'v%s :: %s' % (VERSION_STR, RELEASE_DATE_STR)),
+    'github_home': _GITHUB_HOME_URL,
+}
 
 
 class Messenger(object):
@@ -78,3 +81,7 @@ class Messenger(object):
 
     def gap(self):
         print()
+
+    def encourage_bug_reports(self):
+        print('If this looks like a bug to you, please file a report at %s.  Thank you!' \
+                % _GITHUB_HOME_URL, file=sys.stderr)

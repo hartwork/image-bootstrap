@@ -102,6 +102,7 @@ def main():
             text = str(e)
 
         messenger.error(text)
+        messenger.encourage_bug_reports()
         sys.exit(1)
 
 
