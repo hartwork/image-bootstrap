@@ -42,6 +42,7 @@ def _main_inner(messenger, options):
             options.command_grub2_install,
             )
     bootstrap.check_for_commands()
+    bootstrap.check_script_executability()
     bootstrap.run()
 
     if options.quiet:

@@ -117,6 +117,24 @@ class BootstrapDistroAgnostic(object):
             raise OSError(errno.ENOENT, 'Command "%s" not found in PATH.' \
                 % missing_commands[0])
 
+        self._messenger.gap()
+
+    def check_script_executability(self):
+        for category, abs_scripts_dir in (
+                ('pre-chroot', self._abs_scripts_dir_pre),
+                ('chroot', self._abs_scripts_dir_chroot),
+                ('post-chroot', self._abs_scripts_dir_post),
+                ):
+            if abs_scripts_dir is None:
+                continue
+            self._messenger.info('Checking %s scripts for executablity...' % category)
+            for basename in os.listdir(abs_scripts_dir):
+                abs_filename = os.path.join(abs_scripts_dir, basename)
+                if not os.access(abs_filename, os.X_OK):
+                    raise OSError(errno.EACCES, 'Permission denied, file "%s" not executable' % abs_filename)
+
+        self._messenger.gap()
+
     def _partition_device(self):
         cmd_mklabel = [
                 _COMMAND_PARTED,
