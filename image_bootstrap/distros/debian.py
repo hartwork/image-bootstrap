@@ -8,7 +8,6 @@ import os
 from image_bootstrap.distro import BootstrapDistroAgnostic, COMMAND_CHROOT
 
 
-_COMMAND_DEBOOTSTRAP = 'debootstrap'
 _COMMAND_FIND = 'find'
 
 
@@ -38,6 +37,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
             abs_scripts_dir_post,
             abs_target_path,
             command_grub2_install,
+            command_debootstrap,
             ):
         super(BootstrapDebian, self).__init__(
                 messenger,
@@ -53,14 +53,15 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 )
         self._release = debian_release
         self._mirror_url = debian_mirror_url
+        self._command_debootstrap = command_debootstrap
 
     def get_commands_to_check_for(self):
         return iter(
                 list(super(BootstrapDebian, self).get_commands_to_check_for())
                 + [
                     COMMAND_CHROOT,
-                    _COMMAND_DEBOOTSTRAP,
                     _COMMAND_FIND,
+                    self._command_debootstrap,
                 ])
 
     def run_directory_bootstrap(self):
@@ -70,7 +71,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 'linux-image-%s' % self._architecture,
                 )
         cmd = [
-                _COMMAND_DEBOOTSTRAP,
+                self._command_debootstrap,
                 '--arch', self._architecture,
                 '--include=%s' % ','.join(_extra_packages),
                 self._release,
