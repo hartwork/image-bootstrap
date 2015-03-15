@@ -89,6 +89,8 @@ class BootstrapDistroAgnostic(object):
                 ))
 
     def check_for_commands(self):
+        infos_produced = False
+
         missing_files = []
         missing_commands = []
         dirs = os.environ['PATH'].split(':')
@@ -104,6 +106,7 @@ class BootstrapDistroAgnostic(object):
                 abs_path = os.path.join(_dir, command)
                 if os.path.exists(abs_path):
                     self._messenger.info('Checking for %s... %s' % (command, abs_path))
+                    infos_produced = True
                     break
             else:
                 missing_commands.append(command)
@@ -117,9 +120,12 @@ class BootstrapDistroAgnostic(object):
             raise OSError(errno.ENOENT, 'Command "%s" not found in PATH.' \
                 % missing_commands[0])
 
-        self._messenger.gap()
+        if infos_produced:
+            self._messenger.info_gap()
 
     def check_script_executability(self):
+        infos_produced = False
+
         for category, abs_scripts_dir in (
                 ('pre-chroot', self._abs_scripts_dir_pre),
                 ('chroot', self._abs_scripts_dir_chroot),
@@ -127,13 +133,17 @@ class BootstrapDistroAgnostic(object):
                 ):
             if abs_scripts_dir is None:
                 continue
+
             self._messenger.info('Checking %s scripts for executability...' % category)
+            infos_produced = True
+
             for basename in os.listdir(abs_scripts_dir):
                 abs_filename = os.path.join(abs_scripts_dir, basename)
                 if not os.access(abs_filename, os.X_OK):
                     raise OSError(errno.EACCES, 'Permission denied, file "%s" not executable' % abs_filename)
 
-        self._messenger.gap()
+        if infos_produced:
+            self._messenger.info_gap()
 
     def _partition_device(self):
         cmd_mklabel = [

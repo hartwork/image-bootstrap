@@ -79,7 +79,9 @@ class Messenger(object):
     def error(self, text):
         print(self.colorize('Error: ' + text, Fore.RED, Style.BRIGHT), file=sys.stderr)
 
-    def gap(self):
+    def info_gap(self):
+        if not self._verbose:
+            return
         print()
 
     def encourage_bug_reports(self):
