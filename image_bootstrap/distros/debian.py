@@ -64,11 +64,17 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                     self._command_debootstrap,
                 ])
 
+    def _get_kernel_package_name(self):
+        if self._architecture == 'i386':
+            return 'linux-image-686-pae'
+
+        return 'linux-image-%s' % self._architecture
+
     def run_directory_bootstrap(self):
         _extra_packages = (
                 'grub-pc',  # for update-grub
                 'initramfs-tools',  # for update-initramfs
-                'linux-image-%s' % self._architecture,
+                self._get_kernel_package_name(),
                 )
         cmd = [
                 self._command_debootstrap,
