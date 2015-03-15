@@ -60,28 +60,40 @@ def _main__level_two():
             )
     parser.add_argument('--version', action='version', version=VERSION_STR)
 
-    parser.add_argument('--hostname', required=True, metavar='NAME',
-        help='hostname of virtual machine to install')
-    parser.add_argument('--arch', dest='architecture', default='amd64',
-        help='architecture (e.g. amd64)')
-    parser.add_argument('--password', dest='root_password', metavar='PASSWORD',
-        help='root password to set (default: none / password log-in disabled)')
-    parser.add_argument('--verbose', action='store_true',
-        help='increase verbosity')
-    parser.add_argument('--debug', action='store_true',
-        help='enable debugging')
-    parser.add_argument('--quiet', action='store_true',
-        help='limit output to error messages')
-    parser.add_argument('--color', default=_COLORIZE_AUTO, choices=[_COLORIZE_NEVER, _COLORIZE_ALWAYS, _COLORIZE_AUTO],
+    output = parser.add_argument_group('text output configuration')
+    output.add_argument('--color', default=_COLORIZE_AUTO, choices=[_COLORIZE_NEVER, _COLORIZE_ALWAYS, _COLORIZE_AUTO],
         help='toggle output color (default: %(default)s)')
+    output.add_argument('--debug', action='store_true',
+        help='enable debugging')
+    output.add_argument('--quiet', action='store_true',
+        help='limit output to error messages')
+    output.add_argument('--verbose', action='store_true',
+        help='increase verbosity')
+
+    machine = parser.add_argument_group('machine configuration')
+    machine.add_argument('--arch', dest='architecture', default='amd64',
+        help='architecture (e.g. amd64)')
+    machine.add_argument('--hostname', required=True, metavar='NAME',
+        help='hostname to set')
+    machine.add_argument('--password', dest='root_password', metavar='PASSWORD',
+        help='root password to set (default: none / password log-in disabled)')
+
+    script_dirs = parser.add_argument_group('script integration')
+    script_dirs.add_argument('--scripts-pre', dest='scripts_dir_pre', metavar='DIRECTORY',
+        help='scripts to run prior to chrooting phase')
+    script_dirs.add_argument('--scripts-chroot', dest='scripts_dir_chroot', metavar='DIRECTORY',
+        help='scripts to run during chrooting phase')
+    script_dirs.add_argument('--scripts-post', dest='scripts_dir_post', metavar='DIRECTORY',
+        help='scripts to run after chrooting phase')
+
+    distros = parser.add_argument_group('choice of distribution')
+    distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True,
+        help='select Debian for a distribution')
 
     commands = parser.add_argument_group('command names')
     commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install', default='grub2-install',
         help='override grub2-install command')
 
-    distros = parser.add_argument_group('choice of distribution')
-    distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True,
-        help='select Debian for a distribution')
 
     debian = parser.add_argument_group('Debian')
     debian.add_argument('--debian-release', default='wheezy', choices=['wheezy', 'jessie', 'sid'],
@@ -89,12 +101,6 @@ def _main__level_two():
     debian.add_argument('--debian-mirror', dest='debian_mirror_url', metavar='URL', default='http://http.debian.net/debian',
         help='specify Debian mirror to use')
 
-    parser.add_argument('--scripts-pre', dest='scripts_dir_pre', metavar='DIRECTORY',
-        help='scripts to run prior to chrooting phase')
-    parser.add_argument('--scripts-chroot', dest='scripts_dir_chroot', metavar='DIRECTORY',
-        help='scripts to run during chrooting phase')
-    parser.add_argument('--scripts-post', dest='scripts_dir_post', metavar='DIRECTORY',
-        help='scripts to run after chrooting phase')
 
     parser.add_argument('target_path', metavar='DEVICE',
         help='block device to install to')
