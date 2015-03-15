@@ -1,6 +1,8 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
+PACKAGE_NAME = 'image-bootstrap'
+
 GITHUB_HOME_URL = 'https://github.com/hartwork/image-bootstrap'
 
 _VERSION = (0, 5)
