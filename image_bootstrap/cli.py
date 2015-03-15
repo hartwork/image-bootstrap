@@ -18,7 +18,7 @@ _COLORIZE_ALWAYS = 'always'
 _COLORIZE_AUTO = 'auto'
 
 
-def _main_inner(messenger, options):
+def _main__level_three(messenger, options):
     messenger.banner()
 
     if options.quiet:
@@ -52,7 +52,7 @@ def _main_inner(messenger, options):
     messenger.info('Done.')
 
 
-def main():
+def _main__level_two():
     parser = ArgumentParser(epilog=BANNER, formatter_class=RawDescriptionHelpFormatter)
     parser.add_argument('--version', action='version', version=VERSION_STR)
 
@@ -89,7 +89,7 @@ def main():
 
     messenger = Messenger(bool(options.verbose), colorize)
     try:
-        _main_inner(messenger, options)
+        _main__level_three(messenger, options)
     except BaseException as e:
         if options.debug:
             traceback.print_exc(file=sys.stderr)
@@ -106,8 +106,8 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+def main():
     try:
-        main()
+        _main__level_two()
     except KeyboardInterrupt:
         pass
