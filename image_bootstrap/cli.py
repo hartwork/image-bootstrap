@@ -81,11 +81,11 @@ def _main__level_two():
 
     script_dirs = parser.add_argument_group('script integration')
     script_dirs.add_argument('--scripts-pre', dest='scripts_dir_pre', metavar='DIRECTORY',
-        help='scripts to run prior to chrooting phase')
+        help='scripts to run prior to chrooting phase, in alphabetical order')
     script_dirs.add_argument('--scripts-chroot', dest='scripts_dir_chroot', metavar='DIRECTORY',
-        help='scripts to run during chrooting phase')
+        help='scripts to run during chrooting phase, in alphabetical order')
     script_dirs.add_argument('--scripts-post', dest='scripts_dir_post', metavar='DIRECTORY',
-        help='scripts to run after chrooting phase')
+        help='scripts to run after chrooting phase, in alphabetical order')
 
     distros = parser.add_argument_group('choice of distribution')
     distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True,
