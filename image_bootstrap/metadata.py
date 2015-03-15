@@ -5,6 +5,8 @@ PACKAGE_NAME = 'image-bootstrap'
 
 GITHUB_HOME_URL = 'https://github.com/hartwork/image-bootstrap'
 
+DESCRIPTION = 'Command line tool for creating bootable virtual machine images'
+
 _VERSION = (0, 5)
 VERSION_STR = '.'.join((str(e) for e in _VERSION))
 

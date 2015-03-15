@@ -10,7 +10,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from image_bootstrap.distros.debian import BootstrapDebian
 from image_bootstrap.messenger import Messenger, BANNER
 from image_bootstrap.executor import Executor
-from image_bootstrap.metadata import VERSION_STR
+from image_bootstrap.metadata import DESCRIPTION, VERSION_STR
 
 
 _COLORIZE_NEVER = 'never'
@@ -53,32 +53,51 @@ def _main__level_three(messenger, options):
 
 
 def _main__level_two():
-    parser = ArgumentParser(epilog=BANNER, formatter_class=RawDescriptionHelpFormatter)
+    parser = ArgumentParser(
+            description=DESCRIPTION,
+            epilog=BANNER,
+            formatter_class=RawDescriptionHelpFormatter,
+            )
     parser.add_argument('--version', action='version', version=VERSION_STR)
 
-    parser.add_argument('--hostname', required=True, metavar='NAME')
-    parser.add_argument('--arch', dest='architecture', default='amd64')
-    parser.add_argument('--password', dest='root_password', metavar='PASSWORD')
-    parser.add_argument('--verbose', action='store_true')
-    parser.add_argument('--debug', action='store_true')
-    parser.add_argument('--quiet', action='store_true')
-    parser.add_argument('--color', default=_COLORIZE_AUTO, choices=[_COLORIZE_NEVER, _COLORIZE_ALWAYS, _COLORIZE_AUTO])
+    parser.add_argument('--hostname', required=True, metavar='NAME',
+        help='hostname of virtual machine to install')
+    parser.add_argument('--arch', dest='architecture', default='amd64',
+        help='architecture (e.g. amd64)')
+    parser.add_argument('--password', dest='root_password', metavar='PASSWORD',
+        help='root password to set (default: none / password log-in disabled)')
+    parser.add_argument('--verbose', action='store_true',
+        help='increase verbosity')
+    parser.add_argument('--debug', action='store_true',
+        help='enable debugging')
+    parser.add_argument('--quiet', action='store_true',
+        help='limit output to error messages')
+    parser.add_argument('--color', default=_COLORIZE_AUTO, choices=[_COLORIZE_NEVER, _COLORIZE_ALWAYS, _COLORIZE_AUTO],
+        help='toggle output color (default: %(default)s)')
 
     commands = parser.add_argument_group('command names')
-    commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install', default='grub2-install')
+    commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install', default='grub2-install',
+        help='override grub2-install command')
 
     distros = parser.add_argument_group('choice of distribution')
-    distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True)
+    distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True,
+        help='select Debian for a distribution')
 
     debian = parser.add_argument_group('Debian')
-    debian.add_argument('--debian-release', default='wheezy', choices=['wheezy', 'jessie', 'sid'])
-    debian.add_argument('--debian-mirror', dest='debian_mirror_url', metavar='URL', default='http://http.debian.net/debian')
+    debian.add_argument('--debian-release', default='wheezy', choices=['wheezy', 'jessie', 'sid'],
+        help='specify Debian release')
+    debian.add_argument('--debian-mirror', dest='debian_mirror_url', metavar='URL', default='http://http.debian.net/debian',
+        help='specify Debian mirror to use')
 
-    parser.add_argument('--scripts-pre', dest='scripts_dir_pre', metavar='DIRECTORY')
-    parser.add_argument('--scripts-chroot', dest='scripts_dir_chroot', metavar='DIRECTORY')
-    parser.add_argument('--scripts-post', dest='scripts_dir_post', metavar='DIRECTORY')
+    parser.add_argument('--scripts-pre', dest='scripts_dir_pre', metavar='DIRECTORY',
+        help='scripts to run prior to chrooting phase')
+    parser.add_argument('--scripts-chroot', dest='scripts_dir_chroot', metavar='DIRECTORY',
+        help='scripts to run during chrooting phase')
+    parser.add_argument('--scripts-post', dest='scripts_dir_post', metavar='DIRECTORY',
+        help='scripts to run after chrooting phase')
 
-    parser.add_argument('target_path', metavar='DEVICE')
+    parser.add_argument('target_path', metavar='DEVICE',
+        help='block device to install to')
 
     options = parser.parse_args()
 
