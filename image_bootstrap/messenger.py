@@ -8,12 +8,10 @@ import sys
 
 from colorama import Fore, Style
 
-from image_bootstrap.version import VERSION_STR, RELEASE_DATE_STR
+from image_bootstrap.metadata import GITHUB_HOME_URL, VERSION_STR, RELEASE_DATE_STR
 
 
 _NEEDS_ESCAPING = re.compile('([!`"\'$ \\\\{}()?*&<>;])')
-
-_GITHUB_HOME_URL = 'https://github.com/hartwork/image-bootstrap'
 
 BANNER = """\
      _                          __             __      __               
@@ -29,7 +27,7 @@ Please report bugs at %(github_home)s.  Thank you!\
     '3456789_123456789_': '%*s' \
         % (len('%(3456789_123456789_)s'),
         'v%s :: %s' % (VERSION_STR, RELEASE_DATE_STR)),
-    'github_home': _GITHUB_HOME_URL,
+    'github_home': GITHUB_HOME_URL,
 }
 
 
@@ -86,4 +84,4 @@ class Messenger(object):
 
     def encourage_bug_reports(self):
         print('If this looks like a bug to you, please file a report at %s.  Thank you!' \
-                % _GITHUB_HOME_URL, file=sys.stderr)
+                % GITHUB_HOME_URL, file=sys.stderr)

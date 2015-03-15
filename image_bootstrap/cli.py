@@ -10,7 +10,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from image_bootstrap.distros.debian import BootstrapDebian
 from image_bootstrap.messenger import Messenger, BANNER
 from image_bootstrap.executor import Executor
-from image_bootstrap.version import VERSION_STR
+from image_bootstrap.metadata import VERSION_STR
 
 
 _COLORIZE_NEVER = 'never'
