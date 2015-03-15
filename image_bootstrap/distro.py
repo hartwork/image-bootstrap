@@ -127,7 +127,7 @@ class BootstrapDistroAgnostic(object):
                 ):
             if abs_scripts_dir is None:
                 continue
-            self._messenger.info('Checking %s scripts for executablity...' % category)
+            self._messenger.info('Checking %s scripts for executability...' % category)
             for basename in os.listdir(abs_scripts_dir):
                 abs_filename = os.path.join(abs_scripts_dir, basename)
                 if not os.access(abs_filename, os.X_OK):
