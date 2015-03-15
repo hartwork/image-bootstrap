@@ -26,7 +26,6 @@ _SANE_UUID_CHECKER = re.compile('^[a-f0-9][a-f0-9-]{34}[a-f0-9]$')
 
 _COMMAND_BLKID = 'blkid'
 _COMMAND_CHMOD = 'chmod'
-_COMMAND_CHPASSWD = 'chpasswd'
 COMMAND_CHROOT = 'chroot'
 _COMMAND_CP = 'cp'
 _COMMAND_KPARTX = 'kpartx'
@@ -73,7 +72,6 @@ class BootstrapDistroAgnostic(object):
         return iter((
                 _COMMAND_BLKID,
                 _COMMAND_CHMOD,
-                _COMMAND_CHPASSWD,
                 COMMAND_CHROOT,
                 _COMMAND_CP,
                 _COMMAND_KPARTX,
@@ -220,13 +218,14 @@ class BootstrapDistroAgnostic(object):
     def run_directory_bootstrap(self):
         raise NotImplementedError()
 
-    def _set_root_password(self):
+    def _set_root_password_inside_chroot(self):
         if self._root_password is None:
             return
 
         cmd = [
-                _COMMAND_CHPASSWD,
-                '--root', self._abs_mountpoint,
+                COMMAND_CHROOT,
+                self._abs_mountpoint,
+                'chpasswd',
                 ]
         self._messenger.announce_command(cmd)
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
@@ -433,7 +432,6 @@ class BootstrapDistroAgnostic(object):
                 self._mount_disk_chroot_mounts()
                 try:
                     self.run_directory_bootstrap()
-                    self._set_root_password()
                     self._create_etc_fstab()
                     self._create_etc_hostname()
                     self.create_network_configuration()
@@ -441,6 +439,7 @@ class BootstrapDistroAgnostic(object):
                     self._install_grub()
                     self._mount_nondisk_chroot_mounts()
                     try:
+                        self._set_root_password_inside_chroot()
                         self.generate_grub_cfg_from_inside_chroot()
                         self._fix_grub_cfg_root_device()
                         self.generate_initramfs_from_inside_chroot()
