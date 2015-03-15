@@ -90,6 +90,8 @@ def _main__level_two():
     messenger = Messenger(bool(options.verbose), colorize)
     try:
         _main__level_three(messenger, options)
+    except KeyboardInterrupt:
+        raise
     except BaseException as e:
         if options.debug:
             traceback.print_exc(file=sys.stderr)
