@@ -121,6 +121,9 @@ class BootstrapDistroAgnostic(object):
         if infos_produced:
             self._messenger.info_gap()
 
+    def _script_should_be_run(self, basename):
+        return not basename.endswith('~')
+
     def check_script_executability(self):
         infos_produced = False
 
@@ -136,6 +139,9 @@ class BootstrapDistroAgnostic(object):
             infos_produced = True
 
             for basename in os.listdir(abs_scripts_dir):
+                if not self._script_should_be_run(basename):
+                    continue
+
                 abs_filename = os.path.join(abs_scripts_dir, basename)
                 if not os.access(abs_filename, os.X_OK):
                     raise OSError(errno.EACCES, 'Permission denied, file "%s" not executable' % abs_filename)
@@ -275,6 +281,9 @@ class BootstrapDistroAgnostic(object):
 
     def _run_scripts_from(self, abs_scripts_dir, env):
         for basename in sorted(os.listdir(abs_scripts_dir)):
+            if not self._script_should_be_run(basename):
+                continue
+
             cmd = [os.path.join(abs_scripts_dir, basename)]
             self._executor.check_call(cmd, env=env)
 
@@ -330,6 +339,9 @@ class BootstrapDistroAgnostic(object):
                 ]
         self._executor.check_call(cmd_mkdir)
         for basename in os.listdir(self._abs_scripts_dir_chroot):
+            if not self._script_should_be_run(basename):
+                continue
+
             abs_path_source = os.path.join(self._abs_scripts_dir_chroot, basename)
             abs_path_target = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR, basename)
             cmd_copy = [
@@ -351,6 +363,9 @@ class BootstrapDistroAgnostic(object):
                 'PATH': os.environ['PATH'],
                 }
         for basename in os.listdir(self._abs_scripts_dir_chroot):
+            if not self._script_should_be_run(basename):
+                continue
+
             cmd_run = [
                     COMMAND_CHROOT,
                     self._abs_mountpoint,
@@ -360,6 +375,9 @@ class BootstrapDistroAgnostic(object):
 
     def _remove_chroot_scripts(self):
         for basename in os.listdir(self._abs_scripts_dir_chroot):
+            if not self._script_should_be_run(basename):
+                continue
+
             abs_path_target = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR, basename)
             cmd_rm = [
                     _COMMAND_RM,
