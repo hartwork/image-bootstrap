@@ -5,6 +5,7 @@ all:
 
 deb:
 	debuild -uc -us --lintian-opts --display-info
+	$(RM) -R build
 
 dist:
 	$(RM) MANIFEST
