@@ -8,6 +8,10 @@ Homepage: https://github.com/hartwork/image-bootstrap
 
 Package: image-bootstrap
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}
+Depends: ${misc:Depends}, ${python:Depends},
+ cdebootstrap | debootstrap,
+ grub2,
+ kpartx,
+ parted
 Description: Command line tool for creating bootable virtual machine images
  Started as a replacement to grml-debootstrap.
