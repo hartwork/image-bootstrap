@@ -13,4 +13,7 @@ dist:
 install:
 	./setup.py install --prefix "$(PREFIX)" --root "$(DESTDIR)"
 
-.PHONY: all deb dist install
+mrproper:
+	git clean -d -f -x
+
+.PHONY: all deb dist install mrproper
