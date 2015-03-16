@@ -1,0 +1,6 @@
+/files
+/image-bootstrap/
+/image-bootstrap.debhelper.log
+/image-bootstrap.postinst.debhelper
+/image-bootstrap.prerm.debhelper
+/image-bootstrap.substvars
