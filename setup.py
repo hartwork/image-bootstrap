@@ -16,5 +16,5 @@ if __name__ == '__main__':
             author_email='sebastian@pipping.org',
             url=GITHUB_HOME_URL,
             packages=[PACKAGE_NAME.replace('-','_')],
-            scripts=[PACKAGE_NAME],
+            data_files=[('sbin/', [PACKAGE_NAME])],
             )
