@@ -3,6 +3,9 @@ DESTDIR = /
 
 all:
 
+deb:
+	debuild -uc -us --lintian-opts --display-info
+
 dist:
 	$(RM) MANIFEST
 	./setup.py sdist
@@ -10,4 +13,4 @@ dist:
 install:
 	./setup.py install --prefix "$(PREFIX)" --root "$(DESTDIR)"
 
-.PHONY: all dist install
+.PHONY: all deb dist install
