@@ -1,0 +1,13 @@
+Source: image-bootstrap
+Section: admin
+Priority: extra
+Maintainer: Sebastian Pipping <sebastian@pipping.org>
+Build-Depends: python-all (>= 2.6.6-3), debhelper (>= 8.0.0)
+Standards-Version: 3.9.3
+Homepage: https://github.com/hartwork/image-bootstrap
+
+Package: image-bootstrap
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}
+Description: Command line tool for creating bootable virtual machine images
+ Started as a replacement to grml-debootstrap.
