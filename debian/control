@@ -11,7 +11,7 @@ Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
  python-colorama,
  cdebootstrap | debootstrap,
- grub2,
+ grub-pc | grub-coreboot | grub-efi-amd64 | grub-efi-ia32 | grub-ieee1275 | grub-yeeloong,
  kpartx,
  parted
 Description: Command line tool for creating bootable virtual machine images
