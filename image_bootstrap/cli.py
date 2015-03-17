@@ -47,6 +47,7 @@ def _main__level_three(messenger, options):
             os.path.abspath(options.target_path),
             options.command_grub2_install,
             options.command_debootstrap,
+            options.debootstrap_opt,
             )
     bootstrap.check_for_commands()
     bootstrap.check_script_executability()
@@ -108,6 +109,10 @@ def _main__level_two():
         help='specify Debian release')
     debian.add_argument('--debian-mirror', dest='debian_mirror_url', metavar='URL', default='http://http.debian.net/debian',
         help='specify Debian mirror to use')
+    debian.add_argument('--debootstrap-opt', dest='debootstrap_opt', metavar='OPTION', action='append', default=[],
+        help='option to pass to debootstrap, in addition; '
+        'can be passed several times; '
+        'use with --debootstrap-opt=... syntax, i.e. with "="')
 
 
     parser.add_argument('target_path', metavar='DEVICE',

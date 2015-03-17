@@ -38,6 +38,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
             abs_target_path,
             command_grub2_install,
             command_debootstrap,
+            debootstrap_opt,
             ):
         super(BootstrapDebian, self).__init__(
                 messenger,
@@ -54,6 +55,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
         self._release = debian_release
         self._mirror_url = debian_mirror_url
         self._command_debootstrap = command_debootstrap
+        self._debootstrap_opt = debootstrap_opt
 
     def get_commands_to_check_for(self):
         return iter(
@@ -80,6 +82,9 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 self._command_debootstrap,
                 '--arch', self._architecture,
                 '--include=%s' % ','.join(_extra_packages),
+                ] \
+                + self._debootstrap_opt \
+                + [
                 self._release,
                 self._abs_mountpoint,
                 self._mirror_url,
