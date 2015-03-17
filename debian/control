@@ -9,6 +9,7 @@ Homepage: https://github.com/hartwork/image-bootstrap
 Package: image-bootstrap
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
+ python-colorama,
  cdebootstrap | debootstrap,
  grub2,
  kpartx,
