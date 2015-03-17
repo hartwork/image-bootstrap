@@ -10,6 +10,8 @@ import subprocess
 import tempfile
 import time
 
+from image_bootstrap.mount import MountFinder
+
 
 _MOUNTPOINT_PARENT_DIR = '/mnt'
 _CHROOT_SCRIPT_TARGET_DIR = 'root/chroot-scripts/'
@@ -223,6 +225,12 @@ class BootstrapDistroAgnostic(object):
 
     def run_directory_bootstrap(self):
         raise NotImplementedError()
+
+    def _unmount_directory_bootstrap_leftovers(self):
+        mounts = MountFinder()
+        mounts.load()
+        for abs_mount_point in reversed(list(mounts.below(self._abs_mountpoint))):
+            self._try_unmounting(abs_mount_point)
 
     def _set_root_password_inside_chroot(self):
         if self._root_password is None:
@@ -449,7 +457,10 @@ class BootstrapDistroAgnostic(object):
                 self._gather_first_partition_uuid()
                 self._mount_disk_chroot_mounts()
                 try:
-                    self.run_directory_bootstrap()
+                    try:
+                        self.run_directory_bootstrap()
+                    finally:
+                        self._unmount_directory_bootstrap_leftovers()
                     self._create_etc_fstab()
                     self._create_etc_hostname()
                     self.create_network_configuration()
