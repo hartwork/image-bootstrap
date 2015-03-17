@@ -124,7 +124,11 @@ class BootstrapDistroAgnostic(object):
             self._messenger.info_gap()
 
     def _script_should_be_run(self, basename):
-        return not basename.endswith('~')
+        if basename.startswith('.'):
+            return False
+        elif basename.endswith('~'):
+            return False
+        return True
 
     def check_script_executability(self):
         infos_produced = False
