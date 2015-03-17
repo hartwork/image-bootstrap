@@ -17,14 +17,19 @@ _COLORIZE_NEVER = 'never'
 _COLORIZE_ALWAYS = 'always'
 _COLORIZE_AUTO = 'auto'
 
+_VERBOSITY_QUIET = object()
+_VERBOSITY_VERBOSE = object()
+
 
 def _main__level_three(messenger, options):
     messenger.banner()
 
-    if options.quiet:
-        child_process_stdout = open('/dev/null', 'w')
-    else:
+    stdout_wanted = options.verbosity is _VERBOSITY_VERBOSE
+
+    if stdout_wanted:
         child_process_stdout = None
+    else:
+        child_process_stdout = open('/dev/null', 'w')
 
     executor = Executor(messenger, stdout=child_process_stdout)
 
@@ -47,7 +52,7 @@ def _main__level_three(messenger, options):
     bootstrap.check_script_executability()
     bootstrap.run()
 
-    if options.quiet:
+    if not stdout_wanted:
         child_process_stdout.close()
 
     messenger.info('Done.')
@@ -66,9 +71,9 @@ def _main__level_two():
         help='toggle output color (default: %(default)s)')
     output.add_argument('--debug', action='store_true',
         help='enable debugging')
-    output.add_argument('--quiet', action='store_true',
+    output.add_argument('--quiet', dest='verbosity', action='store_const', const=_VERBOSITY_QUIET,
         help='limit output to error messages')
-    output.add_argument('--verbose', action='store_true',
+    output.add_argument('--verbose', dest='verbosity', action='store_const', const=_VERBOSITY_VERBOSE,
         help='increase verbosity')
 
     machine = parser.add_argument_group('machine configuration')
@@ -115,7 +120,9 @@ def _main__level_two():
     else:
         colorize = options.color == _COLORIZE_ALWAYS
 
-    messenger = Messenger(bool(options.verbose), colorize)
+    messages_wanted = options.verbosity is not _VERBOSITY_QUIET
+
+    messenger = Messenger(messages_wanted, colorize)
     try:
         _main__level_three(messenger, options)
     except KeyboardInterrupt:
