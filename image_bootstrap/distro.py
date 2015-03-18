@@ -231,7 +231,7 @@ class BootstrapDistroAgnostic(object):
 
     def _mkdir_mountpount(self):
         self._abs_mountpoint = tempfile.mkdtemp(dir=_MOUNTPOINT_PARENT_DIR)
-        self._messenger.announce_command(['mkdir', self._abs_mountpoint])
+        self._messenger.announce_command([_COMMAND_MKDIR, self._abs_mountpoint])
 
     def _mount_disk_chroot_mounts(self):
         cmd = [
