@@ -9,6 +9,7 @@ import re
 import subprocess
 import tempfile
 import time
+from ctypes import CDLL, c_int, get_errno
 
 from image_bootstrap.mount import MountFinder
 
@@ -30,6 +31,7 @@ _COMMAND_BLKID = 'blkid'
 _COMMAND_CHMOD = 'chmod'
 COMMAND_CHROOT = 'chroot'
 _COMMAND_CP = 'cp'
+_COMMAND_HOSTNAME = 'hostname'
 _COMMAND_KPARTX = 'kpartx'
 _COMMAND_MKDIR = 'mkdir'
 _COMMAND_MKFS_EXT4 = 'mkfs.ext4'
@@ -76,6 +78,7 @@ class BootstrapDistroAgnostic(object):
                 _COMMAND_CHMOD,
                 COMMAND_CHROOT,
                 _COMMAND_CP,
+                _COMMAND_HOSTNAME,
                 _COMMAND_KPARTX,
                 _COMMAND_MKDIR,
                 _COMMAND_MKFS_EXT4,
@@ -154,6 +157,17 @@ class BootstrapDistroAgnostic(object):
 
         if infos_produced:
             self._messenger.info_gap()
+
+    def _unshare(self):
+        self._messenger.info('Unsharing UTS namespace...')
+        libc = CDLL("libc.so.6")
+        CLONE_NEWUTS = 0x04000000
+        ret = libc.unshare(c_int(CLONE_NEWUTS))
+        if ret:
+            _errno = get_errno() or errno.EPERM
+            raise OSError(_errno, 'Unsharing UTS namespace failed: ' + os.strerror(_errno))
+
+        self._executor.check_call([_COMMAND_HOSTNAME, self._hostname])
 
     def _partition_device(self):
         cmd_mklabel = [
@@ -452,6 +466,7 @@ class BootstrapDistroAgnostic(object):
         os.rmdir(self._abs_mountpoint)
 
     def run(self):
+        self._unshare()
         self._partition_device()
         self._mkdir_mountpount()
         try:
