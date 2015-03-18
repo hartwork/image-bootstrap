@@ -470,7 +470,7 @@ class BootstrapDistroAgnostic(object):
         self._executor.check_call(cmd)
 
     def _rmdir_mountpount(self):
-        self._messenger.announce_command(['rmdir', self._abs_mountpoint])
+        self._messenger.announce_command([_COMMAND_RMDIR, self._abs_mountpoint])
         os.rmdir(self._abs_mountpoint)
 
     def run(self):
