@@ -233,6 +233,14 @@ class BootstrapDistroAgnostic(object):
         self._abs_mountpoint = tempfile.mkdtemp(dir=_MOUNTPOINT_PARENT_DIR)
         self._messenger.announce_command([_COMMAND_MKDIR, self._abs_mountpoint])
 
+    def _mkdir_mountpount_etc(self):
+        cmd = [
+                _COMMAND_MKDIR,
+                '-m', '0755',
+                os.path.join(self._abs_mountpoint, 'etc'),
+                ]
+        self._executor.check_call(cmd)
+
     def _mount_disk_chroot_mounts(self):
         cmd = [
                 _COMMAND_MOUNT,
@@ -476,12 +484,14 @@ class BootstrapDistroAgnostic(object):
                 self._gather_first_partition_uuid()
                 self._mount_disk_chroot_mounts()
                 try:
+                    self._mkdir_mountpount_etc()
+                    self._create_etc_hostname()  # first time
                     try:
                         self.run_directory_bootstrap()
                     finally:
                         self._unmount_directory_bootstrap_leftovers()
+                    self._create_etc_hostname()  # re-write
                     self._create_etc_fstab()
-                    self._create_etc_hostname()
                     self.create_network_configuration()
                     self._run_pre_scripts()
                     self._install_grub()
