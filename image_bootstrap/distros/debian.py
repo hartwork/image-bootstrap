@@ -77,6 +77,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
         return 'linux-image-%s' % self._architecture
 
     def run_directory_bootstrap(self):
+        self._messenger.info('Bootstrapping Debian into "%s"...' % self._abs_mountpoint)
         _extra_packages = (
                 'grub-pc',  # for update-grub
                 'initramfs-tools',  # for update-initramfs
@@ -124,6 +125,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
         self._executor.check_call(cmd)
 
     def perform_post_chroot_clean_up(self):
+        self._messenger.info('Cleaning chroot apt cache...')
         cmd = [
                 _COMMAND_FIND,
                 os.path.join(self._abs_mountpoint, 'var', 'cache', 'apt', 'archives'),

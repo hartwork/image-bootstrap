@@ -174,6 +174,7 @@ class BootstrapDistroAgnostic(object):
         self._executor.check_call([_COMMAND_HOSTNAME, self._hostname])
 
     def _partition_device(self):
+        self._messenger.info('Partitioning "%s"...' % self._abs_target_path)
         cmd_mklabel = [
                 _COMMAND_PARTED,
                 '--script',
@@ -199,6 +200,7 @@ class BootstrapDistroAgnostic(object):
         self._executor.check_call(cmd_boot_flag)
 
     def _kpartx_minus_a(self):
+        self._messenger.info('Activating partition devices...')
         cmd_list = [
                 _COMMAND_KPARTX,
                 '-l',
@@ -227,6 +229,7 @@ class BootstrapDistroAgnostic(object):
                     % self._abs_first_partition_device)
 
     def _format_partitions(self):
+        self._messenger.info('Creating file system on "%s"...' % self._abs_first_partition_device)
         cmd = [
                 _COMMAND_MKFS_EXT4,
                 self._abs_first_partition_device,
@@ -235,17 +238,15 @@ class BootstrapDistroAgnostic(object):
 
     def _mkdir_mountpount(self):
         self._abs_mountpoint = tempfile.mkdtemp(dir=_MOUNTPOINT_PARENT_DIR)
-        self._messenger.announce_command([_COMMAND_MKDIR, self._abs_mountpoint])
+        self._messenger.info('Creating directory "%s"...' % self._abs_mountpoint)
 
     def _mkdir_mountpount_etc(self):
-        cmd = [
-                _COMMAND_MKDIR,
-                '-m', '0755',
-                os.path.join(self._abs_mountpoint, 'etc'),
-                ]
-        self._executor.check_call(cmd)
+        abs_dir = os.path.join(self._abs_mountpoint, 'etc')
+        self._messenger.info('Creating directory "%s"...' % abs_dir)
+        os.mkdir(abs_dir, 0755)
 
     def _mount_disk_chroot_mounts(self):
+        self._messenger.info('Mounting partitions...')
         cmd = [
                 _COMMAND_MOUNT,
                 self._abs_first_partition_device,
@@ -263,6 +264,7 @@ class BootstrapDistroAgnostic(object):
             self._try_unmounting(abs_mount_point)
 
     def _set_root_password_inside_chroot(self):
+        self._messenger.info('Setting root password...')
         if self._root_password is None:
             return
 
@@ -310,6 +312,7 @@ class BootstrapDistroAgnostic(object):
         raise NotImplementedError()
 
     def _fix_grub_cfg_root_device(self):
+        self._messenger.info('Post-processing GRUB config...')
         cmd_sed = [
                 _COMMAND_SED,
                 's,root=[^ ]\+,root=UUID=%s,g' % self._first_partition_uuid,
@@ -326,6 +329,7 @@ class BootstrapDistroAgnostic(object):
             self._executor.check_call(cmd, env=env)
 
     def _run_pre_scripts(self):
+        self._messenger.info('Running pre-chroot scripts...')
         env = {
                 'HOSTNAME': self._hostname,
                 'PATH': os.environ['PATH'],
@@ -335,6 +339,7 @@ class BootstrapDistroAgnostic(object):
             self._run_scripts_from(self._abs_scripts_dir_pre, env)
 
     def _mount_nondisk_chroot_mounts(self):
+        self._messenger.info('Mounting non-disk file systems...')
         for source, options, target in _NON_DISK_MOUNT_TASKS:
             cmd = [
                     _COMMAND_MOUNT,
@@ -347,6 +352,7 @@ class BootstrapDistroAgnostic(object):
             self._executor.check_call(cmd)
 
     def _install_grub(self):
+        self._messenger.info('Installing GRUB to device "%s"...' % self._abs_target_path)
         cmd = [
                 self._command_grub2_install,
                 '--boot-directory',
@@ -364,7 +370,7 @@ class BootstrapDistroAgnostic(object):
     def _create_etc_resolv_conf(self):
         output_filename = os.path.join(self._abs_mountpoint, 'etc', 'resolv.conf')
 
-        self._messenger.info('Writing file "%s" based on "%s"...' % (output_filename, self._abs_etc_resolv_conf))
+        self._messenger.info('Writing file "%s" (based on file "%s")...' % (output_filename, self._abs_etc_resolv_conf))
 
         input_f = open(self._abs_etc_resolv_conf)
         output_f = open(output_filename, 'w')
@@ -376,6 +382,7 @@ class BootstrapDistroAgnostic(object):
         output_f.close()
 
     def _copy_chroot_scripts(self):
+        self._messenger.info('Copying chroot scripts into chroot...')
         abs_path_parent = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR)
         cmd_mkdir = [
                 _COMMAND_MKDIR,
@@ -402,6 +409,7 @@ class BootstrapDistroAgnostic(object):
             self._executor.check_call(cmd_chmod)
 
     def _run_chroot_scripts(self):
+        self._messenger.info('Running chroot scripts...')
         env = {
                 'HOSTNAME': self._hostname,
                 'PATH': os.environ['PATH'],
@@ -418,6 +426,7 @@ class BootstrapDistroAgnostic(object):
             self._executor.check_call(cmd_run, env=env)
 
     def _remove_chroot_scripts(self):
+        self._messenger.info('Removing chroot scripts...')
         for basename in os.listdir(self._abs_scripts_dir_chroot):
             if not self._script_should_be_run(basename):
                 continue
@@ -452,6 +461,7 @@ class BootstrapDistroAgnostic(object):
                 break
 
     def _unmount_nondisk_chroot_mounts(self):
+        self._messenger.info('Unmounting non-disk file systems...')
         for source, options, target in reversed(_NON_DISK_MOUNT_TASKS):
             abs_path = os.path.join(self._abs_mountpoint, target)
             self._try_unmounting(abs_path)
@@ -460,6 +470,7 @@ class BootstrapDistroAgnostic(object):
         raise NotImplementedError()
 
     def _run_post_scripts(self):
+        self._messenger.info('Running post-chroot scripts...')
         env = {
                 'PATH': os.environ['PATH'],
                 'MNTPOINT': self._abs_mountpoint,
@@ -471,6 +482,7 @@ class BootstrapDistroAgnostic(object):
         self._try_unmounting(self._abs_mountpoint)
 
     def _kpartx_minus_d(self):
+        self._messenger.info('Deactivating partition devices...')
         cmd = [
                 _COMMAND_KPARTX,
                 '-d',
@@ -488,7 +500,7 @@ class BootstrapDistroAgnostic(object):
                 break
 
     def _rmdir_mountpount(self):
-        self._messenger.announce_command([_COMMAND_RMDIR, self._abs_mountpoint])
+        self._messenger.info('Removing directory "%s"...' % self._abs_mountpoint)
         for i in range(3):
             try:
                 os.rmdir(self._abs_mountpoint)
@@ -526,9 +538,15 @@ class BootstrapDistroAgnostic(object):
                     self._mount_nondisk_chroot_mounts()
                     try:
                         self._set_root_password_inside_chroot()
+
+                        self._messenger.info('Generating GRUB configuration...')
                         self.generate_grub_cfg_from_inside_chroot()
+
                         self._fix_grub_cfg_root_device()
+
+                        self._messenger.info('Generating initramfs...')
                         self.generate_initramfs_from_inside_chroot()
+
                         if self._abs_scripts_dir_chroot:
                             self._copy_chroot_scripts()
                             try:
