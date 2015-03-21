@@ -514,12 +514,12 @@ class BootstrapDistroAgnostic(object):
     def run(self):
         self._unshare()
         self._partition_device()
-        self._mkdir_mountpount()
+        self._kpartx_minus_a()
         try:
-            self._kpartx_minus_a()
+            self._format_partitions()
+            self._gather_first_partition_uuid()
+            self._mkdir_mountpount()
             try:
-                self._format_partitions()
-                self._gather_first_partition_uuid()
                 self._mount_disk_chroot_mounts()
                 try:
                     self._mkdir_mountpount_etc()
@@ -560,6 +560,6 @@ class BootstrapDistroAgnostic(object):
                 finally:
                     self._unmount_disk_chroot_mounts()
             finally:
-                self._kpartx_minus_d()
+                self._rmdir_mountpount()
         finally:
-            self._rmdir_mountpount()
+            self._kpartx_minus_d()
