@@ -8,7 +8,8 @@ import traceback
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from image_bootstrap.distros.debian import BootstrapDebian
-from image_bootstrap.messenger import Messenger, BANNER
+from image_bootstrap.messenger import Messenger, BANNER, \
+        VERBOSITY_QUIET, VERBOSITY_VERBOSE
 from image_bootstrap.executor import Executor
 from image_bootstrap.metadata import DESCRIPTION, VERSION_STR
 
@@ -17,14 +18,11 @@ _COLORIZE_NEVER = 'never'
 _COLORIZE_ALWAYS = 'always'
 _COLORIZE_AUTO = 'auto'
 
-_VERBOSITY_QUIET = object()
-_VERBOSITY_VERBOSE = object()
-
 
 def _main__level_three(messenger, options):
     messenger.banner()
 
-    stdout_wanted = options.verbosity is _VERBOSITY_VERBOSE
+    stdout_wanted = options.verbosity is VERBOSITY_VERBOSE
 
     if stdout_wanted:
         child_process_stdout = None
@@ -73,9 +71,9 @@ def _main__level_two():
         help='toggle output color (default: %(default)s)')
     output.add_argument('--debug', action='store_true',
         help='enable debugging')
-    output.add_argument('--quiet', dest='verbosity', action='store_const', const=_VERBOSITY_QUIET,
+    output.add_argument('--quiet', dest='verbosity', action='store_const', const=VERBOSITY_QUIET,
         help='limit output to error messages')
-    output.add_argument('--verbose', dest='verbosity', action='store_const', const=_VERBOSITY_VERBOSE,
+    output.add_argument('--verbose', dest='verbosity', action='store_const', const=VERBOSITY_VERBOSE,
         help='increase verbosity')
 
     machine = parser.add_argument_group('machine configuration')
@@ -128,9 +126,7 @@ def _main__level_two():
     else:
         colorize = options.color == _COLORIZE_ALWAYS
 
-    messages_wanted = options.verbosity is not _VERBOSITY_QUIET
-
-    messenger = Messenger(messages_wanted, colorize)
+    messenger = Messenger(options.verbosity, colorize)
     try:
         _main__level_three(messenger, options)
     except KeyboardInterrupt:

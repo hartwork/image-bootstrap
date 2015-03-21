@@ -13,6 +13,9 @@ from image_bootstrap.metadata import GITHUB_HOME_URL, VERSION_STR, RELEASE_DATE_
 
 _NEEDS_ESCAPING = re.compile('([!`"\'$ \\\\{}()?*&<>;])')
 
+VERBOSITY_QUIET = object()
+VERBOSITY_VERBOSE = object()
+
 BANNER = """\
      _                          __             __      __               
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
@@ -32,8 +35,9 @@ Please report bugs at %(github_home)s.  Thank you!\
 
 
 class Messenger(object):
-    def __init__(self, verbose, colorize):
-        self._verbose = verbose
+    def __init__(self, verbosity, colorize):
+        self._infos_wanted = verbosity is not VERBOSITY_QUIET
+        self._commands_wanted = verbosity is VERBOSITY_VERBOSE
         self._colorize = colorize
 
     def colorize(self, text, fore=None, style=None):
@@ -51,7 +55,7 @@ class Messenger(object):
         return ''.join(chunks)
 
     def banner(self):
-        if not self._verbose:
+        if not self._infos_wanted:
             return
 
         print(BANNER)
@@ -61,7 +65,7 @@ class Messenger(object):
         return _NEEDS_ESCAPING.sub('\\\\\\1', text)
 
     def announce_command(self, argv):
-        if not self._verbose:
+        if not self._commands_wanted:
             return
         text = '# %s' % ' '.join((self.escape_shell(e) for e in argv))
 
@@ -70,7 +74,7 @@ class Messenger(object):
         sys.stdout.flush()
 
     def info(self, text):
-        if not self._verbose:
+        if not self._infos_wanted:
             return
         print(self.colorize(text, Fore.GREEN))
 
@@ -78,7 +82,7 @@ class Messenger(object):
         print(self.colorize('Error: ' + text, Fore.RED, Style.BRIGHT), file=sys.stderr)
 
     def info_gap(self):
-        if not self._verbose:
+        if not self._infos_wanted:
             return
         print()
 
