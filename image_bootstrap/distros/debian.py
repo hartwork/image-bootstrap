@@ -9,6 +9,7 @@ from image_bootstrap.distro import BootstrapDistroAgnostic, COMMAND_CHROOT
 
 
 _COMMAND_FIND = 'find'
+_COMMAND_UNSHARE = 'unshare'
 
 
 _ETC_NETWORK_INTERFACES_CONTENT = """\
@@ -63,6 +64,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 + [
                     COMMAND_CHROOT,
                     _COMMAND_FIND,
+                    _COMMAND_UNSHARE,
                     self._command_debootstrap,
                 ])
 
@@ -79,6 +81,9 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 self._get_kernel_package_name(),
                 )
         cmd = [
+                _COMMAND_UNSHARE,
+                '--mount',
+                '--',
                 self._command_debootstrap,
                 '--arch', self._architecture,
                 '--include=%s' % ','.join(_extra_packages),
