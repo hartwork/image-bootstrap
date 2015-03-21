@@ -475,7 +475,15 @@ class BootstrapDistroAgnostic(object):
                 '-p', 'p',
                 self._abs_target_path,
                 ]
-        self._executor.check_call(cmd)
+        for i in range(3):
+            try:
+                self._executor.check_call(cmd)
+            except subprocess.CalledProcessError as e:
+                if e.returncode == 127:  # command not found
+                    raise
+                time.sleep(1)
+            else:
+                break
 
     def _rmdir_mountpount(self):
         self._messenger.announce_command([_COMMAND_RMDIR, self._abs_mountpoint])
