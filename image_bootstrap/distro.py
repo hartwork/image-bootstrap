@@ -42,6 +42,8 @@ _COMMAND_RMDIR = 'rmdir'
 _COMMAND_SED = 'sed'
 _COMMAND_UMOUNT = 'umount'
 
+_EXIT_COMMAND_NOT_FOUND = 127
+
 
 class BootstrapDistroAgnostic(object):
     def __init__(self,
@@ -122,7 +124,7 @@ class BootstrapDistroAgnostic(object):
                 % missing_files[0])
 
         if missing_commands:
-            raise OSError(errno.ENOENT, 'Command "%s" not found in PATH.' \
+            raise OSError(_EXIT_COMMAND_NOT_FOUND, 'Command "%s" not found in PATH.' \
                 % missing_commands[0])
 
         if infos_produced:
@@ -443,7 +445,7 @@ class BootstrapDistroAgnostic(object):
             try:
                 self._executor.check_call(cmd)
             except subprocess.CalledProcessError as e:
-                if e.returncode == 127:  # command not found
+                if e.returncode == _EXIT_COMMAND_NOT_FOUND:
                     raise
                 time.sleep(1)
             else:
@@ -479,7 +481,7 @@ class BootstrapDistroAgnostic(object):
             try:
                 self._executor.check_call(cmd)
             except subprocess.CalledProcessError as e:
-                if e.returncode == 127:  # command not found
+                if e.returncode == _EXIT_COMMAND_NOT_FOUND:
                     raise
                 time.sleep(1)
             else:
