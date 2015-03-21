@@ -50,6 +50,7 @@ class BootstrapDistroAgnostic(object):
             hostname,
             architecture,
             root_password,
+            abs_etc_resolv_conf,
             abs_scripts_dir_pre,
             abs_scripts_dir_chroot,
             abs_scripts_dir_post,
@@ -61,6 +62,7 @@ class BootstrapDistroAgnostic(object):
         self._hostname = hostname
         self._architecture = architecture
         self._root_password = root_password
+        self._abs_etc_resolv_conf = abs_etc_resolv_conf
         self._abs_scripts_dir_pre = abs_scripts_dir_pre
         self._abs_scripts_dir_chroot = abs_scripts_dir_chroot
         self._abs_scripts_dir_post = abs_scripts_dir_post
@@ -357,13 +359,19 @@ class BootstrapDistroAgnostic(object):
     def generate_initramfs_from_inside_chroot(self):
         raise NotImplementedError()
 
-    def _copy_resolv_conf(self):
-        cmd = [
-                _COMMAND_CP,
-                '/etc/resolv.conf',
-                os.path.join(self._abs_mountpoint, 'etc/resolv.conf'),
-                ]
-        self._executor.check_call(cmd)
+    def _create_etc_resolv_conf(self):
+        output_filename = os.path.join(self._abs_mountpoint, 'etc', 'resolv.conf')
+
+        self._messenger.info('Writing file "%s" based on "%s"...' % (output_filename, self._abs_etc_resolv_conf))
+
+        input_f = open(self._abs_etc_resolv_conf)
+        output_f = open(output_filename, 'w')
+        for l in input_f:
+            line = l.rstrip()
+            if line.startswith('nameserver'):
+                print(line, file=output_f)
+        input_f.close()
+        output_f.close()
 
     def _copy_chroot_scripts(self):
         abs_path_parent = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR)
@@ -486,11 +494,13 @@ class BootstrapDistroAgnostic(object):
                 try:
                     self._mkdir_mountpount_etc()
                     self._create_etc_hostname()  # first time
+                    self._create_etc_resolv_conf()  # first time
                     try:
                         self.run_directory_bootstrap()
                     finally:
                         self._unmount_directory_bootstrap_leftovers()
                     self._create_etc_hostname()  # re-write
+                    self._create_etc_resolv_conf()  # re-write
                     self._create_etc_fstab()
                     self.create_network_configuration()
                     self._run_pre_scripts()
@@ -502,7 +512,6 @@ class BootstrapDistroAgnostic(object):
                         self._fix_grub_cfg_root_device()
                         self.generate_initramfs_from_inside_chroot()
                         if self._abs_scripts_dir_chroot:
-                            self._copy_resolv_conf()
                             self._copy_chroot_scripts()
                             try:
                                 self._run_chroot_scripts()
