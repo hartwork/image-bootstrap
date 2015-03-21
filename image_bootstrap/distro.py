@@ -161,13 +161,14 @@ class BootstrapDistroAgnostic(object):
             self._messenger.info_gap()
 
     def _unshare(self):
-        self._messenger.info('Unsharing UTS namespace...')
+        self._messenger.info('Unsharing Linux namespaces (mount, UTS/hostname)...')
         libc = CDLL("libc.so.6")
+        CLONE_NEWNS = 0x00020000
         CLONE_NEWUTS = 0x04000000
-        ret = libc.unshare(c_int(CLONE_NEWUTS))
+        ret = libc.unshare(c_int(CLONE_NEWNS | CLONE_NEWUTS))
         if ret:
             _errno = get_errno() or errno.EPERM
-            raise OSError(_errno, 'Unsharing UTS namespace failed: ' + os.strerror(_errno))
+            raise OSError(_errno, 'Unsharing Linux namespaces failed: ' + os.strerror(_errno))
 
         hostname_char_p = cast(self._hostname, c_char_p)
         hostname_len_size_t = libc.strlen(hostname_char_p)
