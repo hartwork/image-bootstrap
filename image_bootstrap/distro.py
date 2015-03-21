@@ -479,7 +479,15 @@ class BootstrapDistroAgnostic(object):
 
     def _rmdir_mountpount(self):
         self._messenger.announce_command([_COMMAND_RMDIR, self._abs_mountpoint])
-        os.rmdir(self._abs_mountpoint)
+        for i in range(3):
+            try:
+                os.rmdir(self._abs_mountpoint)
+            except OSError as e:
+                if e.errno != errno.EBUSY:
+                    raise
+                time.sleep(1)
+            else:
+                break
 
     def run(self):
         self._unshare()
