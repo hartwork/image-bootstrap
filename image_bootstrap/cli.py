@@ -130,6 +130,7 @@ def _main__level_two():
     try:
         _main__level_three(messenger, options)
     except KeyboardInterrupt:
+        messenger.info('Interrupted.')
         raise
     except BaseException as e:
         if options.debug:
