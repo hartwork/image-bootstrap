@@ -9,7 +9,7 @@ import re
 import subprocess
 import tempfile
 import time
-from ctypes import CDLL, c_int, get_errno
+from ctypes import CDLL, c_int, get_errno, cast, c_char_p
 
 from image_bootstrap.mount import MountFinder
 
@@ -31,7 +31,6 @@ _COMMAND_BLKID = 'blkid'
 _COMMAND_CHMOD = 'chmod'
 COMMAND_CHROOT = 'chroot'
 _COMMAND_CP = 'cp'
-_COMMAND_HOSTNAME = 'hostname'
 _COMMAND_KPARTX = 'kpartx'
 _COMMAND_MKDIR = 'mkdir'
 _COMMAND_MKFS_EXT4 = 'mkfs.ext4'
@@ -82,7 +81,6 @@ class BootstrapDistroAgnostic(object):
                 _COMMAND_CHMOD,
                 COMMAND_CHROOT,
                 _COMMAND_CP,
-                _COMMAND_HOSTNAME,
                 _COMMAND_KPARTX,
                 _COMMAND_MKDIR,
                 _COMMAND_MKFS_EXT4,
@@ -171,7 +169,12 @@ class BootstrapDistroAgnostic(object):
             _errno = get_errno() or errno.EPERM
             raise OSError(_errno, 'Unsharing UTS namespace failed: ' + os.strerror(_errno))
 
-        self._executor.check_call([_COMMAND_HOSTNAME, self._hostname])
+        hostname_char_p = cast(self._hostname, c_char_p)
+        hostname_len_size_t = libc.strlen(hostname_char_p)
+        ret = libc.sethostname(hostname_char_p, hostname_len_size_t)
+        if ret:
+            _errno = get_errno() or errno.EPERM
+            raise OSError(_errno, 'Setting hostname failed: ' + os.strerror(_errno))
 
     def _partition_device(self):
         self._messenger.info('Partitioning "%s"...' % self._abs_target_path)
