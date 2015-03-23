@@ -8,5 +8,5 @@ echo "  \$0 = \"$0"\"
 echo "  \$@ = <$@>"
 echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 echo Environment:
-env
+env | sort
 echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
