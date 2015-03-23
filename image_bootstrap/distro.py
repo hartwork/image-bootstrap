@@ -6,6 +6,7 @@ from __future__ import print_function
 import errno
 import os
 import re
+import stat
 import subprocess
 import tempfile
 import time
@@ -171,6 +172,12 @@ class BootstrapDistroAgnostic(object):
 
         if infos_produced:
             self._messenger.info_gap()
+
+    def check_target_block_device(self):
+        self._messenger.info('Checking if "%s" is a block device...' % self._abs_target_path)
+        props = os.stat(self._abs_target_path)
+        if not stat.S_ISBLK(props.st_mode):
+            raise OSError(errno.ENOTBLK, 'Not a block device: "%s"' % self._abs_target_path)
 
     def _script_should_be_run(self, basename):
         if basename.startswith('.'):

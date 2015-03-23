@@ -50,6 +50,7 @@ def _main__level_three(messenger, options):
             )
     bootstrap.detect_grub2_install()
     bootstrap.check_for_commands()
+    bootstrap.check_target_block_device()
     bootstrap.check_script_executability()
     bootstrap.run()
 
