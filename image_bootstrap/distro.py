@@ -376,13 +376,22 @@ class BootstrapDistroAgnostic(object):
             cmd = [os.path.join(abs_scripts_dir, basename)]
             self._executor.check_call(cmd, env=env)
 
+    def _make_script_environment(self, tell_mountpoint):
+        env = os.environ.copy()
+        env.update({
+                'HOSTNAME': self._hostname,  # for compatibility to grml-debootstrap
+                'IB_HOSTNAME': self._hostname,
+                })
+        if tell_mountpoint:
+            env.update({
+                    'IB_ROOT': self._abs_mountpoint,
+                    'MNTPOINT': self._abs_mountpoint,  # for compatibility to grml-debootstrap
+                    })
+        return env
+
     def _run_pre_scripts(self):
         self._messenger.info('Running pre-chroot scripts...')
-        env = {
-                'HOSTNAME': self._hostname,
-                'PATH': os.environ['PATH'],
-                'MNTPOINT': self._abs_mountpoint,
-                }
+        env = self._make_script_environment(tell_mountpoint=True)
         if self._abs_scripts_dir_pre:
             self._run_scripts_from(self._abs_scripts_dir_pre, env)
 
@@ -458,10 +467,7 @@ class BootstrapDistroAgnostic(object):
 
     def _run_chroot_scripts(self):
         self._messenger.info('Running chroot scripts...')
-        env = {
-                'HOSTNAME': self._hostname,
-                'PATH': os.environ['PATH'],
-                }
+        env = self._make_script_environment(tell_mountpoint=False)
         for basename in os.listdir(self._abs_scripts_dir_chroot):
             if not self._script_should_be_run(basename):
                 continue
@@ -519,10 +525,7 @@ class BootstrapDistroAgnostic(object):
 
     def _run_post_scripts(self):
         self._messenger.info('Running post-chroot scripts...')
-        env = {
-                'PATH': os.environ['PATH'],
-                'MNTPOINT': self._abs_mountpoint,
-                }
+        env = self._make_script_environment(tell_mountpoint=True)
         if self._abs_scripts_dir_post:
             self._run_scripts_from(self._abs_scripts_dir_post, env)
 
