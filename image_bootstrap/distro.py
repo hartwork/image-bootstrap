@@ -279,7 +279,11 @@ class BootstrapDistroAgnostic(object):
                 ]
         self._executor.check_call(cmd_add)
 
-        if not os.path.exists(self._abs_first_partition_device):
+        for i in range(3):
+            if os.path.exists(self._abs_first_partition_device):
+                break
+            time.sleep(1)
+        else:
             raise OSError(errno.ENOENT, "No such block device file: '%s'" \
                     % self._abs_first_partition_device)
 
