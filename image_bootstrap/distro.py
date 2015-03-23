@@ -93,12 +93,21 @@ class BootstrapDistroAgnostic(object):
                 self._command_grub2_install,
                 ))
 
+    def _find_command(self, command):
+        dirs = os.environ['PATH'].split(':')
+        for _dir in dirs:
+            abs_path = os.path.join(_dir, command)
+            if os.path.exists(abs_path):
+                return abs_path
+
+        raise OSError(_EXIT_COMMAND_NOT_FOUND, 'Command "%s" not found in PATH.' \
+            % command)
+
     def check_for_commands(self):
         infos_produced = False
 
         missing_files = []
         missing_commands = []
-        dirs = os.environ['PATH'].split(':')
         for command in sorted(set(self.get_commands_to_check_for())):
             if command.startswith('/'):
                 abs_path = command
@@ -107,15 +116,16 @@ class BootstrapDistroAgnostic(object):
                 continue
 
             assert not command.startswith('/')
-            for _dir in dirs:
-                abs_path = os.path.join(_dir, command)
-                if os.path.exists(abs_path):
-                    self._messenger.info('Checking for %s... %s' % (command, abs_path))
-                    infos_produced = True
-                    break
-            else:
+            try:
+                abs_path = self._find_command(command)
+            except OSError as e:
+                if e.errno != _EXIT_COMMAND_NOT_FOUND:
+                    raise
                 missing_commands.append(command)
                 self._messenger.error('Checking for %s... NOT FOUND' % command)
+            else:
+                self._messenger.info('Checking for %s... %s' % (command, abs_path))
+                infos_produced = True
 
         if missing_files:
             raise OSError(errno.ENOENT, 'File "%s" not found.' \
