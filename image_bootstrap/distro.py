@@ -104,7 +104,7 @@ class BootstrapDistroAgnostic(object):
             % command)
 
     def _protect_against_grub_legacy(self, command):
-        output = self._executor.check_output([command, '--version'])
+        output = subprocess.check_output([command, '--version'])
         if 'GRUB GRUB 0.' in output:
             raise ValueError('Command "%s" is GRUB legacy while GRUB 2 is needed. '
                     'Please install GRUB 2 or pass --grub2-install .. on the command line.' \
