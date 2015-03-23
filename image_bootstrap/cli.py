@@ -48,6 +48,7 @@ def _main__level_three(messenger, options):
             options.command_debootstrap,
             options.debootstrap_opt,
             )
+    bootstrap.detect_grub2_install()
     bootstrap.check_for_commands()
     bootstrap.check_script_executability()
     bootstrap.run()
@@ -101,7 +102,7 @@ def _main__level_two():
     commands = parser.add_argument_group('command names')
     commands.add_argument('--debootstrap', metavar='COMMAND', dest='command_debootstrap', default='debootstrap',
         help='override debootstrap command')
-    commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install', default='grub2-install',
+    commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install',
         help='override grub2-install command')
 
 

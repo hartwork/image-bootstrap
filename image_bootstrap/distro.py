@@ -103,6 +103,40 @@ class BootstrapDistroAgnostic(object):
         raise OSError(_EXIT_COMMAND_NOT_FOUND, 'Command "%s" not found in PATH.' \
             % command)
 
+    def _protect_against_grub_legacy(self, command):
+        output = self._executor.check_output([command, '--version'])
+        if 'GRUB GRUB 0.' in output:
+            raise ValueError('Command "%s" is GRUB legacy while GRUB 2 is needed. '
+                    'Please install GRUB 2 or pass --grub2-install .. on the command line.' \
+                    % command)
+
+    def detect_grub2_install(self):
+        if self._command_grub2_install:
+            return  # Explicit command given, no detection needed
+
+        _COMMAND_GRUB_INSTALL = 'grub-install'
+        _COMMAND_GRUB2_INSTALL = 'grub2-install'
+
+        self._command_grub2_install = _COMMAND_GRUB2_INSTALL
+        try:
+            abs_path = self._find_command(self._command_grub2_install)
+        except OSError as e:
+            if e.errno != _EXIT_COMMAND_NOT_FOUND:
+                raise
+
+            self._command_grub2_install = _COMMAND_GRUB_INSTALL
+            try:
+                abs_path = self._find_command(self._command_grub2_install)
+            except OSError as e:
+                if e.errno != _EXIT_COMMAND_NOT_FOUND:
+                    raise
+
+                # NOTE: consecutive search for "grub-install" will fail and
+                #       be reported, so we don't need to raise here
+                return
+
+            self._protect_against_grub_legacy(self._command_grub2_install)
+
     def check_for_commands(self):
         infos_produced = False
 
