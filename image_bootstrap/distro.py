@@ -30,7 +30,8 @@ _DISK_ID_COUNT_BYTES = 4
 
 _DISK_ID_PATTERN = '^0x[0-9a-fA-F]{1,8}$'
 _DISK_ID_MATCHER = re.compile(_DISK_ID_PATTERN)
-_SANE_UUID_CHECKER = re.compile('^[a-f0-9][a-f0-9-]{34}[a-f0-9]$')
+_UUID_PATTERN = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+_SANE_UUID_CHECKER = re.compile(_UUID_PATTERN)
 
 
 _COMMAND_BLKID = 'blkid'
