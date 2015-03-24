@@ -13,6 +13,7 @@ import time
 from ctypes import CDLL, c_int, get_errno, cast, c_char_p
 
 from image_bootstrap.mount import MountFinder
+from image_bootstrap.types.uuid import require_valid_uuid
 
 
 _MOUNTPOINT_PARENT_DIR = '/mnt'
@@ -30,8 +31,6 @@ _DISK_ID_COUNT_BYTES = 4
 
 _DISK_ID_PATTERN = '^0x[0-9a-fA-F]{1,8}$'
 _DISK_ID_MATCHER = re.compile(_DISK_ID_PATTERN)
-_UUID_PATTERN = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-_SANE_UUID_CHECKER = re.compile(_UUID_PATTERN)
 
 
 _COMMAND_BLKID = 'blkid'
@@ -359,10 +358,6 @@ class BootstrapDistroAgnostic(object):
             return
 
         self._messenger.info('Setting first partition UUID to %s...' % self._first_partition_uuid)
-
-        if not _SANE_UUID_CHECKER.match(self._first_partition_uuid):
-            raise ValueError('Not a well-formed UUID: "%s"' % self._first_partition_uuid)
-
         cmd = [_COMMAND_TUNE2FS,
                 '-U', self._first_partition_uuid,
                 self._abs_first_partition_device,
@@ -378,8 +373,7 @@ class BootstrapDistroAgnostic(object):
                 ]
         output = self._executor.check_output(cmd_blkid)
         first_partition_uuid = output.rstrip()
-        if not _SANE_UUID_CHECKER.match(first_partition_uuid):
-            raise ValueError('Not a well-formed UUID: "%s"' % first_partition_uuid)
+        require_valid_uuid(first_partition_uuid)
         self._first_partition_uuid = first_partition_uuid
 
     def _create_etc_fstab(self):

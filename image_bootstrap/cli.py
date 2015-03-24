@@ -12,6 +12,7 @@ from image_bootstrap.messenger import Messenger, BANNER, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
 from image_bootstrap.executor import Executor
 from image_bootstrap.metadata import DESCRIPTION, VERSION_STR
+from image_bootstrap.types.uuid import uuid_type
 
 
 _COLORIZE_NEVER = 'never'
@@ -92,7 +93,7 @@ def _main__level_two():
         help='file to copy nameserver entries from (default: %(default)s)')
     machine.add_argument('--disk-id', dest='disk_id_human', metavar='ID',
         help='specific disk identifier to apply, e.g. 0x12345678')
-    machine.add_argument('--first-partition-uuid', dest='first_partition_uuid', metavar='UUID',
+    machine.add_argument('--first-partition-uuid', dest='first_partition_uuid', metavar='UUID', type=uuid_type,
         help='specific UUID to apply to first partition, e.g. c1b9d5a2-f162-11cf-9ece-0020afc76f16')
 
     script_dirs = parser.add_argument_group('script integration')
