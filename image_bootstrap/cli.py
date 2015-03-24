@@ -39,6 +39,7 @@ def _main__level_three(messenger, options):
             options.root_password,
             os.path.abspath(options.resolv_conf),
             options.disk_id_human,
+            options.first_partition_uuid,
             options.debian_release,
             options.debian_mirror_url,
             options.scripts_dir_pre and os.path.abspath(options.scripts_dir_pre),
@@ -91,6 +92,8 @@ def _main__level_two():
         help='file to copy nameserver entries from (default: %(default)s)')
     machine.add_argument('--disk-id', dest='disk_id_human', metavar='ID',
         help='specific disk identifier to apply, e.g. 0x12345678')
+    machine.add_argument('--first-partition-uuid', dest='first_partition_uuid', metavar='UUID',
+        help='specific UUID to apply to first partition, e.g. c1b9d5a2-f162-11cf-9ece-0020afc76f16')
 
     script_dirs = parser.add_argument_group('script integration')
     script_dirs.add_argument('--scripts-pre', dest='scripts_dir_pre', metavar='DIRECTORY',

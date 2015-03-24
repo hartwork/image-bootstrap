@@ -46,6 +46,7 @@ _COMMAND_PARTED = 'parted'
 _COMMAND_RM = 'rm'
 _COMMAND_RMDIR = 'rmdir'
 _COMMAND_SED = 'sed'
+_COMMAND_TUNE2FS = 'tune2fs'
 _COMMAND_UMOUNT = 'umount'
 
 _EXIT_COMMAND_NOT_FOUND = 127
@@ -60,6 +61,7 @@ class BootstrapDistroAgnostic(object):
             root_password,
             abs_etc_resolv_conf,
             disk_id_human,
+            first_partition_uuid,
             abs_scripts_dir_pre,
             abs_scripts_dir_chroot,
             abs_scripts_dir_post,
@@ -82,7 +84,7 @@ class BootstrapDistroAgnostic(object):
 
         self._abs_mountpoint = None
         self._abs_first_partition_device = None
-        self._first_partition_uuid = None
+        self._first_partition_uuid = first_partition_uuid
 
     def get_commands_to_check_for(self):
         return iter((
@@ -98,6 +100,7 @@ class BootstrapDistroAgnostic(object):
                 _COMMAND_RM,
                 _COMMAND_RMDIR,
                 _COMMAND_SED,
+                _COMMAND_TUNE2FS,
                 _COMMAND_UMOUNT,
                 self._command_grub2_install,
                 ))
@@ -350,6 +353,21 @@ class BootstrapDistroAgnostic(object):
         p.wait()
         if p.returncode:
             raise subprocess.CalledProcessError(p.returncode, cmd)
+
+    def _set_first_partition_uuid(self):
+        if not self._first_partition_uuid:
+            return
+
+        self._messenger.info('Setting first partition UUID to %s...' % self._first_partition_uuid)
+
+        if not _SANE_UUID_CHECKER.match(self._first_partition_uuid):
+            raise ValueError('Not a well-formed UUID: "%s"' % self._first_partition_uuid)
+
+        cmd = [_COMMAND_TUNE2FS,
+                '-U', self._first_partition_uuid,
+                self._abs_first_partition_device,
+                ]
+        self._executor.check_call(cmd)
 
     def _gather_first_partition_uuid(self):
         cmd_blkid = [
@@ -611,7 +629,13 @@ class BootstrapDistroAgnostic(object):
         self._kpartx_minus_a()
         try:
             self._format_partitions()
-            self._gather_first_partition_uuid()
+
+            if self._first_partition_uuid:
+                self._set_first_partition_uuid()
+            else:
+                self._gather_first_partition_uuid()
+            assert self._first_partition_uuid
+
             self._mkdir_mountpount()
             try:
                 self._mount_disk_chroot_mounts()
