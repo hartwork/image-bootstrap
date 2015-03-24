@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import errno
 import os
+import pwd
 import re
 import stat
 import subprocess
@@ -197,8 +198,17 @@ class BootstrapDistroAgnostic(object):
             return False
         return True
 
-    def check_script_executability(self):
+    def check_script_permissions(self):
         infos_produced = False
+
+        good_uids = set()
+        good_uids.add(os.geteuid())
+        try:
+            sudo_uid = int(os.environ['SUDO_UID'])
+        except (KeyError, ValueError):
+            pass
+        else:
+            good_uids.add(sudo_uid)
 
         for category, abs_scripts_dir in (
                 ('pre-chroot', self._abs_scripts_dir_pre),
@@ -207,6 +217,17 @@ class BootstrapDistroAgnostic(object):
                 ):
             if abs_scripts_dir is None:
                 continue
+
+            self._messenger.info('Checking %s scripts directory permissions...' % category)
+            infos_produced = True
+
+            props = os.lstat(abs_scripts_dir)
+            if props.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+                raise OSError(errno.EPERM, 'Directory "%s" is writable to users other than its owner' % abs_scripts_dir)
+
+            if props.st_uid not in good_uids:
+                user_info = ' or '.join(('user %s/%d' % (pwd.getpwuid(uid).pw_name, uid) for uid in sorted(good_uids)))
+                raise OSError(errno.EPERM, 'Directory "%s" is not owned by %s' % (abs_scripts_dir, user_info))
 
             self._messenger.info('Checking %s scripts for executability...' % category)
             infos_produced = True
