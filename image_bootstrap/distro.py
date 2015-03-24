@@ -29,10 +29,6 @@ _NON_DISK_MOUNT_TASKS = (
 _DISK_ID_OFFSET = 440
 _DISK_ID_COUNT_BYTES = 4
 
-_DISK_ID_PATTERN = '^0x[0-9a-fA-F]{1,8}$'
-_DISK_ID_MATCHER = re.compile(_DISK_ID_PATTERN)
-
-
 _COMMAND_BLKID = 'blkid'
 _COMMAND_CHMOD = 'chmod'
 COMMAND_CHROOT = 'chroot'
@@ -59,7 +55,7 @@ class BootstrapDistroAgnostic(object):
             architecture,
             root_password,
             abs_etc_resolv_conf,
-            disk_id_human,
+            disk_id,
             first_partition_uuid,
             abs_scripts_dir_pre,
             abs_scripts_dir_chroot,
@@ -73,7 +69,7 @@ class BootstrapDistroAgnostic(object):
         self._architecture = architecture
         self._root_password = root_password
         self._abs_etc_resolv_conf = abs_etc_resolv_conf
-        self._disk_id_human = disk_id_human
+        self._disk_id = disk_id
         self._abs_scripts_dir_pre = abs_scripts_dir_pre
         self._abs_scripts_dir_chroot = abs_scripts_dir_chroot
         self._abs_scripts_dir_post = abs_scripts_dir_post
@@ -596,21 +592,14 @@ class BootstrapDistroAgnostic(object):
             else:
                 break
 
-    def _disk_id_human_to_bytes(self, text):
-        if not _DISK_ID_MATCHER.match(text):
-            raise ValueError('"%s" does not match pattern "%s"' % (text, _DISK_ID_PATTERN))
-
-        number = int(text, 16)
-        return ''.join([chr((number >> i * 8) & 255) for i in range(4)])
-
     def _set_disk_id_in_mbr(self):
-        if not self._disk_id_human:
+        if not self._disk_id:
             return
 
-        content = self._disk_id_human_to_bytes(self._disk_id_human)
+        content = self._disk_id.byte_sequence()
         assert len(content) == _DISK_ID_COUNT_BYTES
 
-        self._messenger.info('Setting MBR disk identifier to %s (4 bytes)...' % self._disk_id_human)
+        self._messenger.info('Setting MBR disk identifier to %s (4 bytes)...' % str(self._disk_id))
         f = open(self._abs_target_path, 'w')
         f.seek(_DISK_ID_OFFSET)
         f.write(content)

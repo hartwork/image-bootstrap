@@ -12,6 +12,7 @@ from image_bootstrap.messenger import Messenger, BANNER, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
 from image_bootstrap.executor import Executor
 from image_bootstrap.metadata import DESCRIPTION, VERSION_STR
+from image_bootstrap.types.disk_id import disk_id_type
 from image_bootstrap.types.uuid import uuid_type
 
 
@@ -39,7 +40,7 @@ def _main__level_three(messenger, options):
             options.architecture,
             options.root_password,
             os.path.abspath(options.resolv_conf),
-            options.disk_id_human,
+            options.disk_id,
             options.first_partition_uuid,
             options.debian_release,
             options.debian_mirror_url,
@@ -91,7 +92,7 @@ def _main__level_two():
         help='root password to set (default: none / password log-in disabled)')
     machine.add_argument('--resolv-conf', metavar='FILE', default='/etc/resolv.conf',
         help='file to copy nameserver entries from (default: %(default)s)')
-    machine.add_argument('--disk-id', dest='disk_id_human', metavar='ID',
+    machine.add_argument('--disk-id', dest='disk_id', metavar='ID', type=disk_id_type,
         help='specific disk identifier to apply, e.g. 0x12345678')
     machine.add_argument('--first-partition-uuid', dest='first_partition_uuid', metavar='UUID', type=uuid_type,
         help='specific UUID to apply to first partition, e.g. c1b9d5a2-f162-11cf-9ece-0020afc76f16')
