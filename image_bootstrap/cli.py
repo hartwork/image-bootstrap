@@ -38,6 +38,7 @@ def _main__level_three(messenger, options):
             options.architecture,
             options.root_password,
             os.path.abspath(options.resolv_conf),
+            options.disk_id_human,
             options.debian_release,
             options.debian_mirror_url,
             options.scripts_dir_pre and os.path.abspath(options.scripts_dir_pre),
@@ -88,6 +89,8 @@ def _main__level_two():
         help='root password to set (default: none / password log-in disabled)')
     machine.add_argument('--resolv-conf', metavar='FILE', default='/etc/resolv.conf',
         help='file to copy nameserver entries from (default: %(default)s)')
+    machine.add_argument('--disk-id', dest='disk_id_human', metavar='ID',
+        help='specific disk identifier to apply, e.g. 0x12345678')
 
     script_dirs = parser.add_argument_group('script integration')
     script_dirs.add_argument('--scripts-pre', dest='scripts_dir_pre', metavar='DIRECTORY',

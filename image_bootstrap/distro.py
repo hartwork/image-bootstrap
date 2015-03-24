@@ -25,6 +25,11 @@ _NON_DISK_MOUNT_TASKS = (
         ('/sys', ['-o', 'bind'], 'sys'),
         )
 
+_DISK_ID_OFFSET = 440
+_DISK_ID_COUNT_BYTES = 4
+
+_DISK_ID_PATTERN = '^0x[0-9a-fA-F]{1,8}$'
+_DISK_ID_MATCHER = re.compile(_DISK_ID_PATTERN)
 _SANE_UUID_CHECKER = re.compile('^[a-f0-9][a-f0-9-]{34}[a-f0-9]$')
 
 
@@ -53,6 +58,7 @@ class BootstrapDistroAgnostic(object):
             architecture,
             root_password,
             abs_etc_resolv_conf,
+            disk_id_human,
             abs_scripts_dir_pre,
             abs_scripts_dir_chroot,
             abs_scripts_dir_post,
@@ -65,6 +71,7 @@ class BootstrapDistroAgnostic(object):
         self._architecture = architecture
         self._root_password = root_password
         self._abs_etc_resolv_conf = abs_etc_resolv_conf
+        self._disk_id_human = disk_id_human
         self._abs_scripts_dir_pre = abs_scripts_dir_pre
         self._abs_scripts_dir_chroot = abs_scripts_dir_chroot
         self._abs_scripts_dir_post = abs_scripts_dir_post
@@ -576,9 +583,30 @@ class BootstrapDistroAgnostic(object):
             else:
                 break
 
+    def _disk_id_human_to_bytes(self, text):
+        if not _DISK_ID_MATCHER.match(text):
+            raise ValueError('"%s" does not match pattern "%s"' % (text, _DISK_ID_PATTERN))
+
+        number = int(text, 16)
+        return ''.join([chr((number >> i * 8) & 255) for i in range(4)])
+
+    def _set_disk_id_in_mbr(self):
+        if not self._disk_id_human:
+            return
+
+        content = self._disk_id_human_to_bytes(self._disk_id_human)
+        assert len(content) == _DISK_ID_COUNT_BYTES
+
+        self._messenger.info('Setting MBR disk identifier to %s (4 bytes)...' % self._disk_id_human)
+        f = open(self._abs_target_path, 'w')
+        f.seek(_DISK_ID_OFFSET)
+        f.write(content)
+        f.close()
+
     def run(self):
         self._unshare()
         self._partition_device()
+        self._set_disk_id_in_mbr()
         self._kpartx_minus_a()
         try:
             self._format_partitions()
