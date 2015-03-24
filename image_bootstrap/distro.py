@@ -6,7 +6,6 @@ from __future__ import print_function
 import errno
 import os
 import pwd
-import re
 import stat
 import subprocess
 import tempfile
@@ -129,14 +128,14 @@ class BootstrapDistroAgnostic(object):
 
         self._command_grub2_install = _COMMAND_GRUB2_INSTALL
         try:
-            abs_path = self._find_command(self._command_grub2_install)
+            self._find_command(self._command_grub2_install)
         except OSError as e:
             if e.errno != _EXIT_COMMAND_NOT_FOUND:
                 raise
 
             self._command_grub2_install = _COMMAND_GRUB_INSTALL
             try:
-                abs_path = self._find_command(self._command_grub2_install)
+                self._find_command(self._command_grub2_install)
             except OSError as e:
                 if e.errno != _EXIT_COMMAND_NOT_FOUND:
                     raise
