@@ -37,6 +37,7 @@ Please report bugs at %(github_home)s.  Thank you!\
 class Messenger(object):
     def __init__(self, verbosity, colorize):
         self._infos_wanted = verbosity is not VERBOSITY_QUIET
+        self._warnings_wanted = verbosity is not VERBOSITY_QUIET
         self._commands_wanted = verbosity is VERBOSITY_VERBOSE
         self._colorize = colorize
 
@@ -77,6 +78,11 @@ class Messenger(object):
         if not self._infos_wanted:
             return
         print(self.colorize(text, Fore.GREEN))
+
+    def warn(self, text):
+        if not self._warnings_wanted:
+            return
+        print(self.colorize('Warning: ' + text, Fore.MAGENTA, Style.BRIGHT))
 
     def error(self, text):
         print(self.colorize('Error: ' + text, Fore.RED, Style.BRIGHT), file=sys.stderr)
