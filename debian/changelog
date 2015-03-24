@@ -1,4 +1,4 @@
-image-bootstrap (0.6.6) unstable; urgency=low
+image-bootstrap (0.6.7) unstable; urgency=low
 
   * Initial Release (with help from stdeb and dh_make).
 
