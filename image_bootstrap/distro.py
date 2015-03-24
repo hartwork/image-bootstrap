@@ -38,6 +38,7 @@ _COMMAND_MKDIR = 'mkdir'
 _COMMAND_MKFS_EXT4 = 'mkfs.ext4'
 _COMMAND_MOUNT = 'mount'
 _COMMAND_PARTED = 'parted'
+_COMMAND_PARTPROBE = 'partprobe'
 _COMMAND_RM = 'rm'
 _COMMAND_RMDIR = 'rmdir'
 _COMMAND_SED = 'sed'
@@ -94,6 +95,7 @@ class BootstrapDistroAgnostic(object):
                 _COMMAND_MKFS_EXT4,
                 _COMMAND_MOUNT,
                 _COMMAND_PARTED,
+                _COMMAND_PARTPROBE,
                 _COMMAND_RM,
                 _COMMAND_RMDIR,
                 _COMMAND_SED,
@@ -306,18 +308,36 @@ class BootstrapDistroAgnostic(object):
         device_name = output.split('\n')[0].split(' : ')[0]
         self._abs_first_partition_device = '/dev/mapper/%s' % device_name
 
-        if os.path.exists(self._abs_first_partition_device):
-            raise OSError(errno.EEXIST, "File exists: '%s'" \
-                    % self._abs_first_partition_device)
+        is_loop_device = device_name.startswith('loop')
 
-        cmd_add = [
-                _COMMAND_KPARTX,
-                '-a',
-                '-p', 'p',
-                '-s',
-                self._abs_target_path,
-                ]
-        self._executor.check_call(cmd_add)
+        if is_loop_device:
+            if os.path.exists(self._abs_first_partition_device):
+                raise OSError(errno.EEXIST, "File exists: '%s'" \
+                        % self._abs_first_partition_device)
+
+            cmd_add = [
+                    _COMMAND_KPARTX,
+                    '-a',
+                    '-p', 'p',
+                    '-s',
+                    self._abs_target_path,
+                    ]
+            self._executor.check_call(cmd_add)
+        else:
+            cmd_refresh_table = [
+                    _COMMAND_PARTPROBE,
+                    self._abs_target_path,
+                    ]
+            time.sleep(1)  # increase chances of first call working, e.g. with LVM volumes
+            for i in range(3):
+                try:
+                    self._executor.check_call(cmd_refresh_table)
+                except subprocess.CalledProcessError as e:
+                    if e.returncode == _EXIT_COMMAND_NOT_FOUND:
+                        raise
+                    time.sleep(1)
+                else:
+                    break
 
         for i in range(3):
             if os.path.exists(self._abs_first_partition_device):
