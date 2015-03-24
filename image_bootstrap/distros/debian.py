@@ -4,11 +4,13 @@
 from __future__ import print_function
 
 import os
+import subprocess
 
 from image_bootstrap.distro import BootstrapDistroAgnostic, COMMAND_CHROOT
 
 
 _COMMAND_FIND = 'find'
+_COMMAND_UNAME = 'uname'
 _COMMAND_UNSHARE = 'unshare'
 
 
@@ -20,6 +22,16 @@ iface lo inet loopback
 allow-hotplug eth0
 iface eth0 inet dhcp
 """
+
+
+class _ArchitectureMachineMismatch(Exception):
+    def __init__(self, architecure, machine):
+        self._architecture = architecure
+        self._machine = machine
+
+    def __str__(self):
+        return 'Bootstrapping architecture %s on %s machines not supported' \
+            % (self._architecture, self._machine)
 
 
 class BootstrapDebian(BootstrapDistroAgnostic):
@@ -66,6 +78,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 + [
                     COMMAND_CHROOT,
                     _COMMAND_FIND,
+                    _COMMAND_UNAME,
                     _COMMAND_UNSHARE,
                     self._command_debootstrap,
                 ])
@@ -75,6 +88,22 @@ class BootstrapDebian(BootstrapDistroAgnostic):
             return 'linux-image-686-pae'
 
         return 'linux-image-%s' % self._architecture
+
+    def check_architecture(self):
+        super(BootstrapDebian, self).check_architecture()
+
+        uname_output = subprocess.check_output([_COMMAND_UNAME, '-m'])
+        host_machine = uname_output.rstrip()
+
+        trouble = False
+        if self._architecture == 'amd64' and host_machine != 'x86_64':
+            trouble = True
+        elif self._architecture == 'i386':
+            if host_machine not in ('i386', 'i486', 'i586', 'i686', 'x86_64'):
+                trouble = True
+
+        if trouble:
+            raise _ArchitectureMachineMismatch(self._architecture, host_machine)
 
     def run_directory_bootstrap(self):
         self._messenger.info('Bootstrapping Debian into "%s"...' % self._abs_mountpoint)

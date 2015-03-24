@@ -179,6 +179,9 @@ class BootstrapDistroAgnostic(object):
         if not stat.S_ISBLK(props.st_mode):
             raise OSError(errno.ENOTBLK, 'Not a block device: "%s"' % self._abs_target_path)
 
+    def check_architecture(self):
+        self._messenger.info('Checking for known unsupported architecture/machine combination...')
+
     def _script_should_be_run(self, basename):
         if basename.startswith('.'):
             return False
