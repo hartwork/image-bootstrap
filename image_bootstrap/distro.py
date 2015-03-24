@@ -283,7 +283,16 @@ class BootstrapDistroAgnostic(object):
                 self._abs_target_path,
                 'set', '1', 'boot', 'on',
                 ]
-        self._executor.check_call(cmd_boot_flag)
+        time.sleep(1)  # increase chances of first call working, e.g. with LVM volumes
+        for i in range(3):
+            try:
+                self._executor.check_call(cmd_boot_flag)
+            except subprocess.CalledProcessError as e:
+                if e.returncode == _EXIT_COMMAND_NOT_FOUND:
+                    raise
+                time.sleep(1)
+            else:
+                break
 
     def _kpartx_minus_a(self):
         self._messenger.info('Activating partition devices...')
