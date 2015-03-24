@@ -562,6 +562,7 @@ class BootstrapDistroAgnostic(object):
             self._run_scripts_from(self._abs_scripts_dir_post, env)
 
     def _unmount_disk_chroot_mounts(self):
+        self._messenger.info('Unmounting partitions...')
         self._try_unmounting(self._abs_mountpoint)
 
     def _kpartx_minus_d(self):
