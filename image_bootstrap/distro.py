@@ -244,7 +244,7 @@ class BootstrapDistroAgnostic(object):
 
     def _unshare(self):
         self._messenger.info('Unsharing Linux namespaces (mount, UTS/hostname)...')
-        libc = CDLL("libc.so.6")
+        libc = CDLL("libc.so.6", use_errno=True)
         CLONE_NEWNS = 0x00020000
         CLONE_NEWUTS = 0x04000000
         ret = libc.unshare(c_int(CLONE_NEWNS | CLONE_NEWUTS))
