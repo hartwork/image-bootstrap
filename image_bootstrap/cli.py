@@ -39,6 +39,7 @@ def _main__level_three(messenger, options):
             options.hostname,
             options.architecture,
             options.root_password,
+            options.root_password_file and os.path.abspath(options.root_password_file),
             os.path.abspath(options.resolv_conf),
             options.disk_id,
             options.first_partition_uuid,
@@ -57,6 +58,7 @@ def _main__level_three(messenger, options):
     bootstrap.check_architecture()
     bootstrap.check_target_block_device()
     bootstrap.check_script_executability()
+    bootstrap.process_root_password()
     bootstrap.run()
 
     if not stdout_wanted:
@@ -88,8 +90,11 @@ def _main__level_two():
         help='architecture (e.g. amd64)')
     machine.add_argument('--hostname', required=True, metavar='NAME',
         help='hostname to set')
-    machine.add_argument('--password', dest='root_password', metavar='PASSWORD',
-        help='root password to set (default: none / password log-in disabled)')
+    password_options = machine.add_mutually_exclusive_group()
+    password_options.add_argument('--password', dest='root_password', metavar='PASSWORD',
+        help='root password to set (default: password log-in disabled)')
+    password_options.add_argument('--password-file', dest='root_password_file', metavar='FILE',
+        help='file to read root password from (default: password log-in disabled)')
     machine.add_argument('--resolv-conf', metavar='FILE', default='/etc/resolv.conf',
         help='file to copy nameserver entries from (default: %(default)s)')
     machine.add_argument('--disk-id', dest='disk_id', metavar='ID', type=disk_id_type,

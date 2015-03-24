@@ -54,6 +54,7 @@ class BootstrapDistroAgnostic(object):
             hostname,
             architecture,
             root_password,
+            abs_root_password_file,
             abs_etc_resolv_conf,
             disk_id,
             first_partition_uuid,
@@ -68,6 +69,7 @@ class BootstrapDistroAgnostic(object):
         self._hostname = hostname
         self._architecture = architecture
         self._root_password = root_password
+        self._abs_root_password_file = abs_root_password_file
         self._abs_etc_resolv_conf = abs_etc_resolv_conf
         self._disk_id = disk_id
         self._abs_scripts_dir_pre = abs_scripts_dir_pre
@@ -604,6 +606,19 @@ class BootstrapDistroAgnostic(object):
         f.seek(_DISK_ID_OFFSET)
         f.write(content)
         f.close()
+
+    def process_root_password(self):
+        if self._abs_root_password_file:
+            self._messenger.info('Reading root password from file "%s"...' % self._abs_root_password_file)
+            f = open(self._abs_root_password_file)
+            self._root_password = f.read().split('\n')[0]
+            f.close()
+        elif self._root_password is not None:
+            self._messenger.warn('Using --password PASSWORD is a security risk more often than not; '
+                    'please consider using --password-file FILE, instead.')
+        else:
+            assert not 'password or password file given'
+        assert self._root_password is not None
 
     def run(self):
         self._unshare()
