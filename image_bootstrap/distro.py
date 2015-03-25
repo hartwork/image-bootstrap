@@ -223,6 +223,12 @@ class BootstrapDistroAgnostic(object):
             infos_produced = True
 
             props = os.lstat(abs_scripts_dir)
+            if stat.S_ISLNK(props.st_mode):
+                raise OSError(errno.ENOTDIR, 'Directory "%s" is a symlink. Only true directories are supported.' % abs_scripts_dir)
+
+            if not stat.S_ISDIR(props.st_mode):
+                raise OSError(errno.ENOTDIR, 'Directory "%s" is not a directory' % abs_scripts_dir)
+
             if props.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
                 raise OSError(errno.EPERM, 'Directory "%s" is writable to users other than its owner' % abs_scripts_dir)
 
