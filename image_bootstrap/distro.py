@@ -463,7 +463,7 @@ class BootstrapDistroAgnostic(object):
             cmd = [os.path.join(abs_scripts_dir, basename)]
             self._executor.check_call(cmd, env=env.copy())
 
-    def _make_script_environment(self, tell_mountpoint):
+    def make_environment(self, tell_mountpoint):
         env = os.environ.copy()
         for key in ('LANG', 'LANGUAGE'):
             env.pop(key, None)
@@ -481,7 +481,7 @@ class BootstrapDistroAgnostic(object):
 
     def _run_pre_scripts(self):
         self._messenger.info('Running pre-chroot scripts...')
-        env = self._make_script_environment(tell_mountpoint=True)
+        env = self.make_environment(tell_mountpoint=True)
         if self._abs_scripts_dir_pre:
             self._run_scripts_from(self._abs_scripts_dir_pre, env)
 
@@ -557,7 +557,7 @@ class BootstrapDistroAgnostic(object):
 
     def _run_chroot_scripts(self):
         self._messenger.info('Running chroot scripts...')
-        env = self._make_script_environment(tell_mountpoint=False)
+        env = self.make_environment(tell_mountpoint=False)
         for basename in os.listdir(self._abs_scripts_dir_chroot):
             if not self._script_should_be_run(basename):
                 continue
@@ -615,7 +615,7 @@ class BootstrapDistroAgnostic(object):
 
     def _run_post_scripts(self):
         self._messenger.info('Running post-chroot scripts...')
-        env = self._make_script_environment(tell_mountpoint=True)
+        env = self.make_environment(tell_mountpoint=True)
         if self._abs_scripts_dir_post:
             self._run_scripts_from(self._abs_scripts_dir_post, env)
 
