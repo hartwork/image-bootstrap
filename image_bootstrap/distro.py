@@ -398,8 +398,9 @@ class BootstrapDistroAgnostic(object):
                 self._abs_mountpoint,
                 'chpasswd',
                 ]
+        env = self.make_environment(tell_mountpoint=False)
         self._messenger.announce_command(cmd)
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, env=env)
         p.stdin.write('root:%s' % self._root_password)
         p.stdin.close()
         p.wait()

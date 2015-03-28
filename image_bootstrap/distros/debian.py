@@ -147,7 +147,8 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 self._abs_mountpoint,
                 'update-grub',
                 ]
-        self._executor.check_call(cmd)
+        env = self.make_environment(tell_mountpoint=False)
+        self._executor.check_call(cmd, env=env)
 
     def generate_initramfs_from_inside_chroot(self):
         cmd = [
@@ -157,7 +158,8 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 '-u',
                 '-k', 'all',
                 ]
-        self._executor.check_call(cmd)
+        env = self.make_environment(tell_mountpoint=False)
+        self._executor.check_call(cmd, env=env)
 
     def perform_post_chroot_clean_up(self):
         self._messenger.info('Cleaning chroot apt cache...')
