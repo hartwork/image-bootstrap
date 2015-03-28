@@ -461,7 +461,7 @@ class BootstrapDistroAgnostic(object):
                 continue
 
             cmd = [os.path.join(abs_scripts_dir, basename)]
-            self._executor.check_call(cmd, env=env)
+            self._executor.check_call(cmd, env=env.copy())
 
     def _make_script_environment(self, tell_mountpoint):
         env = os.environ.copy()
@@ -567,7 +567,7 @@ class BootstrapDistroAgnostic(object):
                     self._abs_mountpoint,
                     os.path.join('/', _CHROOT_SCRIPT_TARGET_DIR, basename),
                     ]
-            self._executor.check_call(cmd_run, env=env)
+            self._executor.check_call(cmd_run, env=env.copy())
 
     def _remove_chroot_scripts(self):
         self._messenger.info('Removing chroot scripts...')
