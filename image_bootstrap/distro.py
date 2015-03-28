@@ -465,9 +465,12 @@ class BootstrapDistroAgnostic(object):
 
     def _make_script_environment(self, tell_mountpoint):
         env = os.environ.copy()
+        for key in ('LANG', 'LANGUAGE'):
+            env.pop(key, None)
         env.update({
                 'HOSTNAME': self._hostname,  # for compatibility to grml-debootstrap
                 'IB_HOSTNAME': self._hostname,
+                'LC_ALL': 'C',
                 })
         if tell_mountpoint:
             env.update({
