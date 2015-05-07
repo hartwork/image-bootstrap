@@ -676,9 +676,6 @@ class BootstrapDistroAgnostic(object):
         elif self._root_password is not None:
             self._messenger.warn('Using --password PASSWORD is a security risk more often than not; '
                     'please consider using --password-file FILE, instead.')
-        else:
-            assert not 'password or password file given'
-        assert self._root_password is not None
 
     def run(self):
         self._unshare()
