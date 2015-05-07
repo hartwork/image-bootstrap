@@ -56,6 +56,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
             command_grub2_install,
             command_debootstrap,
             debootstrap_opt,
+            bootloader_approach,
             ):
         super(BootstrapDebian, self).__init__(
                 messenger,
@@ -77,6 +78,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
         self._mirror_url = debian_mirror_url
         self._command_debootstrap = command_debootstrap
         self._debootstrap_opt = debootstrap_opt
+        self._bootloader_approach = bootloader_approach
 
     def get_commands_to_check_for(self):
         return iter(
@@ -140,6 +142,9 @@ class BootstrapDebian(BootstrapDistroAgnostic):
         f = open(filename, 'w')
         print(_ETC_NETWORK_INTERFACES_CONTENT, file=f)
         f.close()
+
+    def get_chroot_command_grub2_install(self):
+        return 'grub-install'
 
     def generate_grub_cfg_from_inside_chroot(self):
         cmd = [
