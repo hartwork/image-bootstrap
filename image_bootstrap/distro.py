@@ -16,8 +16,8 @@ from image_bootstrap.mount import MountFinder
 from image_bootstrap.types.uuid import require_valid_uuid
 
 
-BOOTLOADER_APPROACH_CHROOT_GRUB2 = 'chroot-grub2'
-BOOTLOADER_APPROACH_HOST_GRUB2 = 'host-grub2'
+BOOTLOADER__CHROOT_GRUB2__DRIVE = 'chroot-grub2-drive'
+BOOTLOADER__HOST_GRUB2__DEVICE = 'host-grub2-device'
 
 _MOUNTPOINT_PARENT_DIR = '/mnt'
 _CHROOT_SCRIPT_TARGET_DIR = 'root/chroot-scripts/'
@@ -751,13 +751,13 @@ class BootstrapDistroAgnostic(object):
                     self._create_etc_fstab()
                     self.create_network_configuration()
                     self._run_pre_scripts()
-                    if self._bootloader_approach == BOOTLOADER_APPROACH_HOST_GRUB2:
+                    if self._bootloader_approach == BOOTLOADER__HOST_GRUB2__DEVICE:
                         self._install_bootloader__host_grub2()
                     self._mount_nondisk_chroot_mounts()
                     try:
                         self._set_root_password_inside_chroot()
 
-                        if self._bootloader_approach == BOOTLOADER_APPROACH_CHROOT_GRUB2:
+                        if self._bootloader_approach == BOOTLOADER__CHROOT_GRUB2__DRIVE:
                             self._install_bootloader__chroot_grub2()
 
                         self._messenger.info('Generating GRUB configuration...')
