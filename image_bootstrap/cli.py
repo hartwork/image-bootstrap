@@ -69,6 +69,7 @@ def _main__level_three(messenger, options):
             options.command_debootstrap,
             options.debootstrap_opt,
             options.bootloader_approach,
+            options.bootloader_force,
             )
     bootstrap.select_bootloader()
     bootstrap.detect_grub2_install()
@@ -108,7 +109,9 @@ def _main__level_two():
         help='architecture (e.g. amd64)')
     machine.add_argument('--bootloader', dest='bootloader_approach',
         default=BOOTLOADER__AUTO, choices=_BOOTLOADER_APPROACHES,
-        help='approach to take for bootloader installation (default: %(default)s)')
+        help='approach to take during bootloader installation')
+    machine.add_argument('--bootloader-force', default=False, action='store_true',
+        help='apply more force when installing bootloader (default: disabled)')
     machine.add_argument('--hostname', required=True, metavar='NAME',
         help='hostname to set')
     password_options = machine.add_mutually_exclusive_group()

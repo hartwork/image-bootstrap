@@ -62,6 +62,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
             command_debootstrap,
             debootstrap_opt,
             bootloader_approach,
+            bootloader_force,
             ):
         super(BootstrapDebian, self).__init__(
                 messenger,
@@ -78,6 +79,7 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 abs_scripts_dir_post,
                 abs_target_path,
                 command_grub2_install,
+                bootloader_force,
                 )
         self._release = debian_release
         self._mirror_url = debian_mirror_url

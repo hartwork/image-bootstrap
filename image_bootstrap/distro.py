@@ -71,6 +71,7 @@ class BootstrapDistroAgnostic(object):
             abs_scripts_dir_post,
             abs_target_path,
             command_grub2_install,
+            bootloader_force,
             ):
         self._messenger = messenger
         self._executor = executor
@@ -86,6 +87,7 @@ class BootstrapDistroAgnostic(object):
         self._abs_target_path = abs_target_path
 
         self._command_grub2_install = command_grub2_install
+        self._bootloader_force = bootloader_force
 
         self._abs_mountpoint = None
         self._abs_first_partition_device = None
@@ -562,6 +564,9 @@ class BootstrapDistroAgnostic(object):
                 '--boot-directory',
                 os.path.join(self._abs_mountpoint, 'boot'),
                 ]
+
+        if self._bootloader_force:
+            cmd.append('--force')
 
         if use_device_map:
             cmd.append(grub_drive)
