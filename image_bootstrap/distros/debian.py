@@ -132,7 +132,8 @@ class BootstrapDebian(BootstrapDistroAgnostic):
             raise _ArchitectureMachineMismatch(self._architecture, host_machine)
 
     def run_directory_bootstrap(self):
-        self._messenger.info('Bootstrapping Debian into "%s"...' % self._abs_mountpoint)
+        self._messenger.info('Bootstrapping Debian "%s" into "%s"...'
+                % (self._release, self._abs_mountpoint))
 
         _extra_packages = [
                 'initramfs-tools',  # for update-initramfs
