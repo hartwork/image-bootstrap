@@ -563,12 +563,14 @@ class BootstrapDistroAgnostic(object):
                 self._abs_mountpoint,
                 self.get_chroot_command_grub2_install(),
                 ]
+            env = self.make_environment(tell_mountpoint=False)
         else:
             cmd += [
                 self._command_grub2_install,
                 '--boot-directory',
                 os.path.join(self._abs_mountpoint, 'boot'),
                 ]
+            env = None
 
         if self._bootloader_force:
             cmd.append('--force')
@@ -578,7 +580,7 @@ class BootstrapDistroAgnostic(object):
         else:
             cmd.append(self._abs_target_path)
 
-        self._executor.check_call(cmd)
+        self._executor.check_call(cmd, env=env)
 
         if use_device_map:
             os.remove(abs_chroot_device_map)
