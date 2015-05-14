@@ -93,6 +93,9 @@ class BootstrapDistroAgnostic(object):
         self._abs_first_partition_device = None
         self._first_partition_uuid = first_partition_uuid
 
+    def check_release(self):
+        raise NotImplementedError()
+
     def select_bootloader(self):
         raise NotImplementedError()
 

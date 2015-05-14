@@ -87,6 +87,11 @@ class BootstrapDebian(BootstrapDistroAgnostic):
         self._debootstrap_opt = debootstrap_opt
         self._bootloader_approach = bootloader_approach
 
+    def check_release(self):
+        if self._release in ('stable', 'testing'):
+            raise ValueError('For Debian releases, please use names like "jessie" rather than "%s".'
+                % self._release)
+
     def select_bootloader(self):
         if self._bootloader_approach == BOOTLOADER__AUTO:
             self._bootloader_approach = BOOTLOADER__CHROOT_GRUB2__DRIVE

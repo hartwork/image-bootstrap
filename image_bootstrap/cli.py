@@ -71,6 +71,7 @@ def _main__level_three(messenger, options):
             options.bootloader_approach,
             options.bootloader_force,
             )
+    bootstrap.check_release()
     bootstrap.select_bootloader()
     bootstrap.detect_grub2_install()
     bootstrap.check_for_commands()
