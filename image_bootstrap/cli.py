@@ -146,8 +146,8 @@ def _main__level_two():
 
 
     debian = parser.add_argument_group('Debian')
-    debian.add_argument('--debian-release', default='wheezy', choices=['wheezy', 'jessie', 'sid'],
-        help='specify Debian release')
+    debian.add_argument('--debian-release', default='wheezy', metavar='RELEASE',
+        help='specify Debian release (default: %(default)s)')
     debian.add_argument('--debian-mirror', dest='debian_mirror_url', metavar='URL', default='http://http.debian.net/debian',
         help='specify Debian mirror to use (e.g. http://localhost:3142/debian for a local instance of apt-cacher-ng; default: %(default)s)')
     debian.add_argument('--debootstrap-opt', dest='debootstrap_opt', metavar='OPTION', action='append', default=[],
