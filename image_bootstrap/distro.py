@@ -540,7 +540,6 @@ class BootstrapDistroAgnostic(object):
     def _install_bootloader__grub2(self):
         real_abs_target = os.path.realpath(self._abs_target_path)
         message = self._create_bootloader_install_message(real_abs_target)
-        self._messenger.info(message)
 
         use_chroot = self._bootloader_approach in (BOOTLOADER__CHROOT_GRUB2__DEVICE, BOOTLOADER__CHROOT_GRUB2__DRIVE)
         use_device_map = self._bootloader_approach in (BOOTLOADER__CHROOT_GRUB2__DRIVE, BOOTLOADER__HOST_GRUB2__DRIVE)
@@ -549,11 +548,13 @@ class BootstrapDistroAgnostic(object):
             # Write device map just for being able to call grub-install
             abs_chroot_device_map = os.path.join(self._abs_mountpoint, 'boot', 'grub', 'device.map')
             grub_drive = '(hd0)'
-            self._messenger.info('First writing device map to "%s" (mapping "%s" to "%s")...' \
+            self._messenger.info('Writing device map to "%s" (mapping "%s" to "%s")...' \
                     % (abs_chroot_device_map, grub_drive, real_abs_target))
             f = open(abs_chroot_device_map, 'w')
             print('%s\t%s' % (grub_drive, real_abs_target), file=f)
             f.close()
+
+        self._messenger.info(message)
 
         cmd = []
 
