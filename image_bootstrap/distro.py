@@ -16,8 +16,12 @@ from image_bootstrap.mount import MountFinder
 from image_bootstrap.types.uuid import require_valid_uuid
 
 
+BOOTLOADER__AUTO = 'auto'
+BOOTLOADER__CHROOT_GRUB2__DEVICE = 'chroot-grub2-device'
 BOOTLOADER__CHROOT_GRUB2__DRIVE = 'chroot-grub2-drive'
 BOOTLOADER__HOST_GRUB2__DEVICE = 'host-grub2-device'
+BOOTLOADER__HOST_GRUB2__DRIVE = 'host-grub2-drive'
+BOOTLOADER__NONE = 'none'
 
 _MOUNTPOINT_PARENT_DIR = '/mnt'
 _CHROOT_SCRIPT_TARGET_DIR = 'root/chroot-scripts/'
@@ -87,6 +91,9 @@ class BootstrapDistroAgnostic(object):
         self._abs_first_partition_device = None
         self._first_partition_uuid = first_partition_uuid
 
+    def select_bootloader(self):
+        raise NotImplementedError()
+
     def get_commands_to_check_for(self):
         return iter((
                 _COMMAND_BLKID,
@@ -127,6 +134,12 @@ class BootstrapDistroAgnostic(object):
     def detect_grub2_install(self):
         if self._command_grub2_install:
             return  # Explicit command given, no detection needed
+
+        if self._bootloader_approach not in (
+                BOOTLOADER__HOST_GRUB2__DEVICE,
+                BOOTLOADER__HOST_GRUB2__DRIVE,
+                ):
+            return  # Host grub2-install not used, no detection needed
 
         _COMMAND_GRUB_INSTALL = 'grub-install'
         _COMMAND_GRUB2_INSTALL = 'grub2-install'
@@ -514,44 +527,51 @@ class BootstrapDistroAgnostic(object):
         return 'Installing bootloader to device "%s" (%s)...' % (
                 self._abs_target_path, ', '.join(hints))
 
-    def _install_bootloader__host_grub2(self):
-        real_abs_target = os.path.realpath(self._abs_target_path)
-        message = self._create_bootloader_install_message(real_abs_target)
-        self._messenger.info(message)
-        cmd = [
-                self._command_grub2_install,
-                '--boot-directory',
-                os.path.join(self._abs_mountpoint, 'boot'),
-                self._abs_target_path,
-                ]
-        self._executor.check_call(cmd)
-
     def get_chroot_command_grub2_install(self):
         raise NotImplementedError()
 
-    def _install_bootloader__chroot_grub2(self):
+    def _install_bootloader__grub2(self):
         real_abs_target = os.path.realpath(self._abs_target_path)
         message = self._create_bootloader_install_message(real_abs_target)
         self._messenger.info(message)
 
-        # Write device map just for being able to call grub-install
-        abs_chroot_device_map = os.path.join(self._abs_mountpoint, 'boot', 'grub', 'device.map')
-        grub_drive = '(hd0)'
-        self._messenger.info('First writing device map to "%s" (mapping "%s" to "%s")...' \
-                % (abs_chroot_device_map, grub_drive, real_abs_target))
-        f = open(abs_chroot_device_map, 'w')
-        print('%s\t%s' % (grub_drive, real_abs_target), file=f)
-        f.close()
+        use_chroot = self._bootloader_approach in (BOOTLOADER__CHROOT_GRUB2__DEVICE, BOOTLOADER__CHROOT_GRUB2__DRIVE)
+        use_device_map = self._bootloader_approach in (BOOTLOADER__CHROOT_GRUB2__DRIVE, BOOTLOADER__HOST_GRUB2__DRIVE)
 
-        cmd = [
+        if use_device_map:
+            # Write device map just for being able to call grub-install
+            abs_chroot_device_map = os.path.join(self._abs_mountpoint, 'boot', 'grub', 'device.map')
+            grub_drive = '(hd0)'
+            self._messenger.info('First writing device map to "%s" (mapping "%s" to "%s")...' \
+                    % (abs_chroot_device_map, grub_drive, real_abs_target))
+            f = open(abs_chroot_device_map, 'w')
+            print('%s\t%s' % (grub_drive, real_abs_target), file=f)
+            f.close()
+
+        cmd = []
+
+        if use_chroot:
+            cmd += [
                 COMMAND_CHROOT,
                 self._abs_mountpoint,
                 self.get_chroot_command_grub2_install(),
-                grub_drive,
                 ]
+        else:
+            cmd += [
+                self._command_grub2_install,
+                '--boot-directory',
+                os.path.join(self._abs_mountpoint, 'boot'),
+                ]
+
+        if use_device_map:
+            cmd.append(grub_drive)
+        else:
+            cmd.append(self._abs_target_path)
+
         self._executor.check_call(cmd)
 
-        os.remove(abs_chroot_device_map)
+        if use_device_map:
+            os.remove(abs_chroot_device_map)
 
     def generate_grub_cfg_from_inside_chroot(self):
         raise NotImplementedError()
@@ -751,19 +771,20 @@ class BootstrapDistroAgnostic(object):
                     self._create_etc_fstab()
                     self.create_network_configuration()
                     self._run_pre_scripts()
-                    if self._bootloader_approach == BOOTLOADER__HOST_GRUB2__DEVICE:
-                        self._install_bootloader__host_grub2()
+                    if self._bootloader_approach in (BOOTLOADER__HOST_GRUB2__DEVICE, BOOTLOADER__HOST_GRUB2__DRIVE):
+                        self._install_bootloader__grub2()
                     self._mount_nondisk_chroot_mounts()
                     try:
                         self._set_root_password_inside_chroot()
 
-                        if self._bootloader_approach == BOOTLOADER__CHROOT_GRUB2__DRIVE:
-                            self._install_bootloader__chroot_grub2()
+                        if self._bootloader_approach in (BOOTLOADER__CHROOT_GRUB2__DEVICE, BOOTLOADER__CHROOT_GRUB2__DRIVE):
+                            self._install_bootloader__grub2()
 
-                        self._messenger.info('Generating GRUB configuration...')
-                        self.generate_grub_cfg_from_inside_chroot()
+                        if self._bootloader_approach != BOOTLOADER__NONE:
+                            self._messenger.info('Generating GRUB configuration...')
+                            self.generate_grub_cfg_from_inside_chroot()
 
-                        self._fix_grub_cfg_root_device()
+                            self._fix_grub_cfg_root_device()
 
                         self._messenger.info('Generating initramfs...')
                         self.generate_initramfs_from_inside_chroot()

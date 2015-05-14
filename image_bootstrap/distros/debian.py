@@ -6,7 +6,12 @@ from __future__ import print_function
 import os
 import subprocess
 
-from image_bootstrap.distro import BootstrapDistroAgnostic, COMMAND_CHROOT
+from image_bootstrap.distro import \
+        BootstrapDistroAgnostic, COMMAND_CHROOT, \
+        BOOTLOADER__AUTO, \
+        BOOTLOADER__CHROOT_GRUB2__DRIVE, \
+        BOOTLOADER__HOST_GRUB2__DRIVE, \
+        BOOTLOADER__NONE
 
 
 _COMMAND_FIND = 'find'
@@ -80,6 +85,12 @@ class BootstrapDebian(BootstrapDistroAgnostic):
         self._debootstrap_opt = debootstrap_opt
         self._bootloader_approach = bootloader_approach
 
+    def select_bootloader(self):
+        if self._bootloader_approach == BOOTLOADER__AUTO:
+            self._bootloader_approach = BOOTLOADER__CHROOT_GRUB2__DRIVE
+            self._messenger.info('Selected approach "%s" for bootloader installation.'
+                    % self._bootloader_approach)
+
     def get_commands_to_check_for(self):
         return iter(
                 list(super(BootstrapDebian, self).get_commands_to_check_for())
@@ -115,11 +126,14 @@ class BootstrapDebian(BootstrapDistroAgnostic):
 
     def run_directory_bootstrap(self):
         self._messenger.info('Bootstrapping Debian into "%s"...' % self._abs_mountpoint)
-        _extra_packages = (
-                'grub-pc',  # for update-grub
+
+        _extra_packages = [
                 'initramfs-tools',  # for update-initramfs
                 self._get_kernel_package_name(),
-                )
+                ]
+        if self._bootloader_approach != BOOTLOADER__NONE:
+            _extra_packages.append('grub-pc')
+
         cmd = [
                 _COMMAND_UNSHARE,
                 '--mount',

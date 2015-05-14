@@ -8,8 +8,12 @@ import traceback
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from image_bootstrap.distro import \
+        BOOTLOADER__AUTO, \
+        BOOTLOADER__CHROOT_GRUB2__DEVICE, \
         BOOTLOADER__CHROOT_GRUB2__DRIVE, \
-        BOOTLOADER__HOST_GRUB2__DEVICE
+        BOOTLOADER__HOST_GRUB2__DEVICE, \
+        BOOTLOADER__HOST_GRUB2__DRIVE, \
+        BOOTLOADER__NONE
 from image_bootstrap.distros.debian import BootstrapDebian
 from image_bootstrap.messenger import Messenger, BANNER, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
@@ -24,8 +28,12 @@ _COLORIZE_ALWAYS = 'always'
 _COLORIZE_AUTO = 'auto'
 
 _BOOTLOADER_APPROACHES = (
+        BOOTLOADER__AUTO,
+        BOOTLOADER__CHROOT_GRUB2__DEVICE,
         BOOTLOADER__CHROOT_GRUB2__DRIVE,
         BOOTLOADER__HOST_GRUB2__DEVICE,
+        BOOTLOADER__HOST_GRUB2__DRIVE,
+        BOOTLOADER__NONE
         )
 
 
@@ -62,8 +70,8 @@ def _main__level_three(messenger, options):
             options.debootstrap_opt,
             options.bootloader_approach,
             )
-    if options.bootloader_approach == BOOTLOADER__HOST_GRUB2__DEVICE:
-        bootstrap.detect_grub2_install()
+    bootstrap.select_bootloader()
+    bootstrap.detect_grub2_install()
     bootstrap.check_for_commands()
     bootstrap.check_architecture()
     bootstrap.check_target_block_device()
@@ -99,7 +107,7 @@ def _main__level_two():
     machine.add_argument('--arch', dest='architecture', default='amd64',
         help='architecture (e.g. amd64)')
     machine.add_argument('--bootloader', dest='bootloader_approach',
-        default=BOOTLOADER__HOST_GRUB2__DEVICE, choices=_BOOTLOADER_APPROACHES,
+        default=BOOTLOADER__AUTO, choices=_BOOTLOADER_APPROACHES,
         help='approach to take for bootloader installation (default: %(default)s)')
     machine.add_argument('--hostname', required=True, metavar='NAME',
         help='hostname to set')
