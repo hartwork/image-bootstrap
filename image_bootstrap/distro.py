@@ -71,6 +71,7 @@ class BootstrapDistroAgnostic(object):
             abs_scripts_dir_post,
             abs_target_path,
             command_grub2_install,
+            bootloader_approach,
             bootloader_force,
             ):
         self._messenger = messenger
@@ -87,6 +88,7 @@ class BootstrapDistroAgnostic(object):
         self._abs_target_path = abs_target_path
 
         self._command_grub2_install = command_grub2_install
+        self._bootloader_approach = bootloader_approach
         self._bootloader_force = bootloader_force
 
         self._abs_mountpoint = None

@@ -79,13 +79,13 @@ class BootstrapDebian(BootstrapDistroAgnostic):
                 abs_scripts_dir_post,
                 abs_target_path,
                 command_grub2_install,
+                bootloader_approach,
                 bootloader_force,
                 )
         self._release = debian_release
         self._mirror_url = debian_mirror_url
         self._command_debootstrap = command_debootstrap
         self._debootstrap_opt = debootstrap_opt
-        self._bootloader_approach = bootloader_approach
 
     def check_release(self):
         if self._release in ('stable', 'testing'):
