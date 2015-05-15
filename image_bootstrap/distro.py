@@ -307,7 +307,9 @@ class BootstrapDistroAgnostic(object):
                 _COMMAND_PARTED,
                 '--script',
                 self._abs_target_path,
-                'mkpart', 'primary', 'ext4', '512B', '100%',
+                'mkpart',
+                '--align', 'optimal',
+                'primary', 'ext4', '1', '100%',
                 ]
         self._executor.check_call(cmd_mkpart)
 
