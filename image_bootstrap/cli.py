@@ -110,7 +110,7 @@ def _main__level_two():
         help='architecture (e.g. amd64)')
     machine.add_argument('--bootloader', dest='bootloader_approach',
         default=BOOTLOADER__AUTO, choices=_BOOTLOADER_APPROACHES,
-        help='approach to take during bootloader installation')
+        help='approach to take during bootloader installation (default: %(default)s)')
     machine.add_argument('--bootloader-force', default=False, action='store_true',
         help='apply more force when installing bootloader (default: disabled)')
     machine.add_argument('--hostname', required=True, metavar='NAME',

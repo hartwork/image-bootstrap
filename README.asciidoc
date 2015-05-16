@@ -163,6 +163,7 @@ machine configuration:
   --arch ARCHITECTURE   architecture (e.g. amd64)
   --bootloader {auto,chroot-grub2-device,chroot-grub2-drive,host-grub2-device,host-grub2-drive,none}
                         approach to take during bootloader installation
+                        (default: auto)
   --bootloader-force    apply more force when installing bootloader (default:
                         disabled)
   --hostname NAME       hostname to set
