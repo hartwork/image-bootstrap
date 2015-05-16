@@ -108,7 +108,8 @@ passing `--mirror http://localhost:3142/debian` to *image-bootstrap* may come in
 
 Debian package
 --------------
-As long as *image-bootstrap* as not available _in_ Debian, yourself from Git as follows:
+As long as *image-bootstrap* as not available _in_ Debian, you can
+make an *image-bootstrap* Debian package yourself easily from Git as follows:
 
 ------------------------------------------------------------------------------------------
 # git clone https://github.com/hartwork/image-bootstrap.git
