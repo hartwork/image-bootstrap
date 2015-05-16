@@ -1,0 +1,220 @@
+About
+-----
+*image-bootstrap* started out as a re-write of
+https://github.com/grml/grml-debootstrap[grml-debootstrap].
+Primarily, it can be used to create Debian images ready to be launched as a virtual machine.
+
+In comparision to grml-debootstrap, *image-bootstrap*
+
+ * installs to block devices only,
+
+ * supports several approaches to installing GRUB (including _not_ to install GRUB at all),
+
+ * does not leak the host's hostname into the resulting image,
+
+ * supports passing the root password off the command-line
+   (and the eyes of other users and shell history),
+
+ * supports using a custom `/ect/resolv.conf` file
+   (e.g. to not leak your home router model name from `/ect/resolv.conf` into the image),
+
+ * is written in Python rather than Bash/mksh, and
+
+ * has more friendly terminal output.
+
+
+Example
+-------
+The following is a complete demo of installing Debian jessie to LVM volume `/dev/vg/lv`
+and launching the resulting image using KVM.
+------------------------------------------------------------------------------------------
+# ${EDITOR} root_password.txt
+
+# sudo image-bootstrap --debian --hostname jessie --password-file root_password.txt /dev/vg/lv
+     _                          __             __      __               
+    (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
+   / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \ 
+  /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/ 
+               /___/                      v0.7.0 :: 2015-05-14  /_/     
+
+Software libre licensed under AGPL v3 or later.
+Brought to you by Sebastian Pipping <sebastian@pipping.org>.
+Please report bugs at https://github.com/hartwork/image-bootstrap.  Thank you!
+
+Selected approach "chroot-grub2-drive" for bootloader installation.
+Checking for blkid... /sbin/blkid
+Checking for chmod... /bin/chmod
+Checking for chroot... /usr/sbin/chroot
+Checking for cp... /bin/cp
+Checking for debootstrap... /usr/sbin/debootstrap
+Checking for find... /usr/bin/find
+Checking for kpartx... /sbin/kpartx
+Checking for mkdir... /bin/mkdir
+Checking for mkfs.ext4... /sbin/mkfs.ext4
+Checking for mount... /bin/mount
+Checking for parted... /sbin/parted
+Checking for partprobe... /sbin/partprobe
+Checking for rm... /bin/rm
+Checking for rmdir... /bin/rmdir
+Checking for sed... /bin/sed
+Checking for tune2fs... /sbin/tune2fs
+Checking for umount... /bin/umount
+Checking for uname... /bin/uname
+Checking for unshare... /usr/bin/unshare
+
+Checking for known unsupported architecture/machine combination...
+Checking if "/dev/vg/lv" is a block device...
+Reading root password from file "/home/user1/root_password.txt"...
+Unsharing Linux namespaces (mount, UTS/hostname)...
+Partitioning "/dev/vg/lv"...
+Activating partition devices...
+Creating file system on "/dev/mapper/vg-lvp1"...
+Creating directory "/mnt/tmpFczeFl"...
+Mounting partitions...
+Creating directory "/mnt/tmpFczeFl/etc"...
+Writing file "/mnt/tmpFczeFl/etc/hostname"...
+Writing file "/mnt/tmpFczeFl/etc/resolv.conf" (based on file "/etc/resolv.conf")...
+Bootstrapping Debian "jessie" into "/mnt/tmpFczeFl"...
+Writing file "/mnt/tmpFczeFl/etc/hostname"...
+Writing file "/mnt/tmpFczeFl/etc/resolv.conf" (based on file "/etc/resolv.conf")...
+Writing file "/mnt/tmpFczeFl/etc/fstab"...
+Writing file "/mnt/tmpFczeFl/etc/network/interfaces"...
+Running pre-chroot scripts...
+Mounting non-disk file systems...
+Setting root password...
+Writing device map to "/mnt/tmpFczeFl/boot/grub/device.map" (mapping "(hd0)" to "/dev/dm-8")...
+Installing bootloader to device "/dev/vg/lv" (actually "/dev/dm-8", approach "chroot-grub2-drive")...
+Generating GRUB configuration...
+Post-processing GRUB config...
+Generating initramfs...
+Unmounting non-disk file systems...
+Cleaning chroot apt cache...
+Running post-chroot scripts...
+Unmounting partitions...
+Removing directory "/mnt/tmpFczeFl"...
+Deactivating partition devices...
+Done.
+
+# sudo kvm -hda /dev/vg/lv
+------------------------------------------------------------------------------------------
+
+Without `--color never`, the output above is actually in color.
+
+When creating multiple images,
+a local instance of https://www.unix-ag.uni-kl.de/~bloch/acng/[Apt-Cacher NG] and
+passing `--mirror http://localhost:3142/debian` to *image-bootstrap* may come in handy.
+
+
+Debian package
+--------------
+As long as *image-bootstrap* as not available _in_ Debian, yourself from Git as follows:
+
+------------------------------------------------------------------------------------------
+# git clone https://github.com/hartwork/image-bootstrap.git
+Cloning into 'image-bootstrap'...
+[..]
+
+# make -C image-bootstrap/ deb
+[..]
+
+# ls *.deb
+image-bootstrap_0.7.0_all.deb
+
+# sudo dpkg -i image-bootstrap_0.7.0_all.deb
+[..]
+------------------------------------------------------------------------------------------
+
+
+Usage
+-----
+A dump of the current `--help` output would be:
+------------------------------------------------------------------------------------------
+$ image-bootstrap --help
+usage: image-bootstrap [-h] [--version] [--color {never,always,auto}]
+                       [--debug] [--quiet] [--verbose] [--arch ARCHITECTURE]
+                       [--bootloader {auto,chroot-grub2-device,chroot-grub2-drive,host-grub2-device,host-grub2-drive,none}]
+                       [--bootloader-force] --hostname NAME
+                       [--password PASSWORD | --password-file FILE]
+                       [--resolv-conf FILE] [--disk-id ID]
+                       [--first-partition-uuid UUID] [--scripts-pre DIRECTORY]
+                       [--scripts-chroot DIRECTORY] [--scripts-post DIRECTORY]
+                       --debian [--debootstrap COMMAND]
+                       [--grub2-install COMMAND] [--debian-release RELEASE]
+                       [--debian-mirror URL] [--debootstrap-opt OPTION]
+                       DEVICE
+
+Command line tool for creating bootable virtual machine images
+
+positional arguments:
+  DEVICE                block device to install to
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+
+text output configuration:
+  --color {never,always,auto}
+                        toggle output color (default: auto)
+  --debug               enable debugging
+  --quiet               limit output to error messages
+  --verbose             increase verbosity
+
+machine configuration:
+  --arch ARCHITECTURE   architecture (e.g. amd64)
+  --bootloader {auto,chroot-grub2-device,chroot-grub2-drive,host-grub2-device,host-grub2-drive,none}
+                        approach to take during bootloader installation
+  --bootloader-force    apply more force when installing bootloader (default:
+                        disabled)
+  --hostname NAME       hostname to set
+  --password PASSWORD   root password to set (default: password log-in
+                        disabled)
+  --password-file FILE  file to read root password from (default: password
+                        log-in disabled)
+  --resolv-conf FILE    file to copy nameserver entries from (default:
+                        /etc/resolv.conf)
+  --disk-id ID          specific disk identifier to apply, e.g. 0x12345678
+  --first-partition-uuid UUID
+                        specific UUID to apply to first partition, e.g.
+                        c1b9d5a2-f162-11cf-9ece-0020afc76f16
+
+script integration:
+  --scripts-pre DIRECTORY
+                        scripts to run prior to chrooting phase, in
+                        alphabetical order
+  --scripts-chroot DIRECTORY
+                        scripts to run during chrooting phase, in alphabetical
+                        order
+  --scripts-post DIRECTORY
+                        scripts to run after chrooting phase, in alphabetical
+                        order
+
+choice of distribution:
+  --debian              select Debian for a distribution
+
+command names:
+  --debootstrap COMMAND
+                        override debootstrap command
+  --grub2-install COMMAND
+                        override grub2-install command
+
+Debian:
+  --debian-release RELEASE
+                        specify Debian release (default: jessie)
+  --debian-mirror URL   specify Debian mirror to use (e.g.
+                        http://localhost:3142/debian for a local instance of
+                        apt-cacher-ng; default: http://http.debian.net/debian)
+  --debootstrap-opt OPTION
+                        option to pass to debootstrap, in addition; can be
+                        passed several times; use with --debootstrap-opt=...
+                        syntax, i.e. with "="
+
+     _                          __             __      __               
+    (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
+   / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \ 
+  /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/ 
+               /___/                      v0.7.0 :: 2015-05-14  /_/     
+
+Software libre licensed under AGPL v3 or later.
+Brought to you by Sebastian Pipping <sebastian@pipping.org>.
+Please report bugs at https://github.com/hartwork/image-bootstrap.  Thank you!
+------------------------------------------------------------------------------------------
