@@ -54,6 +54,8 @@ _COMMAND_UMOUNT = 'umount'
 
 _EXIT_COMMAND_NOT_FOUND = 127
 
+_PARTITION_DELIMITER = 'p'  # Keep at "p" to not break LVM support
+
 
 class BootstrapDistroAgnostic(object):
     def __init__(self,
@@ -335,7 +337,7 @@ class BootstrapDistroAgnostic(object):
         cmd_list = [
                 _COMMAND_KPARTX,
                 '-l',
-                '-p', 'p',
+                '-p', _PARTITION_DELIMITER,
                 self._abs_target_path,
                 ]
         output = self._executor.check_output(cmd_list)
@@ -352,7 +354,7 @@ class BootstrapDistroAgnostic(object):
             cmd_add = [
                     _COMMAND_KPARTX,
                     '-a',
-                    '-p', 'p',
+                    '-p', _PARTITION_DELIMITER,
                     '-s',
                     self._abs_target_path,
                     ]
@@ -708,7 +710,7 @@ class BootstrapDistroAgnostic(object):
         cmd = [
                 _COMMAND_KPARTX,
                 '-d',
-                '-p', 'p',
+                '-p', _PARTITION_DELIMITER,
                 self._abs_target_path,
                 ]
         for i in range(3):
