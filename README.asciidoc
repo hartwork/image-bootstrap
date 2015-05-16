@@ -30,7 +30,8 @@ and launching the resulting image using KVM.
 ------------------------------------------------------------------------------------------
 # ${EDITOR} root_password.txt
 
-# sudo image-bootstrap --debian --hostname jessie --password-file root_password.txt /dev/vg/lv
+# sudo image-bootstrap --debian --hostname jessie \
+                                  --password-file root_password.txt /dev/vg/lv
      _                          __             __      __               
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
    / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \ 
