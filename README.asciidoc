@@ -130,7 +130,7 @@ Usage
 -----
 A dump of the current `--help` output would be:
 ------------------------------------------------------------------------------------------
-$ image-bootstrap --help
+# image-bootstrap --help
 usage: image-bootstrap [-h] [--version] [--color {never,always,auto}]
                        [--debug] [--quiet] [--verbose] [--arch ARCHITECTURE]
                        [--bootloader {auto,chroot-grub2-device,chroot-grub2-drive,host-grub2-device,host-grub2-drive,none}]
