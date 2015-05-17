@@ -42,21 +42,26 @@ class _ArchitectureMachineMismatch(Exception):
 
 class DebianStrategy(object):
     DISTRO_KEY = 'debian'
+    DISTRO_NAME_SHORT = 'Debian'
+    DISTRO_NAME_LONG = 'Debian GNU/Linux'
+    DEFAULT_RELEASE = 'jessie'
+    DEFAULT_MIRROR_URL = 'http://http.debian.net/debian'
+    APT_CACHER_NG_URL = 'http://localhost:3142/debian'
 
     def __init__(self,
             messenger,
             executor,
 
-            debian_release,
-            debian_mirror_url,
+            release,
+            mirror_url,
             command_debootstrap,
             debootstrap_opt,
             ):
         self._messenger = messenger
         self._executor = executor
 
-        self._release = debian_release
-        self._mirror_url = debian_mirror_url
+        self._release = release
+        self._mirror_url = mirror_url
         self._command_debootstrap = command_debootstrap
         self._debootstrap_opt = debootstrap_opt
 
@@ -165,7 +170,7 @@ class DebianStrategy(object):
 
     @classmethod
     def add_parser_to(clazz, distros):
-        debian = distros.add_parser('debian', help='Debian GNU/Linux')
+        debian = distros.add_parser(clazz.DISTRO_KEY, help=clazz.DISTRO_NAME_LONG)
         debian.set_defaults(**{DISTRO_CLASS_FIELD: clazz})
 
         debian_commands = debian.add_argument_group('command names')
@@ -173,13 +178,15 @@ class DebianStrategy(object):
                 dest='command_debootstrap', default='debootstrap',
                 help='override debootstrap command')
 
-        debian.add_argument('--release', dest='debian_release', default='jessie',
+        debian.add_argument('--release', dest='release', default=clazz.DEFAULT_RELEASE,
                 metavar='RELEASE',
-                help='specify Debian release (default: %(default)s)')
-        debian.add_argument('--mirror', dest='debian_mirror_url', metavar='URL',
-                default='http://http.debian.net/debian',
-                help='specify Debian mirror to use (e.g. http://localhost:3142/debian for '
-                    'a local instance of apt-cacher-ng; default: %(default)s)')
+                help='specify %s release (default: %%(default)s)'
+                % clazz.DISTRO_NAME_SHORT)
+        debian.add_argument('--mirror', dest='mirror_url', metavar='URL',
+                default=clazz.DEFAULT_MIRROR_URL,
+                help='specify %s mirror to use (e.g. %s for '
+                    'a local instance of apt-cacher-ng; default: %%(default)s)'
+                    % (clazz.DISTRO_NAME_SHORT, clazz.APT_CACHER_NG_URL))
 
         debian.add_argument('--debootstrap-opt', dest='debootstrap_opt',
                 metavar='OPTION', action='append', default=[],
@@ -187,13 +194,13 @@ class DebianStrategy(object):
                     'can be passed several times; '
                     'use with --debootstrap-opt=... syntax, i.e. with "="')
 
-    @staticmethod
-    def create(messenger, executor, options):
-        return DebianStrategy(
+    @classmethod
+    def create(clazz, messenger, executor, options):
+        return clazz(
                 messenger,
                 executor,
-                options.debian_release,
-                options.debian_mirror_url,
+                options.release,
+                options.mirror_url,
                 options.command_debootstrap,
                 options.debootstrap_opt,
                 )

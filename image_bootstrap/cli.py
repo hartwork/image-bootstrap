@@ -17,6 +17,7 @@ from image_bootstrap.engine import \
         BOOTLOADER__NONE
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD
 from image_bootstrap.distros.debian import DebianStrategy
+from image_bootstrap.distros.ubuntu import UbuntuStrategy
 from image_bootstrap.messenger import Messenger, BANNER, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
 from image_bootstrap.executor import Executor
@@ -147,7 +148,11 @@ def _main__level_two():
             metavar='DISTRIBUTION', help='choice of distribution, pick from:')
 
 
-    DebianStrategy.add_parser_to(distros)
+    for strategy_clazz in (
+            DebianStrategy,
+            UbuntuStrategy,
+            ):
+        strategy_clazz.add_parser_to(distros)
 
 
     parser.add_argument('target_path', metavar='DEVICE',
