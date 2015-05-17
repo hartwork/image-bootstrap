@@ -396,6 +396,7 @@ class BootstrapEngine(object):
         self._messenger.info('Creating file system on "%s"...' % self._abs_first_partition_device)
         cmd = [
                 _COMMAND_MKFS_EXT4,
+                '-F',
                 self._abs_first_partition_device,
                 ]
         self._executor.check_call(cmd)
