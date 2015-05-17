@@ -14,6 +14,8 @@ from image_bootstrap.engine import \
         BOOTLOADER__NONE
 
 
+DISTRO_CLASS_FIELD = 'distro_class'
+
 _COMMAND_FIND = 'find'
 _COMMAND_UNAME = 'uname'
 _COMMAND_UNSHARE = 'unshare'
@@ -162,9 +164,10 @@ class DebianStrategy(object):
                 ]
         self._executor.check_call(cmd)
 
-    @staticmethod
-    def add_parser_to(distros):
+    @classmethod
+    def add_parser_to(clazz, distros):
         debian = distros.add_parser('debian', help='Debian GNU/Linux')
+        debian.set_defaults(**{DISTRO_CLASS_FIELD: clazz})
 
         debian_commands = debian.add_argument_group('command names')
         debian_commands.add_argument('--debootstrap', metavar='COMMAND',
