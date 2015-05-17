@@ -7,14 +7,15 @@ import subprocess
 import traceback
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
-from image_bootstrap.distro import \
+from image_bootstrap.engine import \
+        BootstrapEngine, \
         BOOTLOADER__AUTO, \
         BOOTLOADER__CHROOT_GRUB2__DEVICE, \
         BOOTLOADER__CHROOT_GRUB2__DRIVE, \
         BOOTLOADER__HOST_GRUB2__DEVICE, \
         BOOTLOADER__HOST_GRUB2__DRIVE, \
         BOOTLOADER__NONE
-from image_bootstrap.distros.debian import BootstrapDebian
+from image_bootstrap.distros.debian import DebianStrategy
 from image_bootstrap.messenger import Messenger, BANNER, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
 from image_bootstrap.executor import Executor
@@ -49,7 +50,7 @@ def _main__level_three(messenger, options):
 
     executor = Executor(messenger, stdout=child_process_stdout)
 
-    bootstrap = BootstrapDebian(
+    bootstrap = BootstrapEngine(
             messenger,
             executor,
             options.hostname,
@@ -59,18 +60,25 @@ def _main__level_three(messenger, options):
             os.path.abspath(options.resolv_conf),
             options.disk_id,
             options.first_partition_uuid,
-            options.debian_release,
-            options.debian_mirror_url,
             options.scripts_dir_pre and os.path.abspath(options.scripts_dir_pre),
             options.scripts_dir_chroot and os.path.abspath(options.scripts_dir_chroot),
             options.scripts_dir_post and os.path.abspath(options.scripts_dir_post),
             os.path.abspath(options.target_path),
             options.command_grub2_install,
-            options.command_debootstrap,
-            options.debootstrap_opt,
             options.bootloader_approach,
             options.bootloader_force,
             )
+
+    if True:
+        bootstrap.set_distro(DebianStrategy(
+                messenger,
+                executor,
+                options.debian_release,
+                options.debian_mirror_url,
+                options.command_debootstrap,
+                options.debootstrap_opt,
+                ))
+
     bootstrap.check_release()
     bootstrap.select_bootloader()
     bootstrap.detect_grub2_install()
