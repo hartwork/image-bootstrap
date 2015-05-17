@@ -15,7 +15,8 @@ from image_bootstrap.engine import \
         BOOTLOADER__HOST_GRUB2__DEVICE, \
         BOOTLOADER__HOST_GRUB2__DRIVE, \
         BOOTLOADER__NONE
-from image_bootstrap.distros.debian import DebianStrategy, DISTRO_CLASS_FIELD
+from image_bootstrap.distros.base import DISTRO_CLASS_FIELD
+from image_bootstrap.distros.debian import DebianStrategy
 from image_bootstrap.messenger import Messenger, BANNER, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
 from image_bootstrap.executor import Executor

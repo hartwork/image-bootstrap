@@ -6,6 +6,7 @@ from __future__ import print_function
 import os
 import subprocess
 
+from image_bootstrap.distros.base import DISTRO_CLASS_FIELD
 from image_bootstrap.engine import \
         COMMAND_CHROOT, \
         BOOTLOADER__AUTO, \
@@ -13,8 +14,6 @@ from image_bootstrap.engine import \
         BOOTLOADER__HOST_GRUB2__DRIVE, \
         BOOTLOADER__NONE
 
-
-DISTRO_CLASS_FIELD = 'distro_class'
 
 _COMMAND_FIND = 'find'
 _COMMAND_UNAME = 'uname'
