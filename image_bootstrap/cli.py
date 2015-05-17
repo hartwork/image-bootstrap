@@ -135,22 +135,27 @@ def _main__level_two():
     script_dirs.add_argument('--scripts-post', dest='scripts_dir_post', metavar='DIRECTORY',
         help='scripts to run after chrooting phase, in alphabetical order')
 
-    distros = parser.add_argument_group('choice of distribution')
-    distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True,
-        help='select Debian for a distribution')
-
     commands = parser.add_argument_group('command names')
-    commands.add_argument('--debootstrap', metavar='COMMAND', dest='command_debootstrap', default='debootstrap',
-        help='override debootstrap command')
     commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install',
         help='override grub2-install command')
 
+    distros = parser.add_subparsers(title='subcommands (choice of distribution)',
+			description='Run "%(prog)s DISTRIBUTION --help" for details '
+					'on options specific to that distribution.',
+			metavar='DISTRIBUTION', help='choice of distribution, pick from:')
 
-    debian = parser.add_argument_group('Debian')
-    debian.add_argument('--debian-release', default='jessie', metavar='RELEASE',
+
+    debian = distros.add_parser('debian', help='Debian GNU/Linux')
+
+    debian_commands = debian.add_argument_group('command names')
+    debian_commands.add_argument('--debootstrap', metavar='COMMAND', dest='command_debootstrap', default='debootstrap',
+        help='override debootstrap command')
+
+    debian.add_argument('--release', dest='debian_release', default='jessie', metavar='RELEASE',
         help='specify Debian release (default: %(default)s)')
-    debian.add_argument('--debian-mirror', dest='debian_mirror_url', metavar='URL', default='http://http.debian.net/debian',
+    debian.add_argument('--mirror', dest='debian_mirror_url', metavar='URL', default='http://http.debian.net/debian',
         help='specify Debian mirror to use (e.g. http://localhost:3142/debian for a local instance of apt-cacher-ng; default: %(default)s)')
+
     debian.add_argument('--debootstrap-opt', dest='debootstrap_opt', metavar='OPTION', action='append', default=[],
         help='option to pass to debootstrap, in addition; '
         'can be passed several times; '
