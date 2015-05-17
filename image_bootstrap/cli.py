@@ -140,9 +140,9 @@ def _main__level_two():
         help='override grub2-install command')
 
     distros = parser.add_subparsers(title='subcommands (choice of distribution)',
-			description='Run "%(prog)s DISTRIBUTION --help" for details '
-					'on options specific to that distribution.',
-			metavar='DISTRIBUTION', help='choice of distribution, pick from:')
+            description='Run "%(prog)s DISTRIBUTION --help" for details '
+                    'on options specific to that distribution.',
+            metavar='DISTRIBUTION', help='choice of distribution, pick from:')
 
 
     debian = distros.add_parser('debian', help='Debian GNU/Linux')
