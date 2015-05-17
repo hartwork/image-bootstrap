@@ -161,3 +161,37 @@ class DebianStrategy(object):
                 '-delete',
                 ]
         self._executor.check_call(cmd)
+
+    @staticmethod
+    def add_parser_to(distros):
+        debian = distros.add_parser('debian', help='Debian GNU/Linux')
+
+        debian_commands = debian.add_argument_group('command names')
+        debian_commands.add_argument('--debootstrap', metavar='COMMAND',
+                dest='command_debootstrap', default='debootstrap',
+                help='override debootstrap command')
+
+        debian.add_argument('--release', dest='debian_release', default='jessie',
+                metavar='RELEASE',
+                help='specify Debian release (default: %(default)s)')
+        debian.add_argument('--mirror', dest='debian_mirror_url', metavar='URL',
+                default='http://http.debian.net/debian',
+                help='specify Debian mirror to use (e.g. http://localhost:3142/debian for '
+                    'a local instance of apt-cacher-ng; default: %(default)s)')
+
+        debian.add_argument('--debootstrap-opt', dest='debootstrap_opt',
+                metavar='OPTION', action='append', default=[],
+                help='option to pass to debootstrap, in addition; '
+                    'can be passed several times; '
+                    'use with --debootstrap-opt=... syntax, i.e. with "="')
+
+    @staticmethod
+    def create(messenger, executor, options):
+        return DebianStrategy(
+                messenger,
+                executor,
+                options.debian_release,
+                options.debian_mirror_url,
+                options.command_debootstrap,
+                options.debootstrap_opt,
+                )
