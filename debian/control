@@ -10,7 +10,8 @@ Package: image-bootstrap
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
  python-colorama,
- debootstrap | cdebootstrap | cdebootstrap-static, debian-archive-keyring, gnupg,
+ debootstrap | cdebootstrap | cdebootstrap-static,
+ debian-archive-keyring, ubuntu-keyring, gnupg,
  grub-pc | grub-coreboot | grub-efi-amd64 | grub-efi-ia32 | grub-ieee1275 | grub-yeeloong,
  kpartx,
  parted
