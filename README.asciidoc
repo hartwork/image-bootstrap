@@ -30,7 +30,7 @@ and launching the resulting image using KVM.
 ------------------------------------------------------------------------------------------
 # ${EDITOR} root_password.txt
 
-# sudo image-bootstrap --debian --hostname jessie \
+# sudo image-bootstrap --hostname jessie debian \
                                   --password-file root_password.txt /dev/vg/lv
      _                          __             __      __               
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
@@ -129,6 +129,18 @@ image-bootstrap_0.7.0_all.deb
 
 Usage
 -----
+
+In general, the usage is:
+------------------------------------------------------------------------------------------
+image-bootstrap [..] DISTRIBUTION [..] DEVICE
+------------------------------------------------------------------------------------------
+or
+------------------------------------------------------------------------------------------
+image-bootstrap --hostname NAME [DISTRO_AGNOSTIC] DISTRIBUTION [DISTRO_SPECIFIC] DEVICE
+------------------------------------------------------------------------------------------
+in a bit more detail.
+
+
 A dump of the current `--help` output would be:
 ------------------------------------------------------------------------------------------
 # image-bootstrap --help
@@ -140,10 +152,8 @@ usage: image-bootstrap [-h] [--version] [--color {never,always,auto}]
                        [--resolv-conf FILE] [--disk-id ID]
                        [--first-partition-uuid UUID] [--scripts-pre DIRECTORY]
                        [--scripts-chroot DIRECTORY] [--scripts-post DIRECTORY]
-                       --debian [--debootstrap COMMAND]
-                       [--grub2-install COMMAND] [--debian-release RELEASE]
-                       [--debian-mirror URL] [--debootstrap-opt OPTION]
-                       DEVICE
+                       [--grub2-install COMMAND]
+                       DISTRIBUTION ... DEVICE
 
 Command line tool for creating bootable virtual machine images
 
@@ -191,25 +201,16 @@ script integration:
                         scripts to run after chrooting phase, in alphabetical
                         order
 
-choice of distribution:
-  --debian              select Debian for a distribution
-
 command names:
-  --debootstrap COMMAND
-                        override debootstrap command
   --grub2-install COMMAND
                         override grub2-install command
 
-Debian:
-  --debian-release RELEASE
-                        specify Debian release (default: jessie)
-  --debian-mirror URL   specify Debian mirror to use (e.g.
-                        http://localhost:3142/debian for a local instance of
-                        apt-cacher-ng; default: http://http.debian.net/debian)
-  --debootstrap-opt OPTION
-                        option to pass to debootstrap, in addition; can be
-                        passed several times; use with --debootstrap-opt=...
-                        syntax, i.e. with "="
+subcommands (choice of distribution):
+  Run "image-bootstrap DISTRIBUTION --help" for details on options specific to that distribution.
+
+  DISTRIBUTION          choice of distribution, pick from:
+    debian              Debian GNU/Linux
+    ubuntu              Ubuntu
 
      _                          __             __      __               
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
@@ -220,4 +221,27 @@ Debian:
 Software libre licensed under AGPL v3 or later.
 Brought to you by Sebastian Pipping <sebastian@pipping.org>.
 Please report bugs at https://github.com/hartwork/image-bootstrap.  Thank you!
+------------------------------------------------------------------------------------------
+
+To show options specific to Debian, run ..
+
+------------------------------------------------------------------------------------------
+# image-bootstrap debian --help
+usage: image-bootstrap debian [-h] [--debootstrap COMMAND] [--release RELEASE]
+                              [--mirror URL] [--debootstrap-opt OPTION]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --release RELEASE     specify Debian release (default: jessie)
+  --mirror URL          specify Debian mirror to use (e.g.
+                        http://localhost:3142/debian for a local instance of
+                        apt-cacher-ng; default: http://http.debian.net/debian)
+  --debootstrap-opt OPTION
+                        option to pass to debootstrap, in addition; can be
+                        passed several times; use with --debootstrap-opt=...
+                        syntax, i.e. with "="
+
+command names:
+  --debootstrap COMMAND
+                        override debootstrap command
 ------------------------------------------------------------------------------------------

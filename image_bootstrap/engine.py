@@ -57,7 +57,7 @@ _EXIT_COMMAND_NOT_FOUND = 127
 _PARTITION_DELIMITER = 'p'  # Keep at "p" to not break LVM support
 
 
-class BootstrapDistroAgnostic(object):
+class BootstrapEngine(object):
     def __init__(self,
             messenger,
             executor,
@@ -97,14 +97,22 @@ class BootstrapDistroAgnostic(object):
         self._abs_first_partition_device = None
         self._first_partition_uuid = first_partition_uuid
 
+        self._distro = None
+
+    def set_distro(self, distro):
+        self._distro = distro
+
     def check_release(self):
-        raise NotImplementedError()
+        return self._distro.check_release()
 
     def select_bootloader(self):
-        raise NotImplementedError()
+        if self._bootloader_approach == BOOTLOADER__AUTO:
+            self._bootloader_approach = self._distro.select_bootloader()
+            self._messenger.info('Selected approach "%s" for bootloader installation.'
+                    % self._bootloader_approach)
 
     def get_commands_to_check_for(self):
-        return iter((
+        return list(self._distro.get_commands_to_check_for()) + [
                 _COMMAND_BLKID,
                 _COMMAND_CHMOD,
                 COMMAND_CHROOT,
@@ -121,7 +129,7 @@ class BootstrapDistroAgnostic(object):
                 _COMMAND_TUNE2FS,
                 _COMMAND_UMOUNT,
                 self._command_grub2_install,
-                ))
+                ]
 
     def _find_command(self, command):
         dirs = os.environ['PATH'].split(':')
@@ -219,6 +227,7 @@ class BootstrapDistroAgnostic(object):
 
     def check_architecture(self):
         self._messenger.info('Checking for known unsupported architecture/machine combination...')
+        self._distro.check_architecture(self._architecture)
 
     def _script_should_be_run(self, basename):
         if basename.startswith('.'):
@@ -387,6 +396,7 @@ class BootstrapDistroAgnostic(object):
         self._messenger.info('Creating file system on "%s"...' % self._abs_first_partition_device)
         cmd = [
                 _COMMAND_MKFS_EXT4,
+                '-F',
                 self._abs_first_partition_device,
                 ]
         self._executor.check_call(cmd)
@@ -410,7 +420,11 @@ class BootstrapDistroAgnostic(object):
         self._executor.check_call(cmd)
 
     def run_directory_bootstrap(self):
-        raise NotImplementedError()
+        return self._distro.run_directory_bootstrap(
+                self._abs_mountpoint,
+                self._architecture,
+                self._bootloader_approach,
+                )
 
     def _unmount_directory_bootstrap_leftovers(self):
         mounts = MountFinder()
@@ -475,7 +489,7 @@ class BootstrapDistroAgnostic(object):
         f.close()
 
     def create_network_configuration(self):
-        raise NotImplementedError()
+        return self._distro.create_network_configuration(self._abs_mountpoint)
 
     def _fix_grub_cfg_root_device(self):
         self._messenger.info('Post-processing GRUB config...')
@@ -539,7 +553,7 @@ class BootstrapDistroAgnostic(object):
                 self._abs_target_path, ', '.join(hints))
 
     def get_chroot_command_grub2_install(self):
-        raise NotImplementedError()
+        return self._distro.get_chroot_command_grub2_install()
 
     def _install_bootloader__grub2(self):
         real_abs_target = os.path.realpath(self._abs_target_path)
@@ -591,10 +605,12 @@ class BootstrapDistroAgnostic(object):
             os.remove(abs_chroot_device_map)
 
     def generate_grub_cfg_from_inside_chroot(self):
-        raise NotImplementedError()
+        env = self.make_environment(tell_mountpoint=False)
+        return self._distro.generate_grub_cfg_from_inside_chroot(self._abs_mountpoint, env)
 
     def generate_initramfs_from_inside_chroot(self):
-        raise NotImplementedError()
+        env = self.make_environment(tell_mountpoint=False)
+        return self._distro.generate_initramfs_from_inside_chroot(self._abs_mountpoint, env)
 
     def _create_etc_resolv_conf(self):
         output_filename = os.path.join(self._abs_mountpoint, 'etc', 'resolv.conf')
@@ -693,7 +709,7 @@ class BootstrapDistroAgnostic(object):
             self._try_unmounting(abs_path)
 
     def perform_post_chroot_clean_up(self):
-        raise NotImplementedError()
+        return self._distro.perform_post_chroot_clean_up(self._abs_mountpoint)
 
     def _run_post_scripts(self):
         self._messenger.info('Running post-chroot scripts...')

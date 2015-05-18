@@ -7,14 +7,17 @@ import subprocess
 import traceback
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
-from image_bootstrap.distro import \
+from image_bootstrap.engine import \
+        BootstrapEngine, \
         BOOTLOADER__AUTO, \
         BOOTLOADER__CHROOT_GRUB2__DEVICE, \
         BOOTLOADER__CHROOT_GRUB2__DRIVE, \
         BOOTLOADER__HOST_GRUB2__DEVICE, \
         BOOTLOADER__HOST_GRUB2__DRIVE, \
         BOOTLOADER__NONE
-from image_bootstrap.distros.debian import BootstrapDebian
+from image_bootstrap.distros.base import DISTRO_CLASS_FIELD
+from image_bootstrap.distros.debian import DebianStrategy
+from image_bootstrap.distros.ubuntu import UbuntuStrategy
 from image_bootstrap.messenger import Messenger, BANNER, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
 from image_bootstrap.executor import Executor
@@ -49,7 +52,7 @@ def _main__level_three(messenger, options):
 
     executor = Executor(messenger, stdout=child_process_stdout)
 
-    bootstrap = BootstrapDebian(
+    bootstrap = BootstrapEngine(
             messenger,
             executor,
             options.hostname,
@@ -59,18 +62,18 @@ def _main__level_three(messenger, options):
             os.path.abspath(options.resolv_conf),
             options.disk_id,
             options.first_partition_uuid,
-            options.debian_release,
-            options.debian_mirror_url,
             options.scripts_dir_pre and os.path.abspath(options.scripts_dir_pre),
             options.scripts_dir_chroot and os.path.abspath(options.scripts_dir_chroot),
             options.scripts_dir_post and os.path.abspath(options.scripts_dir_post),
             os.path.abspath(options.target_path),
             options.command_grub2_install,
-            options.command_debootstrap,
-            options.debootstrap_opt,
             options.bootloader_approach,
             options.bootloader_force,
             )
+
+    distro_class = getattr(options, DISTRO_CLASS_FIELD)
+    bootstrap.set_distro(distro_class.create(messenger, executor, options))
+
     bootstrap.check_release()
     bootstrap.select_bootloader()
     bootstrap.detect_grub2_install()
@@ -135,26 +138,21 @@ def _main__level_two():
     script_dirs.add_argument('--scripts-post', dest='scripts_dir_post', metavar='DIRECTORY',
         help='scripts to run after chrooting phase, in alphabetical order')
 
-    distros = parser.add_argument_group('choice of distribution')
-    distros.add_argument('--debian', dest='distribution', action='store_const', const=BootstrapDebian.DISTRO_KEY, required=True,
-        help='select Debian for a distribution')
-
     commands = parser.add_argument_group('command names')
-    commands.add_argument('--debootstrap', metavar='COMMAND', dest='command_debootstrap', default='debootstrap',
-        help='override debootstrap command')
     commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install',
         help='override grub2-install command')
 
+    distros = parser.add_subparsers(title='subcommands (choice of distribution)',
+            description='Run "%(prog)s DISTRIBUTION --help" for details '
+                    'on options specific to that distribution.',
+            metavar='DISTRIBUTION', help='choice of distribution, pick from:')
 
-    debian = parser.add_argument_group('Debian')
-    debian.add_argument('--debian-release', default='jessie', metavar='RELEASE',
-        help='specify Debian release (default: %(default)s)')
-    debian.add_argument('--debian-mirror', dest='debian_mirror_url', metavar='URL', default='http://http.debian.net/debian',
-        help='specify Debian mirror to use (e.g. http://localhost:3142/debian for a local instance of apt-cacher-ng; default: %(default)s)')
-    debian.add_argument('--debootstrap-opt', dest='debootstrap_opt', metavar='OPTION', action='append', default=[],
-        help='option to pass to debootstrap, in addition; '
-        'can be passed several times; '
-        'use with --debootstrap-opt=... syntax, i.e. with "="')
+
+    for strategy_clazz in (
+            DebianStrategy,
+            UbuntuStrategy,
+            ):
+        strategy_clazz.add_parser_to(distros)
 
 
     parser.add_argument('target_path', metavar='DEVICE',
