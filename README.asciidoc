@@ -210,6 +210,7 @@ subcommands (choice of distribution):
 
   DISTRIBUTION          choice of distribution, pick from:
     debian              Debian GNU/Linux
+    ubuntu              Ubuntu
 
      _                          __             __      __               
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
