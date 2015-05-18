@@ -36,7 +36,7 @@ and launching the resulting image using KVM.
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
    / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \ 
   /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/ 
-               /___/                      v0.7.0 :: 2015-05-14  /_/     
+               /___/                      v0.8.0 :: 2015-05-18  /_/     
 
 Software libre licensed under AGPL v3 or later.
 Brought to you by Sebastian Pipping <sebastian@pipping.org>.
@@ -120,9 +120,9 @@ Cloning into 'image-bootstrap'...
 [..]
 
 # ls *.deb
-image-bootstrap_0.7.0_all.deb
+image-bootstrap_0.8.0_all.deb
 
-# sudo dpkg -i image-bootstrap_0.7.0_all.deb
+# sudo dpkg -i image-bootstrap_0.8.0_all.deb
 [..]
 ------------------------------------------------------------------------------------------
 
@@ -216,7 +216,7 @@ subcommands (choice of distribution):
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
    / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \ 
   /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/ 
-               /___/                      v0.7.0 :: 2015-05-14  /_/     
+               /___/                      v0.8.0 :: 2015-05-18  /_/     
 
 Software libre licensed under AGPL v3 or later.
 Brought to you by Sebastian Pipping <sebastian@pipping.org>.
