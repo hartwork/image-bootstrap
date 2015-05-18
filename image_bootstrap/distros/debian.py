@@ -103,8 +103,8 @@ class DebianStrategy(object):
             raise _ArchitectureMachineMismatch(architecture, host_machine)
 
     def run_directory_bootstrap(self, abs_mountpoint, architecture, bootloader_approach):
-        self._messenger.info('Bootstrapping Debian "%s" into "%s"...'
-                % (self._release, abs_mountpoint))
+        self._messenger.info('Bootstrapping %s "%s" into "%s"...'
+                % (self.DISTRO_NAME_SHORT, self._release, abs_mountpoint))
 
         _extra_packages = [
                 'initramfs-tools',  # for update-initramfs
