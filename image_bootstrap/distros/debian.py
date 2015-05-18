@@ -82,7 +82,7 @@ class DebianStrategy(object):
                     self._command_debootstrap,
                 ]
 
-    def _get_kernel_package_name(self, architecture):
+    def get_kernel_package_name(self, architecture):
         if architecture == 'i386':
             return 'linux-image-686-pae'
 
@@ -108,7 +108,7 @@ class DebianStrategy(object):
 
         _extra_packages = [
                 'initramfs-tools',  # for update-initramfs
-                self._get_kernel_package_name(architecture),
+                self.get_kernel_package_name(architecture),
                 ]
         if bootloader_approach != BOOTLOADER__NONE:
             _extra_packages.append('grub-pc')
