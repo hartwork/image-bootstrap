@@ -23,6 +23,7 @@ if __name__ == '__main__':
             packages=[
                 _PYTHON_PACKAGE_NAME,
                 '%s.distros' % _PYTHON_PACKAGE_NAME,
+                '%s.types' % _PYTHON_PACKAGE_NAME,
             ],
             data_files=[('sbin/', [PACKAGE_NAME])],
             classifiers=[
