@@ -245,3 +245,14 @@ command names:
   --debootstrap COMMAND
                         override debootstrap command
 ------------------------------------------------------------------------------------------
+
+
+Known limitations
+-----------------
+GRUB 1.99 has trouble installing to loop devices.
+As a result, using *image-bootstrap* to install e.g. Debian _wheezy_ to a loop device
+requires
+
+ . bootloader approach `host-grub2-device` or `host-grub2-drive` and
+
+ . a more recent version of GRUB 2.x on the system running *image-bootstrap*.
