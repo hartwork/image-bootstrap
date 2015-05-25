@@ -180,7 +180,7 @@ class ArchBootstrapper(object):
             print('## Added by directory-bootstrap', file=f)
             print('Server = %s' % self._mirror_url, file=f)
 
-    def _prepare_pacstrap(self, abs_pacstrap_inner_root):
+    def _initialize_pacman_keyring(self, abs_pacstrap_inner_root):
         self._messenger.info('Initializing pacman keyring... (may take 2 to 4 minutes)')
         before = datetime.datetime.now()
 
@@ -265,7 +265,7 @@ class ArchBootstrapper(object):
 
                 try:
                     self._adjust_pacman_mirror_list(abs_pacstrap_inner_root)
-                    self._prepare_pacstrap(abs_pacstrap_inner_root)
+                    self._initialize_pacman_keyring(abs_pacstrap_inner_root)
                 finally:
                     for source, options, target in reversed(_NON_DISK_MOUNT_TASKS):
                         abs_path = os.path.join(abs_pacstrap_inner_root, target)
