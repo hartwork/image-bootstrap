@@ -17,6 +17,7 @@ from tarfile import TarFile
 
 from directory_bootstrap.shared.commands import check_for_commands
 from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
+from directory_bootstrap.shared.namespace import unshare_current_process
 
 
 _GPG_DISPLAY_KEY_FORMAT = '0xlong'
@@ -264,6 +265,9 @@ class ArchBootstrapper(object):
         for source, options, target in reversed(_NON_DISK_MOUNT_TASKS):
             abs_path = os.path.join(abs_pacstrap_inner_root, target)
             try_unmounting(self._executor, abs_path)
+
+    def unshare(self):
+        unshare_current_process(self._messenger)
 
     def run(self):
         self._require_cache_writable()
