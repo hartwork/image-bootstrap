@@ -245,6 +245,7 @@ class ArchBootstrapper(object):
                 ])
 
     def _mount_nondisk_chroot_mounts(self, abs_pacstrap_inner_root):
+        self._messenger.info('Mounting non-disk file systems...')
         for source, options, target in _NON_DISK_MOUNT_TASKS:
             self._executor.check_call([
                     _COMMAND_MOUNT,
@@ -259,6 +260,7 @@ class ArchBootstrapper(object):
         try_unmounting(self._executor, abs_pacstrap_target_dir)
 
     def _unmount_nondisk_chroot_mounts(self, abs_pacstrap_inner_root):
+        self._messenger.info('Unmounting non-disk file systems...')
         for source, options, target in reversed(_NON_DISK_MOUNT_TASKS):
             abs_path = os.path.join(abs_pacstrap_inner_root, target)
             try_unmounting(self._executor, abs_path)
