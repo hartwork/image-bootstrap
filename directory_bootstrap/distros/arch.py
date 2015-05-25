@@ -326,3 +326,10 @@ class ArchBootstrapper(object):
         finally:
             self._messenger.info('Cleaning up "%s"...' % abs_temp_dir)
             shutil.rmtree(abs_temp_dir)
+
+    @classmethod
+    def add_arguments_to(clazz, distro):
+        distro.add_argument('--arch', default='x86_64', choices=SUPPORTED_ARCHITECTURES)
+        distro.add_argument('--image-date', type=date_argparse_type)
+        distro.add_argument('--cache-dir', default='/var/cache/dir-bootstrap/')
+        distro.add_argument('--mirror', dest='mirror_url', metavar='URL', default='http://mirror.rackspace.com/archlinux/$repo/os/$arch')

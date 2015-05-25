@@ -58,11 +58,7 @@ def _main__level_two():
             metavar='DISTRIBUTION', help='choice of distribution, pick from:')
 
     arch = distros.add_parser('arch')
-
-    arch.add_argument('--arch', default='x86_64', choices=SUPPORTED_ARCHITECTURES)
-    arch.add_argument('--image-date', type=date_argparse_type)
-    arch.add_argument('--cache-dir', default='/var/cache/dir-bootstrap/')
-    arch.add_argument('--mirror', dest='mirror_url', metavar='URL', default='http://mirror.rackspace.com/archlinux/$repo/os/$arch')
+    ArchBootstrapper.add_arguments_to(arch)
 
     parser.add_argument('target_dir', metavar='DIRECTORY')
 
