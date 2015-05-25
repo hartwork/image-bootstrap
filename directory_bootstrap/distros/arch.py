@@ -214,6 +214,18 @@ class ArchBootstrapper(object):
         after = datetime.datetime.now()
         self._messenger.info('Took %d seconds.' % (after - before).total_seconds())
 
+    def _run_pacstrap(self, abs_pacstrap_inner_root, rel_pacstrap_target_dir):
+        self._messenger.info('Pacstrapping into "%s"...'
+                % (os.path.join(abs_pacstrap_inner_root, rel_pacstrap_target_dir)))
+        env = self._make_chroot_env()
+        cmd = [
+                _COMMAND_CHROOT,
+                abs_pacstrap_inner_root,
+                'pacstrap',
+                os.path.join('/', rel_pacstrap_target_dir),
+                ]
+        self._executor.check_call(cmd, env=env)
+
     def run(self):
         self._require_cache_writable()
 
@@ -274,6 +286,7 @@ class ArchBootstrapper(object):
                     self._adjust_pacman_mirror_list(abs_pacstrap_inner_root)
                     self._copy_etc_resolv_conf(abs_pacstrap_inner_root)
                     self._initialize_pacman_keyring(abs_pacstrap_inner_root)
+                    self._run_pacstrap(abs_pacstrap_inner_root, rel_pacstrap_target_dir)
                 finally:
                     for source, options, target in reversed(_NON_DISK_MOUNT_TASKS):
                         abs_path = os.path.join(abs_pacstrap_inner_root, target)
