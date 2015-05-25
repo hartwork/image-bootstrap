@@ -181,7 +181,7 @@ class ArchBootstrapper(object):
             print('Server = %s' % self._mirror_url, file=f)
 
     def _prepare_pacstrap(self, abs_pacstrap_inner_root):
-        self._messenger.info('Initializing pacman keyring...')
+        self._messenger.info('Initializing pacman keyring... (may take 2 to 4 minutes)')
         before = datetime.datetime.now()
 
         env = self._make_chroot_env()
