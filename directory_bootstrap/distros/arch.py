@@ -226,6 +226,39 @@ class ArchBootstrapper(object):
                 ]
         self._executor.check_call(cmd, env=env)
 
+    def _mount_disk_chroot_mounts(self, abs_pacstrap_target_dir):
+        self._executor.check_call([
+                _COMMAND_MOUNT,
+                '-o', 'bind',
+                self._abs_target_dir,
+                abs_pacstrap_target_dir,
+                ])
+
+    def _mount_nondisk_chroot_mounts(self, abs_pacstrap_inner_root):
+        for source, options, target in _NON_DISK_MOUNT_TASKS:
+            self._executor.check_call([
+                    _COMMAND_MOUNT,
+                    source,
+                    ] \
+                    + options \
+                    + [
+                        os.path.join(abs_pacstrap_inner_root, target),
+                    ])
+
+    def _unmount_disk_chroot_mounts(self, abs_pacstrap_target_dir):
+        self._executor.check_call([
+                _COMMAND_UMOUNT,
+                abs_pacstrap_target_dir,
+                ])
+
+    def _unmount_nondisk_chroot_mounts(self, abs_pacstrap_inner_root):
+        for source, options, target in reversed(_NON_DISK_MOUNT_TASKS):
+            abs_path = os.path.join(abs_pacstrap_inner_root, target)
+            self._executor.check_call([
+                    _COMMAND_UMOUNT,
+                    abs_path,
+                    ])
+
     def run(self):
         self._require_cache_writable()
 
@@ -265,41 +298,18 @@ class ArchBootstrapper(object):
 
             os.makedirs(abs_pacstrap_target_dir)
 
-            self._executor.check_call([
-                    _COMMAND_MOUNT,
-                    '-o', 'bind',
-                    self._abs_target_dir,
-                    abs_pacstrap_target_dir,
-                    ])
+            self._mount_disk_chroot_mounts(abs_pacstrap_target_dir)
             try:
-                for source, options, target in _NON_DISK_MOUNT_TASKS:
-                    self._executor.check_call([
-                            _COMMAND_MOUNT,
-                            source,
-                            ] \
-                            + options \
-                            + [
-                                os.path.join(abs_pacstrap_inner_root, target),
-                            ])
-
+                self._mount_nondisk_chroot_mounts(abs_pacstrap_inner_root)
                 try:
                     self._adjust_pacman_mirror_list(abs_pacstrap_inner_root)
                     self._copy_etc_resolv_conf(abs_pacstrap_inner_root)
                     self._initialize_pacman_keyring(abs_pacstrap_inner_root)
                     self._run_pacstrap(abs_pacstrap_inner_root, rel_pacstrap_target_dir)
                 finally:
-                    for source, options, target in reversed(_NON_DISK_MOUNT_TASKS):
-                        abs_path = os.path.join(abs_pacstrap_inner_root, target)
-                        self._executor.check_call([
-                                _COMMAND_UMOUNT,
-                                abs_path,
-                                ])
-
+                    self._unmount_nondisk_chroot_mounts(abs_pacstrap_inner_root)
             finally:
-                self._executor.check_call([
-                        _COMMAND_UMOUNT,
-                        abs_pacstrap_target_dir,
-                        ])
+                self._unmount_disk_chroot_mounts(abs_pacstrap_target_dir)
 
         finally:
             self._messenger.info('Cleaning up "%s"...' % abs_temp_dir)
