@@ -1,6 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
+import datetime
 import errno
 import os
 import re
@@ -169,6 +170,7 @@ class ArchBootstrapper(object):
 
     def _prepare_pacstrap(self, abs_pacstrap_inner_root):
         self._messenger.info('Initializing pacman keyring...')
+        before = datetime.datetime.now()
 
         env = self._make_chroot_env()
 
@@ -189,6 +191,9 @@ class ArchBootstrapper(object):
                 '--populate', 'archlinux',
                 ]
         self._executor.check_call(cmd, env=env)
+
+        after = datetime.datetime.now()
+        self._messenger.info('Took %d seconds.' % (after - before).total_seconds())
 
     def run(self):
         self._require_cache_writable()
