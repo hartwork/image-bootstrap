@@ -106,6 +106,15 @@ class ArchBootstrapper(object):
         self._download_url_to_file(url, filename)
         return filename
 
+    def _get_gpg_argv_start(self, abs_gpg_home_dir):
+        return [
+                _COMMAND_GPG,
+                '--home', abs_gpg_home_dir,
+                '--keyid-format', _GPG_DISPLAY_KEY_FORMAT,
+                '--no-autostart',
+                '--batch',
+            ]
+
     def _initialize_gpg_home(self, abs_temp_dir, package_filename, package_yyyymmdd):
         abs_gpg_home_dir = os.path.join(abs_temp_dir, 'gpg_home')
         self._messenger.info('Initializing temporary GnuPG home at "%s"...' % abs_gpg_home_dir)
@@ -116,13 +125,7 @@ class ArchBootstrapper(object):
             tf.extract(rel_archlinux_gpg_path, path=abs_temp_dir)
         abs_archlinux_gpg_path = os.path.join(abs_temp_dir, rel_archlinux_gpg_path)
 
-        cmd = [
-                _COMMAND_GPG,
-                '--home', abs_gpg_home_dir,
-                '--keyid-format', _GPG_DISPLAY_KEY_FORMAT,
-                '--no-autostart',
-                '--batch',
-
+        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
                 '--quiet',
                 '--import', abs_archlinux_gpg_path,
             ]
@@ -132,13 +135,7 @@ class ArchBootstrapper(object):
 
     def _verify_file_gpg(self, candidate_filename, signature_filename, abs_gpg_home_dir):
         self._messenger.info('Verifying integrity of file "%s"...' % candidate_filename)
-        cmd = [
-                _COMMAND_GPG,
-                '--home', abs_gpg_home_dir,
-                '--keyid-format', _GPG_DISPLAY_KEY_FORMAT,
-                '--no-autostart',
-                '--batch',
-
+        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
                 '--verify',
                 signature_filename,
                 candidate_filename,
