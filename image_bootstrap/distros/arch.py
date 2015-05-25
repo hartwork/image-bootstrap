@@ -32,8 +32,13 @@ class ArchStrategy(DistroStrategy):
                 ]
 
     def check_architecture(self, architecture):
+        if architecture == 'amd64':
+            architecture = 'x86_64'
+
         if architecture not in SUPPORTED_ARCHITECTURES:
             raise ValueError('Architecture "%s" not supported' % architecture)
+
+        return architecture
 
     def run_directory_bootstrap(self, abs_mountpoint, architecture, bootloader_approach):
         self._messenger.info('Bootstrapping %s into "%s"...'

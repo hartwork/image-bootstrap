@@ -96,6 +96,8 @@ class DebianStrategy(DistroStrategy):
         if trouble:
             raise _ArchitectureMachineMismatch(architecture, host_machine)
 
+        return architecture
+
     def run_directory_bootstrap(self, abs_mountpoint, architecture, bootloader_approach):
         self._messenger.info('Bootstrapping %s "%s" into "%s"...'
                 % (self.DISTRO_NAME_SHORT, self._release, abs_mountpoint))

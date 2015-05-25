@@ -184,7 +184,8 @@ class BootstrapEngine(object):
 
     def check_architecture(self):
         self._messenger.info('Checking for known unsupported architecture/machine combination...')
-        self._distro.check_architecture(self._architecture)
+        self._architecture = self._distro.check_architecture(self._architecture)
+        assert self._architecture is not None
 
     def _script_should_be_run(self, basename):
         if basename.startswith('.'):
