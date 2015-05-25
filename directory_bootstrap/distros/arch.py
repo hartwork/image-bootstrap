@@ -332,7 +332,7 @@ class ArchBootstrapper(object):
     def add_arguments_to(clazz, distro):
         distro.add_argument('--image-date', type=date_argparse_type, metavar='YYYY-MM-DD',
                 help='date to use boostrap image of (e.g. 2015-05-01, default: latest available)')
-        distro.add_argument('--cache-dir', metavar='DIRECTORY', default='/var/cache/dir-bootstrap/',
+        distro.add_argument('--cache-dir', metavar='DIRECTORY', default='/var/cache/directory-bootstrap/',
                 help='directory to use for downloads (default: %(default)s)')
         distro.add_argument('--mirror', dest='mirror_url', metavar='URL',
                 default='http://mirror.rackspace.com/archlinux/$repo/os/$arch',
