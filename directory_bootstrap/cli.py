@@ -26,14 +26,11 @@ def _main__level_three(messenger, options):
     executor = Executor(messenger, stdout=child_process_stdout)
 
 
-    options.cache_dir = os.path.abspath(options.cache_dir)
-    options.target_dir = os.path.abspath(options.target_dir)
-
     bootstrap = ArchBootstrapper(
             messenger,
             executor,
-            options.target_dir,
-            options.cache_dir,
+            os.path.abspath(options.target_dir),
+            os.path.abspath(options.cache_dir),
             options.architecture,
             options.image_date,
             options.mirror_url,
