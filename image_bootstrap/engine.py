@@ -12,6 +12,8 @@ import tempfile
 import time
 from ctypes import CDLL, c_int, get_errno, cast, c_char_p
 
+from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
+
 from image_bootstrap.mount import MountFinder
 from image_bootstrap.types.uuid import require_valid_uuid
 
@@ -50,7 +52,6 @@ _COMMAND_RM = 'rm'
 _COMMAND_RMDIR = 'rmdir'
 _COMMAND_SED = 'sed'
 _COMMAND_TUNE2FS = 'tune2fs'
-_COMMAND_UMOUNT = 'umount'
 
 _EXIT_COMMAND_NOT_FOUND = 127
 
@@ -127,7 +128,7 @@ class BootstrapEngine(object):
                 _COMMAND_RMDIR,
                 _COMMAND_SED,
                 _COMMAND_TUNE2FS,
-                _COMMAND_UMOUNT,
+                COMMAND_UMOUNT,
                 self._command_grub2_install,
                 ]
 
@@ -688,19 +689,7 @@ class BootstrapEngine(object):
         self._executor.check_call(cmd_rmdir)
 
     def _try_unmounting(self, abs_path):
-        cmd = [
-                _COMMAND_UMOUNT,
-                abs_path,
-                ]
-        for i in range(3):
-            try:
-                self._executor.check_call(cmd)
-            except subprocess.CalledProcessError as e:
-                if e.returncode == _EXIT_COMMAND_NOT_FOUND:
-                    raise
-                time.sleep(1)
-            else:
-                break
+        return try_unmounting(self._executor, abs_path)
 
     def _unmount_nondisk_chroot_mounts(self):
         self._messenger.info('Unmounting non-disk file systems...')
