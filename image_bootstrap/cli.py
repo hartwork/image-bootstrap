@@ -22,6 +22,7 @@ from image_bootstrap.engine import \
         BOOTLOADER__HOST_GRUB2__DRIVE, \
         BOOTLOADER__NONE
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD
+from image_bootstrap.distros.arch import ArchStrategy
 from image_bootstrap.distros.debian import DebianStrategy
 from image_bootstrap.distros.ubuntu import UbuntuStrategy
 from image_bootstrap.types.disk_id import disk_id_type
@@ -139,6 +140,7 @@ def _main__level_two():
 
 
     for strategy_clazz in (
+            ArchStrategy,
             DebianStrategy,
             UbuntuStrategy,
             ):
