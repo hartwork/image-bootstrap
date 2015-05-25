@@ -14,31 +14,7 @@ from directory_bootstrap.shared.output_control import \
         add_output_control_options, is_color_wanted
 
 
-def main():
-    parser = argparse.ArgumentParser()
-
-    add_output_control_options(parser)
-
-    distros = parser.add_subparsers(title='subcommands (choice of distribution)',
-            description='Run "%(prog)s DISTRIBUTION --help" for details '
-                    'on options specific to that distribution.',
-            metavar='DISTRIBUTION', help='choice of distribution, pick from:')
-
-    arch = distros.add_parser('arch')
-
-    arch.add_argument('--arch', default='x86_64')
-    arch.add_argument('--image-date', type=date_argparse_type)
-    arch.add_argument('--cache-dir', default='/var/cache/dir-bootstrap/')
-    arch.add_argument('--mirror', dest='mirror_url', metavar='URL', default='http://mirror.rackspace.com/archlinux/$repo/os/$arch')
-
-    parser.add_argument('target_dir', metavar='DIRECTORY')
-
-    options = parser.parse_args()
-
-
-    messenger = Messenger(options.verbosity, is_color_wanted(options))
-
-
+def _main__level_three(messenger, options):
     stdout_wanted = options.verbosity is VERBOSITY_VERBOSE
 
     if stdout_wanted:
@@ -66,3 +42,37 @@ def main():
 
     if not stdout_wanted:
         child_process_stdout.close()
+
+
+def _main__level_two():
+    parser = argparse.ArgumentParser()
+
+    add_output_control_options(parser)
+
+    distros = parser.add_subparsers(title='subcommands (choice of distribution)',
+            description='Run "%(prog)s DISTRIBUTION --help" for details '
+                    'on options specific to that distribution.',
+            metavar='DISTRIBUTION', help='choice of distribution, pick from:')
+
+    arch = distros.add_parser('arch')
+
+    arch.add_argument('--arch', default='x86_64')
+    arch.add_argument('--image-date', type=date_argparse_type)
+    arch.add_argument('--cache-dir', default='/var/cache/dir-bootstrap/')
+    arch.add_argument('--mirror', dest='mirror_url', metavar='URL', default='http://mirror.rackspace.com/archlinux/$repo/os/$arch')
+
+    parser.add_argument('target_dir', metavar='DIRECTORY')
+
+    options = parser.parse_args()
+
+
+    messenger = Messenger(options.verbosity, is_color_wanted(options))
+
+    _main__level_three(messenger, options)
+
+
+def main():
+    try:
+        _main__level_two()
+    except KeyboardInterrupt:
+        pass
