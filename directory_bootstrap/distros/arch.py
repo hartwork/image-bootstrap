@@ -68,7 +68,8 @@ class ArchBootstrapper(object):
     def check_for_commands(self):
         check_for_commands(self._messenger, self.get_commands_to_check_for())
 
-    def get_commands_to_check_for(self):
+    @staticmethod
+    def get_commands_to_check_for():
         return [
                 _COMMAND_CHROOT,
                 _COMMAND_GPG,
