@@ -12,6 +12,8 @@ import tempfile
 import time
 from ctypes import CDLL, c_int, get_errno, cast, c_char_p
 
+from directory_bootstrap.shared.commands import \
+        check_for_commands, find_command, EXIT_COMMAND_NOT_FOUND
 from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
 
 from image_bootstrap.mount import MountFinder
@@ -52,8 +54,6 @@ _COMMAND_RM = 'rm'
 _COMMAND_RMDIR = 'rmdir'
 _COMMAND_SED = 'sed'
 _COMMAND_TUNE2FS = 'tune2fs'
-
-_EXIT_COMMAND_NOT_FOUND = 127
 
 _PARTITION_DELIMITER = 'p'  # Keep at "p" to not break LVM support
 
@@ -132,16 +132,6 @@ class BootstrapEngine(object):
                 self._command_grub2_install,
                 ]
 
-    def _find_command(self, command):
-        dirs = os.environ['PATH'].split(':')
-        for _dir in dirs:
-            abs_path = os.path.join(_dir, command)
-            if os.path.exists(abs_path):
-                return abs_path
-
-        raise OSError(_EXIT_COMMAND_NOT_FOUND, 'Command "%s" not found in PATH.' \
-            % command)
-
     def _protect_against_grub_legacy(self, command):
         output = subprocess.check_output([command, '--version'])
         if 'GRUB GRUB 0.' in output:
@@ -164,16 +154,16 @@ class BootstrapEngine(object):
 
         self._command_grub2_install = _COMMAND_GRUB2_INSTALL
         try:
-            self._find_command(self._command_grub2_install)
+            find_command(self._command_grub2_install)
         except OSError as e:
-            if e.errno != _EXIT_COMMAND_NOT_FOUND:
+            if e.errno != EXIT_COMMAND_NOT_FOUND:
                 raise
 
             self._command_grub2_install = _COMMAND_GRUB_INSTALL
             try:
-                self._find_command(self._command_grub2_install)
+                find_command(self._command_grub2_install)
             except OSError as e:
-                if e.errno != _EXIT_COMMAND_NOT_FOUND:
+                if e.errno != EXIT_COMMAND_NOT_FOUND:
                     raise
 
                 # NOTE: consecutive search for "grub-install" will fail and
@@ -183,42 +173,7 @@ class BootstrapEngine(object):
             self._protect_against_grub_legacy(self._command_grub2_install)
 
     def check_for_commands(self):
-        infos_produced = False
-
-        missing_files = []
-        missing_commands = []
-        for command in sorted(set(self.get_commands_to_check_for())):
-            if command is None:
-                continue
-
-            if command.startswith('/'):
-                abs_path = command
-                if not os.path.exists(abs_path):
-                    missing_files.append(abs_path)
-                continue
-
-            assert not command.startswith('/')
-            try:
-                abs_path = self._find_command(command)
-            except OSError as e:
-                if e.errno != _EXIT_COMMAND_NOT_FOUND:
-                    raise
-                missing_commands.append(command)
-                self._messenger.error('Checking for %s... NOT FOUND' % command)
-            else:
-                self._messenger.info('Checking for %s... %s' % (command, abs_path))
-                infos_produced = True
-
-        if missing_files:
-            raise OSError(errno.ENOENT, 'File "%s" not found.' \
-                % missing_files[0])
-
-        if missing_commands:
-            raise OSError(_EXIT_COMMAND_NOT_FOUND, 'Command "%s" not found in PATH.' \
-                % missing_commands[0])
-
-        if infos_produced:
-            self._messenger.info_gap()
+        check_for_commands(self._messenger, self.get_commands_to_check_for())
 
     def check_target_block_device(self):
         self._messenger.info('Checking if "%s" is a block device...' % self._abs_target_path)
@@ -336,7 +291,7 @@ class BootstrapEngine(object):
             try:
                 self._executor.check_call(cmd_boot_flag)
             except subprocess.CalledProcessError as e:
-                if e.returncode == _EXIT_COMMAND_NOT_FOUND:
+                if e.returncode == EXIT_COMMAND_NOT_FOUND:
                     raise
                 time.sleep(1)
             else:
@@ -379,7 +334,7 @@ class BootstrapEngine(object):
                 try:
                     self._executor.check_call(cmd_refresh_table)
                 except subprocess.CalledProcessError as e:
-                    if e.returncode == _EXIT_COMMAND_NOT_FOUND:
+                    if e.returncode == EXIT_COMMAND_NOT_FOUND:
                         raise
                     time.sleep(1)
                 else:
@@ -722,7 +677,7 @@ class BootstrapEngine(object):
             try:
                 self._executor.check_call(cmd)
             except subprocess.CalledProcessError as e:
-                if e.returncode == _EXIT_COMMAND_NOT_FOUND:
+                if e.returncode == EXIT_COMMAND_NOT_FOUND:
                     raise
                 time.sleep(1)
             else:
