@@ -34,7 +34,7 @@ def _main__level_three(messenger, options):
             executor,
             options.target_dir,
             options.cache_dir,
-            options.arch,
+            options.architecture,
             options.image_date,
             options.mirror_url,
             )
@@ -51,6 +51,11 @@ def _main__level_two():
     parser = argparse.ArgumentParser()
 
     add_output_control_options(parser)
+
+    system = parser.add_argument_group('system configuration')
+    system.add_argument('--arch', dest='architecture', default='x86_64',
+            choices=SUPPORTED_ARCHITECTURES,
+            help='architecture (e.g. x86_64)')
 
     distros = parser.add_subparsers(title='subcommands (choice of distribution)',
             description='Run "%(prog)s DISTRIBUTION --help" for details '
