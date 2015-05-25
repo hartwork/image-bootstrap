@@ -6,12 +6,9 @@ from __future__ import print_function
 import os
 import subprocess
 
-from image_bootstrap.distros.base import DISTRO_CLASS_FIELD
+from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 from image_bootstrap.engine import \
         COMMAND_CHROOT, \
-        BOOTLOADER__AUTO, \
-        BOOTLOADER__CHROOT_GRUB2__DRIVE, \
-        BOOTLOADER__HOST_GRUB2__DRIVE, \
         BOOTLOADER__NONE
 
 
@@ -40,7 +37,7 @@ class _ArchitectureMachineMismatch(Exception):
             % (self._architecture, self._machine)
 
 
-class DebianStrategy(object):
+class DebianStrategy(DistroStrategy):
     DISTRO_KEY = 'debian'
     DISTRO_NAME_SHORT = 'Debian'
     DISTRO_NAME_LONG = 'Debian GNU/Linux'
@@ -69,9 +66,6 @@ class DebianStrategy(object):
         if self._release in ('stable', 'testing'):
             raise ValueError('For Debian releases, please use names like "jessie" rather than "%s".'
                 % self._release)
-
-    def select_bootloader(self):
-        return BOOTLOADER__CHROOT_GRUB2__DRIVE
 
     def get_commands_to_check_for(self):
         return [
