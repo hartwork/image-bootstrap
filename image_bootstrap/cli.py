@@ -7,6 +7,11 @@ import subprocess
 import traceback
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
+from directory_bootstrap.shared.executor import Executor
+from directory_bootstrap.shared.messenger import Messenger, BANNER, \
+        VERBOSITY_QUIET, VERBOSITY_VERBOSE
+from directory_bootstrap.shared.metadata import DESCRIPTION, VERSION_STR
+
 from image_bootstrap.engine import \
         BootstrapEngine, \
         BOOTLOADER__AUTO, \
@@ -18,10 +23,6 @@ from image_bootstrap.engine import \
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD
 from image_bootstrap.distros.debian import DebianStrategy
 from image_bootstrap.distros.ubuntu import UbuntuStrategy
-from image_bootstrap.messenger import Messenger, BANNER, \
-        VERBOSITY_QUIET, VERBOSITY_VERBOSE
-from image_bootstrap.executor import Executor
-from image_bootstrap.metadata import DESCRIPTION, VERSION_STR
 from image_bootstrap.types.disk_id import disk_id_type
 from image_bootstrap.types.uuid import uuid_type
 

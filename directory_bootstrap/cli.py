@@ -7,10 +7,9 @@ import re
 import sys
 
 from directory_bootstrap.distros.arch import ArchBootstrapper, date_argparse_type
-
-from image_bootstrap.messenger import Messenger, \
+from directory_bootstrap.shared.executor import Executor
+from directory_bootstrap.shared.messenger import Messenger, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
-from image_bootstrap.executor import Executor
 
 
 _COLORIZE_NEVER = 'never'
