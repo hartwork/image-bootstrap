@@ -15,6 +15,8 @@ import tempfile
 from bs4 import BeautifulSoup
 from tarfile import TarFile
 
+from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
+
 
 _GPG_DISPLAY_KEY_FORMAT = '0xlong'
 
@@ -28,7 +30,6 @@ _COMMAND_CHROOT = 'chroot'
 _COMMAND_GPG = 'gpg'
 _COMMAND_WGET = 'wget'
 _COMMAND_MOUNT = 'mount'
-_COMMAND_UMOUNT = 'umount'
 
 
 _year = '([2-9][0-9]{3})'
@@ -243,18 +244,12 @@ class ArchBootstrapper(object):
                     ])
 
     def _unmount_disk_chroot_mounts(self, abs_pacstrap_target_dir):
-        self._executor.check_call([
-                _COMMAND_UMOUNT,
-                abs_pacstrap_target_dir,
-                ])
+        try_unmounting(self._executor, abs_pacstrap_target_dir)
 
     def _unmount_nondisk_chroot_mounts(self, abs_pacstrap_inner_root):
         for source, options, target in reversed(_NON_DISK_MOUNT_TASKS):
             abs_path = os.path.join(abs_pacstrap_inner_root, target)
-            self._executor.check_call([
-                    _COMMAND_UMOUNT,
-                    abs_path,
-                    ])
+            try_unmounting(self._executor, abs_path)
 
     def run(self):
         self._require_cache_writable()
