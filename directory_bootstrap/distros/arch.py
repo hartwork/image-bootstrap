@@ -180,6 +180,13 @@ class ArchBootstrapper(object):
             print('## Added by directory-bootstrap', file=f)
             print('Server = %s' % self._mirror_url, file=f)
 
+    def _copy_etc_resolv_conf(self, abs_pacstrap_inner_root):
+        source = '/etc/resolv.conf'
+        target = os.path.join(abs_pacstrap_inner_root, 'etc/resolv.conf')
+
+        self._messenger.info('Writing file "%s"...' % target)
+        shutil.copyfile(source, target)
+
     def _initialize_pacman_keyring(self, abs_pacstrap_inner_root):
         self._messenger.info('Initializing pacman keyring... (may take 2 to 4 minutes)')
         before = datetime.datetime.now()
@@ -265,6 +272,7 @@ class ArchBootstrapper(object):
 
                 try:
                     self._adjust_pacman_mirror_list(abs_pacstrap_inner_root)
+                    self._copy_etc_resolv_conf(abs_pacstrap_inner_root)
                     self._initialize_pacman_keyring(abs_pacstrap_inner_root)
                 finally:
                     for source, options, target in reversed(_NON_DISK_MOUNT_TASKS):
