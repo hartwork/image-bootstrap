@@ -291,6 +291,8 @@ class ArchBootstrapper(object):
 
 
             abs_pacstrap_inner_root = self._extract_image(image_filename, abs_temp_dir)
+            self._adjust_pacman_mirror_list(abs_pacstrap_inner_root)
+            self._copy_etc_resolv_conf(abs_pacstrap_inner_root)
 
 
             rel_pacstrap_target_dir = os.path.join('mnt', 'arch_root', '')
@@ -302,8 +304,6 @@ class ArchBootstrapper(object):
             try:
                 self._mount_nondisk_chroot_mounts(abs_pacstrap_inner_root)
                 try:
-                    self._adjust_pacman_mirror_list(abs_pacstrap_inner_root)
-                    self._copy_etc_resolv_conf(abs_pacstrap_inner_root)
                     self._initialize_pacman_keyring(abs_pacstrap_inner_root)
                     self._run_pacstrap(abs_pacstrap_inner_root, rel_pacstrap_target_dir)
                 finally:
