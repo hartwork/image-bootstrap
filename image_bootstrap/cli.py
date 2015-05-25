@@ -11,7 +11,7 @@ from directory_bootstrap.shared.messenger import Messenger, BANNER, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
 from directory_bootstrap.shared.metadata import DESCRIPTION, VERSION_STR
 from directory_bootstrap.shared.output_control import \
-        add_output_control_options, is_color_wanted
+        add_output_control_options, is_color_wanted, run_handle_errors
 
 from image_bootstrap.engine import \
         BootstrapEngine, \
@@ -151,25 +151,7 @@ def _main__level_two():
     options = parser.parse_args()
 
     messenger = Messenger(options.verbosity, is_color_wanted(options))
-    try:
-        _main__level_three(messenger, options)
-    except KeyboardInterrupt:
-        messenger.info('Interrupted.')
-        raise
-    except BaseException as e:
-        if options.debug:
-            traceback.print_exc(file=sys.stderr)
-
-        if isinstance(e, subprocess.CalledProcessError):
-            # Manual work to avoid list square brackets in output
-            command_flat = ' '.join((messenger.escape_shell(e) for e in e.cmd))
-            text = 'Command "%s" returned non-zero exit status %s' % (command_flat, e.returncode)
-        else:
-            text = str(e)
-
-        messenger.error(text)
-        messenger.encourage_bug_reports()
-        sys.exit(1)
+    run_handle_errors(_main__level_three, messenger, options)
 
 
 def main():

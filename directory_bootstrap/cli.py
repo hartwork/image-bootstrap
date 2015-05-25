@@ -11,7 +11,7 @@ from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.messenger import Messenger, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
 from directory_bootstrap.shared.output_control import \
-        add_output_control_options, is_color_wanted
+        add_output_control_options, is_color_wanted, run_handle_errors
 
 
 def _main__level_three(messenger, options):
@@ -67,8 +67,7 @@ def _main__level_two():
 
 
     messenger = Messenger(options.verbosity, is_color_wanted(options))
-
-    _main__level_three(messenger, options)
+    run_handle_errors(_main__level_three, messenger, options)
 
 
 def main():

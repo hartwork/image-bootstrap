@@ -2,6 +2,7 @@
 # Licensed under AGPL v3 or later
 
 import os
+import subprocess
 import sys
 import traceback
 
@@ -32,3 +33,25 @@ def is_color_wanted(options):
         colorize = options.color == _COLORIZE_ALWAYS
 
     return colorize
+
+
+def run_handle_errors(main_function, messenger, options):
+    try:
+        main_function(messenger, options)
+    except KeyboardInterrupt:
+        messenger.info('Interrupted.')
+        raise
+    except BaseException as e:
+        if options.debug:
+            traceback.print_exc(file=sys.stderr)
+
+        if isinstance(e, subprocess.CalledProcessError):
+            # Manual work to avoid list square brackets in output
+            command_flat = ' '.join((messenger.escape_shell(e) for e in e.cmd))
+            text = 'Command "%s" returned non-zero exit status %s' % (command_flat, e.returncode)
+        else:
+            text = str(e)
+
+        messenger.error(text)
+        messenger.encourage_bug_reports()
+        sys.exit(1)
