@@ -10,11 +10,12 @@ import stat
 import subprocess
 import tempfile
 import time
-from ctypes import CDLL, c_int, get_errno, cast, c_char_p
 
 from directory_bootstrap.shared.commands import \
         check_for_commands, find_command, EXIT_COMMAND_NOT_FOUND
 from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
+from directory_bootstrap.shared.namespace import \
+        unshare_current_process, set_hostname
 
 from image_bootstrap.mount import MountFinder
 from image_bootstrap.types.uuid import require_valid_uuid
@@ -244,21 +245,8 @@ class BootstrapEngine(object):
             self._messenger.info_gap()
 
     def _unshare(self):
-        self._messenger.info('Unsharing Linux namespaces (mount, UTS/hostname)...')
-        libc = CDLL("libc.so.6", use_errno=True)
-        CLONE_NEWNS = 0x00020000
-        CLONE_NEWUTS = 0x04000000
-        ret = libc.unshare(c_int(CLONE_NEWNS | CLONE_NEWUTS))
-        if ret:
-            _errno = get_errno() or errno.EPERM
-            raise OSError(_errno, 'Unsharing Linux namespaces failed: ' + os.strerror(_errno))
-
-        hostname_char_p = cast(self._hostname, c_char_p)
-        hostname_len_size_t = libc.strlen(hostname_char_p)
-        ret = libc.sethostname(hostname_char_p, hostname_len_size_t)
-        if ret:
-            _errno = get_errno() or errno.EPERM
-            raise OSError(_errno, 'Setting hostname failed: ' + os.strerror(_errno))
+        unshare_current_process(self._messenger)
+        set_hostname(self._hostname)
 
     def _partition_device(self):
         self._messenger.info('Partitioning "%s"...' % self._abs_target_path)
