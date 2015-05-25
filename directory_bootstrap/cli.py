@@ -42,6 +42,7 @@ def main():
     arch.add_argument('--arch', default='x86_64')
     arch.add_argument('--image-date', type=date_argparse_type)
     arch.add_argument('--cache-dir', default='/var/cache/dir-bootstrap/')
+    arch.add_argument('--mirror', dest='mirror_url', metavar='URL', default='http://mirror.rackspace.com/archlinux/$repo/os/$arch')
 
     parser.add_argument('target_dir', metavar='DIRECTORY')
 
@@ -76,6 +77,7 @@ def main():
             options.cache_dir,
             options.arch,
             options.image_date,
+            options.mirror_url,
             )
     boostrap.run()
 

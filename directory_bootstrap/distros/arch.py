@@ -1,6 +1,8 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
+from __future__ import print_function
+
 import datetime
 import errno
 import os
@@ -48,13 +50,15 @@ date_argparse_type.__name__ = 'date'
 
 
 class ArchBootstrapper(object):
-    def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir, architecture, image_date_triple_or_none):
+    def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
+                architecture, image_date_triple_or_none, mirror_url):
         self._messenger = messenger
         self._executor = executor
         self._abs_target_dir = abs_target_dir
         self._abs_cache_dir = abs_cache_dir
         self._architecture = architecture
         self._image_date_triple_or_none = image_date_triple_or_none
+        self._mirror_url = mirror_url
 
     def _get_keyring_listing(self):
         self._messenger.info('Downloading keyring listing...')
@@ -168,6 +172,14 @@ class ArchBootstrapper(object):
                 })
         return env
 
+    def _adjust_pacman_mirror_list(self, abs_pacstrap_inner_root):
+        abs_mirrorlist = os.path.join(abs_pacstrap_inner_root, 'etc/pacman.d/mirrorlist')
+        self._messenger.info('Adjusting mirror list at "%s"...' % abs_mirrorlist)
+        with open(abs_mirrorlist, 'a') as f:
+            print(file=f)
+            print('## Added by directory-bootstrap', file=f)
+            print('Server = %s' % self._mirror_url, file=f)
+
     def _prepare_pacstrap(self, abs_pacstrap_inner_root):
         self._messenger.info('Initializing pacman keyring...')
         before = datetime.datetime.now()
@@ -252,6 +264,7 @@ class ArchBootstrapper(object):
                             ])
 
                 try:
+                    self._adjust_pacman_mirror_list(abs_pacstrap_inner_root)
                     self._prepare_pacstrap(abs_pacstrap_inner_root)
                 finally:
                     for source, options, target in reversed(_NON_DISK_MOUNT_TASKS):
