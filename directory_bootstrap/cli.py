@@ -6,7 +6,8 @@ import os
 import re
 import sys
 
-from directory_bootstrap.distros.arch import ArchBootstrapper, date_argparse_type
+from directory_bootstrap.distros.arch import ArchBootstrapper, \
+        date_argparse_type, SUPPORTED_ARCHITECTURES
 from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.messenger import Messenger, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
@@ -58,7 +59,7 @@ def _main__level_two():
 
     arch = distros.add_parser('arch')
 
-    arch.add_argument('--arch', default='x86_64')
+    arch.add_argument('--arch', default='x86_64', choices=SUPPORTED_ARCHITECTURES)
     arch.add_argument('--image-date', type=date_argparse_type)
     arch.add_argument('--cache-dir', default='/var/cache/dir-bootstrap/')
     arch.add_argument('--mirror', dest='mirror_url', metavar='URL', default='http://mirror.rackspace.com/archlinux/$repo/os/$arch')

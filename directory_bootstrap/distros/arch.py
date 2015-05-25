@@ -20,6 +20,8 @@ from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
 from directory_bootstrap.shared.namespace import unshare_current_process
 
 
+SUPPORTED_ARCHITECTURES = ('i686', 'x86_64')
+
 _GPG_DISPLAY_KEY_FORMAT = '0xlong'
 
 _NON_DISK_MOUNT_TASKS = (
