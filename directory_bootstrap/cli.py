@@ -34,6 +34,7 @@ def _main__level_three(messenger, options):
             options.architecture,
             options.image_date,
             options.mirror_url,
+            os.path.abspath(options.resolv_conf),
             )
     bootstrap.check_for_commands()
     bootstrap.unshare()
@@ -53,6 +54,8 @@ def _main__level_two():
     system.add_argument('--arch', dest='architecture', default='x86_64',
             choices=SUPPORTED_ARCHITECTURES,
             help='architecture (e.g. x86_64)')
+    system.add_argument('--resolv-conf', metavar='FILE', default='/etc/resolv.conf',
+        help='file to copy nameserver entries from (default: %(default)s)')
 
     distros = parser.add_subparsers(title='subcommands (choice of distribution)',
             description='Run "%(prog)s DISTRIBUTION --help" for details '

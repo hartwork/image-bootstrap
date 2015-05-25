@@ -18,13 +18,15 @@ class ArchStrategy(DistroStrategy):
     DISTRO_NAME_LONG = 'Arch Linux'
 
     def __init__(self, messenger, executor,
-                abs_cache_dir, image_date_triple_or_none, mirror_url):
+                abs_cache_dir, image_date_triple_or_none, mirror_url,
+                abs_resolv_conf):
         self._messenger = messenger
         self._executor = executor
 
         self._abs_cache_dir = abs_cache_dir
         self._image_date_triple_or_none = image_date_triple_or_none
         self._mirror_url = mirror_url
+        self._abs_resolv_conf = abs_resolv_conf
 
     def get_commands_to_check_for(self):
         return ArchBootstrapper.get_commands_to_check_for() + [
@@ -52,6 +54,7 @@ class ArchStrategy(DistroStrategy):
                 architecture,
                 self._image_date_triple_or_none,
                 self._mirror_url,
+                self._abs_resolv_conf,
                 )
         bootstrap.run()
 
@@ -100,5 +103,6 @@ class ArchStrategy(DistroStrategy):
                 executor,
                 os.path.abspath(options.cache_dir),
                 options.image_date,
-                options.mirror_url
+                options.mirror_url,
+                os.path.abspath(options.resolv_conf),
                 )

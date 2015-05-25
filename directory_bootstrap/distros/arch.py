@@ -57,7 +57,8 @@ date_argparse_type.__name__ = 'date'
 
 class ArchBootstrapper(object):
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
-                architecture, image_date_triple_or_none, mirror_url):
+                architecture, image_date_triple_or_none, mirror_url,
+                abs_resolv_conf):
         self._messenger = messenger
         self._executor = executor
         self._abs_target_dir = abs_target_dir
@@ -65,6 +66,7 @@ class ArchBootstrapper(object):
         self._architecture = architecture
         self._image_date_triple_or_none = image_date_triple_or_none
         self._mirror_url = mirror_url
+        self._abs_resolv_conf = abs_resolv_conf
 
     def check_for_commands(self):
         check_for_commands(self._messenger, self.get_commands_to_check_for())
@@ -196,10 +198,8 @@ class ArchBootstrapper(object):
             print('Server = %s' % self._mirror_url, file=f)
 
     def _copy_etc_resolv_conf(self, abs_pacstrap_inner_root):
-        source = '/etc/resolv.conf'
         target = os.path.join(abs_pacstrap_inner_root, 'etc/resolv.conf')
-
-        filter_copy_resolv_conf(self._messenger, source, target)
+        filter_copy_resolv_conf(self._messenger, self._abs_resolv_conf, target)
 
     def _initialize_pacman_keyring(self, abs_pacstrap_inner_root):
         self._messenger.info('Initializing pacman keyring... (may take 2 to 4 minutes)')
