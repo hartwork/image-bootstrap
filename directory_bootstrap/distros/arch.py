@@ -15,6 +15,7 @@ import tempfile
 from bs4 import BeautifulSoup
 from tarfile import TarFile
 
+from directory_bootstrap.shared.commands import check_for_commands
 from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
 
 
@@ -60,6 +61,17 @@ class ArchBootstrapper(object):
         self._architecture = architecture
         self._image_date_triple_or_none = image_date_triple_or_none
         self._mirror_url = mirror_url
+
+    def check_for_commands(self):
+        check_for_commands(self._messenger, self.get_commands_to_check_for())
+
+    def get_commands_to_check_for(self):
+        return [
+                _COMMAND_CHROOT,
+                _COMMAND_GPG,
+                _COMMAND_MOUNT,
+                _COMMAND_WGET,
+                ]
 
     def _get_keyring_listing(self):
         self._messenger.info('Downloading keyring listing...')

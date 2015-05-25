@@ -37,6 +37,7 @@ def _main__level_three(messenger, options):
             options.image_date,
             options.mirror_url,
             )
+    bootstrap.check_for_commands()
     bootstrap.run()
 
 
