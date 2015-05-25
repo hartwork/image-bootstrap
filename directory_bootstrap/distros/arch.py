@@ -20,8 +20,8 @@ _GPG_DISPLAY_KEY_FORMAT = '0xlong'
 
 _NON_DISK_MOUNT_TASKS = (
         ('/dev', ['-o', 'bind'], 'dev'),
-        ('/dev/pts', ['-o', 'bind'], 'dev/pts'),
-        ('/dev/shm', ['-o', 'bind'], 'dev/shm'),
+        ('/dev/pts', ['-o', 'bind'], 'dev/pts'),  # for gpgme
+        ('PROC', ['-t', 'proc'], 'proc'),  # for pacstrap mountpoint detection
         )
 
 _COMMAND_CHROOT = 'chroot'
