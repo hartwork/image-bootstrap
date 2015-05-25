@@ -28,7 +28,7 @@ def _main__level_three(messenger, options):
     options.cache_dir = os.path.abspath(options.cache_dir)
     options.target_dir = os.path.abspath(options.target_dir)
 
-    boostrap = ArchBootstrapper(
+    bootstrap = ArchBootstrapper(
             messenger,
             executor,
             options.target_dir,
@@ -37,7 +37,7 @@ def _main__level_three(messenger, options):
             options.image_date,
             options.mirror_url,
             )
-    boostrap.run()
+    bootstrap.run()
 
 
     if not stdout_wanted:
