@@ -16,6 +16,7 @@ from directory_bootstrap.shared.commands import \
 from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
 from directory_bootstrap.shared.namespace import \
         unshare_current_process, set_hostname
+from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
 
 from image_bootstrap.mount import MountFinder
 from image_bootstrap.types.uuid import require_valid_uuid
@@ -564,16 +565,7 @@ class BootstrapEngine(object):
     def _create_etc_resolv_conf(self):
         output_filename = os.path.join(self._abs_mountpoint, 'etc', 'resolv.conf')
 
-        self._messenger.info('Writing file "%s" (based on file "%s")...' % (output_filename, self._abs_etc_resolv_conf))
-
-        input_f = open(self._abs_etc_resolv_conf)
-        output_f = open(output_filename, 'w')
-        for l in input_f:
-            line = l.rstrip()
-            if line.startswith('nameserver'):
-                print(line, file=output_f)
-        input_f.close()
-        output_f.close()
+        filter_copy_resolv_conf(self._messenger, self._abs_etc_resolv_conf, output_filename)
 
     def _copy_chroot_scripts(self):
         self._messenger.info('Copying chroot scripts into chroot...')

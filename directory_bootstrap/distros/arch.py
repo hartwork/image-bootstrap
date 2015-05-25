@@ -18,6 +18,7 @@ from tarfile import TarFile
 from directory_bootstrap.shared.commands import check_for_commands
 from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
 from directory_bootstrap.shared.namespace import unshare_current_process
+from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
 
 
 SUPPORTED_ARCHITECTURES = ('i686', 'x86_64')
@@ -198,8 +199,7 @@ class ArchBootstrapper(object):
         source = '/etc/resolv.conf'
         target = os.path.join(abs_pacstrap_inner_root, 'etc/resolv.conf')
 
-        self._messenger.info('Writing file "%s"...' % target)
-        shutil.copyfile(source, target)
+        filter_copy_resolv_conf(self._messenger, source, target)
 
     def _initialize_pacman_keyring(self, abs_pacstrap_inner_root):
         self._messenger.info('Initializing pacman keyring... (may take 2 to 4 minutes)')
