@@ -36,6 +36,10 @@ class DistroStrategy(object):
         pass
 
     @abstractmethod
+    def ensure_chroot_has_grub2_installed(self, abs_mountpoint, env):
+        pass
+
+    @abstractmethod
     def get_chroot_command_grub2_install(self):
         pass
 

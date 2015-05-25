@@ -500,6 +500,10 @@ class BootstrapEngine(object):
     def get_chroot_command_grub2_install(self):
         return self._distro.get_chroot_command_grub2_install()
 
+    def _ensure_chroot_has_grub2_installed(self):
+        env = self.make_environment(tell_mountpoint=False)
+        self._distro.ensure_chroot_has_grub2_installed(self._abs_mountpoint, env)
+
     def _install_bootloader__grub2(self):
         real_abs_target = os.path.realpath(self._abs_target_path)
         message = self._create_bootloader_install_message(real_abs_target)
@@ -744,6 +748,7 @@ class BootstrapEngine(object):
                         self._set_root_password_inside_chroot()
 
                         if self._bootloader_approach in (BOOTLOADER__CHROOT_GRUB2__DEVICE, BOOTLOADER__CHROOT_GRUB2__DRIVE):
+                            self._ensure_chroot_has_grub2_installed()
                             self._install_bootloader__grub2()
 
                         if self._bootloader_approach != BOOTLOADER__NONE:

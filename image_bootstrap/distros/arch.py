@@ -58,6 +58,16 @@ class ArchStrategy(DistroStrategy):
     def create_network_configuration(self, abs_mountpoint):
         pass  # TODO
 
+    def ensure_chroot_has_grub2_installed(self, abs_mountpoint, env):
+        cmd = [
+                _COMMAND_CHROOT,
+                abs_mountpoint,
+                'pacman',
+                '--noconfirm',
+                '--sync', 'grub',
+                ]
+        self._executor.check_call(cmd, env=env)
+
     def get_chroot_command_grub2_install(self):
         return 'grub-install'
 

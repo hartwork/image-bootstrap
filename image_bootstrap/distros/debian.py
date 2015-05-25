@@ -132,6 +132,9 @@ class DebianStrategy(DistroStrategy):
         print(_ETC_NETWORK_INTERFACES_CONTENT, file=f)
         f.close()
 
+    def ensure_chroot_has_grub2_installed(self, abs_mountpoint, env):
+        pass  # debootstrap has already pulled GRUB 2.x in
+
     def get_chroot_command_grub2_install(self):
         return 'grub-install'
 
