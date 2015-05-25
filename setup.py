@@ -24,8 +24,13 @@ if __name__ == '__main__':
                 _PYTHON_PACKAGE_NAME,
                 '%s.distros' % _PYTHON_PACKAGE_NAME,
                 '%s.types' % _PYTHON_PACKAGE_NAME,
+                'directory_bootstrap',
+                'directory_bootstrap.distros',
+                'directory_bootstrap.shared',
             ],
-            data_files=[('sbin/', [PACKAGE_NAME])],
+            data_files=[
+                ('sbin/', [PACKAGE_NAME, 'directory-bootstrap']),
+            ],
             classifiers=[
                 'Development Status :: 4 - Beta',
                 'Environment :: Console',
