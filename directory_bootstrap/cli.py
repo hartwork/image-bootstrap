@@ -10,26 +10,14 @@ from directory_bootstrap.distros.arch import ArchBootstrapper, date_argparse_typ
 from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.messenger import Messenger, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
-
-
-_COLORIZE_NEVER = 'never'
-_COLORIZE_ALWAYS = 'always'
-_COLORIZE_AUTO = 'auto'
+from directory_bootstrap.shared.output_control import \
+        add_output_control_options, is_color_wanted
 
 
 def main():
     parser = argparse.ArgumentParser()
 
-    output = parser.add_argument_group('text output configuration')
-    output.add_argument('--color', default=_COLORIZE_AUTO, choices=[_COLORIZE_NEVER, _COLORIZE_ALWAYS, _COLORIZE_AUTO],
-        help='toggle output color (default: %(default)s)')
-    output.add_argument('--debug', action='store_true',
-        help='enable debugging')
-    output.add_argument('--quiet', dest='verbosity', action='store_const', const=VERBOSITY_QUIET,
-        help='limit output to error messages')
-    output.add_argument('--verbose', dest='verbosity', action='store_const', const=VERBOSITY_VERBOSE,
-        help='increase verbosity')
-
+    add_output_control_options(parser)
 
     distros = parser.add_subparsers(title='subcommands (choice of distribution)',
             description='Run "%(prog)s DISTRIBUTION --help" for details '
@@ -48,12 +36,7 @@ def main():
     options = parser.parse_args()
 
 
-    if options.color == _COLORIZE_AUTO:
-        colorize = os.isatty(sys.stdout.fileno())
-    else:
-        colorize = options.color == _COLORIZE_ALWAYS
-
-    messenger = Messenger(options.verbosity, colorize)
+    messenger = Messenger(options.verbosity, is_color_wanted(options))
 
 
     stdout_wanted = options.verbosity is VERBOSITY_VERBOSE
