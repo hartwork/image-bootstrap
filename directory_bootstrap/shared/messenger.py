@@ -8,7 +8,7 @@ import sys
 
 from colorama import Fore, Style
 
-from image_bootstrap.metadata import GITHUB_HOME_URL, VERSION_STR, RELEASE_DATE_STR
+from directory_bootstrap.shared.metadata import GITHUB_HOME_URL, VERSION_STR, RELEASE_DATE_STR
 
 
 _NEEDS_ESCAPING = re.compile('([!`"\'$ \\\\{}()?*&<>;])')

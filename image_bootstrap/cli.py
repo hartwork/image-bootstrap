@@ -4,8 +4,14 @@
 import os
 import sys
 import subprocess
-import traceback
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
+
+from directory_bootstrap.shared.executor import Executor
+from directory_bootstrap.shared.messenger import Messenger, BANNER, \
+        VERBOSITY_QUIET, VERBOSITY_VERBOSE
+from directory_bootstrap.shared.metadata import DESCRIPTION, VERSION_STR
+from directory_bootstrap.shared.output_control import \
+        add_output_control_options, is_color_wanted, run_handle_errors
 
 from image_bootstrap.engine import \
         BootstrapEngine, \
@@ -16,19 +22,12 @@ from image_bootstrap.engine import \
         BOOTLOADER__HOST_GRUB2__DRIVE, \
         BOOTLOADER__NONE
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD
+from image_bootstrap.distros.arch import ArchStrategy
 from image_bootstrap.distros.debian import DebianStrategy
 from image_bootstrap.distros.ubuntu import UbuntuStrategy
-from image_bootstrap.messenger import Messenger, BANNER, \
-        VERBOSITY_QUIET, VERBOSITY_VERBOSE
-from image_bootstrap.executor import Executor
-from image_bootstrap.metadata import DESCRIPTION, VERSION_STR
 from image_bootstrap.types.disk_id import disk_id_type
 from image_bootstrap.types.uuid import uuid_type
 
-
-_COLORIZE_NEVER = 'never'
-_COLORIZE_ALWAYS = 'always'
-_COLORIZE_AUTO = 'auto'
 
 _BOOTLOADER_APPROACHES = (
         BOOTLOADER__AUTO,
@@ -98,15 +97,7 @@ def _main__level_two():
             )
     parser.add_argument('--version', action='version', version=VERSION_STR)
 
-    output = parser.add_argument_group('text output configuration')
-    output.add_argument('--color', default=_COLORIZE_AUTO, choices=[_COLORIZE_NEVER, _COLORIZE_ALWAYS, _COLORIZE_AUTO],
-        help='toggle output color (default: %(default)s)')
-    output.add_argument('--debug', action='store_true',
-        help='enable debugging')
-    output.add_argument('--quiet', dest='verbosity', action='store_const', const=VERBOSITY_QUIET,
-        help='limit output to error messages')
-    output.add_argument('--verbose', dest='verbosity', action='store_const', const=VERBOSITY_VERBOSE,
-        help='increase verbosity')
+    add_output_control_options(parser)
 
     machine = parser.add_argument_group('machine configuration')
     machine.add_argument('--arch', dest='architecture', default='amd64',
@@ -149,6 +140,7 @@ def _main__level_two():
 
 
     for strategy_clazz in (
+            ArchStrategy,
             DebianStrategy,
             UbuntuStrategy,
             ):
@@ -160,31 +152,8 @@ def _main__level_two():
 
     options = parser.parse_args()
 
-    if options.color == _COLORIZE_AUTO:
-        colorize = os.isatty(sys.stdout.fileno())
-    else:
-        colorize = options.color == _COLORIZE_ALWAYS
-
-    messenger = Messenger(options.verbosity, colorize)
-    try:
-        _main__level_three(messenger, options)
-    except KeyboardInterrupt:
-        messenger.info('Interrupted.')
-        raise
-    except BaseException as e:
-        if options.debug:
-            traceback.print_exc(file=sys.stderr)
-
-        if isinstance(e, subprocess.CalledProcessError):
-            # Manual work to avoid list square brackets in output
-            command_flat = ' '.join((messenger.escape_shell(e) for e in e.cmd))
-            text = 'Command "%s" returned non-zero exit status %s' % (command_flat, e.returncode)
-        else:
-            text = str(e)
-
-        messenger.error(text)
-        messenger.encourage_bug_reports()
-        sys.exit(1)
+    messenger = Messenger(options.verbosity, is_color_wanted(options))
+    run_handle_errors(_main__level_three, messenger, options)
 
 
 def main():

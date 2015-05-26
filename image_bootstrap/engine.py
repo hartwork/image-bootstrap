@@ -10,7 +10,18 @@ import stat
 import subprocess
 import tempfile
 import time
-from ctypes import CDLL, c_int, get_errno, cast, c_char_p
+
+from directory_bootstrap.shared.commands import \
+        check_for_commands, find_command, EXIT_COMMAND_NOT_FOUND, \
+        COMMAND_BLKID, COMMAND_CHMOD, COMMAND_CHROOT, \
+        COMMAND_CP, COMMAND_KPARTX, COMMAND_MKDIR, \
+        COMMAND_MKFS_EXT4, COMMAND_MOUNT, COMMAND_PARTED, \
+        COMMAND_PARTPROBE, COMMAND_RM, COMMAND_RMDIR, \
+        COMMAND_SED, COMMAND_TUNE2FS
+from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
+from directory_bootstrap.shared.namespace import \
+        unshare_current_process, set_hostname
+from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
 
 from image_bootstrap.mount import MountFinder
 from image_bootstrap.types.uuid import require_valid_uuid
@@ -35,24 +46,6 @@ _NON_DISK_MOUNT_TASKS = (
 
 _DISK_ID_OFFSET = 440
 _DISK_ID_COUNT_BYTES = 4
-
-_COMMAND_BLKID = 'blkid'
-_COMMAND_CHMOD = 'chmod'
-COMMAND_CHROOT = 'chroot'
-_COMMAND_CP = 'cp'
-_COMMAND_KPARTX = 'kpartx'
-_COMMAND_MKDIR = 'mkdir'
-_COMMAND_MKFS_EXT4 = 'mkfs.ext4'
-_COMMAND_MOUNT = 'mount'
-_COMMAND_PARTED = 'parted'
-_COMMAND_PARTPROBE = 'partprobe'
-_COMMAND_RM = 'rm'
-_COMMAND_RMDIR = 'rmdir'
-_COMMAND_SED = 'sed'
-_COMMAND_TUNE2FS = 'tune2fs'
-_COMMAND_UMOUNT = 'umount'
-
-_EXIT_COMMAND_NOT_FOUND = 127
 
 _PARTITION_DELIMITER = 'p'  # Keep at "p" to not break LVM support
 
@@ -113,33 +106,23 @@ class BootstrapEngine(object):
 
     def get_commands_to_check_for(self):
         return list(self._distro.get_commands_to_check_for()) + [
-                _COMMAND_BLKID,
-                _COMMAND_CHMOD,
+                COMMAND_BLKID,
+                COMMAND_CHMOD,
                 COMMAND_CHROOT,
-                _COMMAND_CP,
-                _COMMAND_KPARTX,
-                _COMMAND_MKDIR,
-                _COMMAND_MKFS_EXT4,
-                _COMMAND_MOUNT,
-                _COMMAND_PARTED,
-                _COMMAND_PARTPROBE,
-                _COMMAND_RM,
-                _COMMAND_RMDIR,
-                _COMMAND_SED,
-                _COMMAND_TUNE2FS,
-                _COMMAND_UMOUNT,
+                COMMAND_CP,
+                COMMAND_KPARTX,
+                COMMAND_MKDIR,
+                COMMAND_MKFS_EXT4,
+                COMMAND_MOUNT,
+                COMMAND_PARTED,
+                COMMAND_PARTPROBE,
+                COMMAND_RM,
+                COMMAND_RMDIR,
+                COMMAND_SED,
+                COMMAND_TUNE2FS,
+                COMMAND_UMOUNT,
                 self._command_grub2_install,
                 ]
-
-    def _find_command(self, command):
-        dirs = os.environ['PATH'].split(':')
-        for _dir in dirs:
-            abs_path = os.path.join(_dir, command)
-            if os.path.exists(abs_path):
-                return abs_path
-
-        raise OSError(_EXIT_COMMAND_NOT_FOUND, 'Command "%s" not found in PATH.' \
-            % command)
 
     def _protect_against_grub_legacy(self, command):
         output = subprocess.check_output([command, '--version'])
@@ -158,21 +141,21 @@ class BootstrapEngine(object):
                 ):
             return  # Host grub2-install not used, no detection needed
 
-        _COMMAND_GRUB_INSTALL = 'grub-install'
-        _COMMAND_GRUB2_INSTALL = 'grub2-install'
+        COMMAND_GRUB_INSTALL = 'grub-install'
+        COMMAND_GRUB2_INSTALL = 'grub2-install'
 
-        self._command_grub2_install = _COMMAND_GRUB2_INSTALL
+        self._command_grub2_install = COMMAND_GRUB2_INSTALL
         try:
-            self._find_command(self._command_grub2_install)
+            find_command(self._command_grub2_install)
         except OSError as e:
-            if e.errno != _EXIT_COMMAND_NOT_FOUND:
+            if e.errno != EXIT_COMMAND_NOT_FOUND:
                 raise
 
-            self._command_grub2_install = _COMMAND_GRUB_INSTALL
+            self._command_grub2_install = COMMAND_GRUB_INSTALL
             try:
-                self._find_command(self._command_grub2_install)
+                find_command(self._command_grub2_install)
             except OSError as e:
-                if e.errno != _EXIT_COMMAND_NOT_FOUND:
+                if e.errno != EXIT_COMMAND_NOT_FOUND:
                     raise
 
                 # NOTE: consecutive search for "grub-install" will fail and
@@ -182,42 +165,7 @@ class BootstrapEngine(object):
             self._protect_against_grub_legacy(self._command_grub2_install)
 
     def check_for_commands(self):
-        infos_produced = False
-
-        missing_files = []
-        missing_commands = []
-        for command in sorted(set(self.get_commands_to_check_for())):
-            if command is None:
-                continue
-
-            if command.startswith('/'):
-                abs_path = command
-                if not os.path.exists(abs_path):
-                    missing_files.append(abs_path)
-                continue
-
-            assert not command.startswith('/')
-            try:
-                abs_path = self._find_command(command)
-            except OSError as e:
-                if e.errno != _EXIT_COMMAND_NOT_FOUND:
-                    raise
-                missing_commands.append(command)
-                self._messenger.error('Checking for %s... NOT FOUND' % command)
-            else:
-                self._messenger.info('Checking for %s... %s' % (command, abs_path))
-                infos_produced = True
-
-        if missing_files:
-            raise OSError(errno.ENOENT, 'File "%s" not found.' \
-                % missing_files[0])
-
-        if missing_commands:
-            raise OSError(_EXIT_COMMAND_NOT_FOUND, 'Command "%s" not found in PATH.' \
-                % missing_commands[0])
-
-        if infos_produced:
-            self._messenger.info_gap()
+        check_for_commands(self._messenger, self.get_commands_to_check_for())
 
     def check_target_block_device(self):
         self._messenger.info('Checking if "%s" is a block device...' % self._abs_target_path)
@@ -227,7 +175,8 @@ class BootstrapEngine(object):
 
     def check_architecture(self):
         self._messenger.info('Checking for known unsupported architecture/machine combination...')
-        self._distro.check_architecture(self._architecture)
+        self._architecture = self._distro.check_architecture(self._architecture)
+        assert self._architecture is not None
 
     def _script_should_be_run(self, basename):
         if basename.startswith('.'):
@@ -288,26 +237,13 @@ class BootstrapEngine(object):
             self._messenger.info_gap()
 
     def _unshare(self):
-        self._messenger.info('Unsharing Linux namespaces (mount, UTS/hostname)...')
-        libc = CDLL("libc.so.6", use_errno=True)
-        CLONE_NEWNS = 0x00020000
-        CLONE_NEWUTS = 0x04000000
-        ret = libc.unshare(c_int(CLONE_NEWNS | CLONE_NEWUTS))
-        if ret:
-            _errno = get_errno() or errno.EPERM
-            raise OSError(_errno, 'Unsharing Linux namespaces failed: ' + os.strerror(_errno))
-
-        hostname_char_p = cast(self._hostname, c_char_p)
-        hostname_len_size_t = libc.strlen(hostname_char_p)
-        ret = libc.sethostname(hostname_char_p, hostname_len_size_t)
-        if ret:
-            _errno = get_errno() or errno.EPERM
-            raise OSError(_errno, 'Setting hostname failed: ' + os.strerror(_errno))
+        unshare_current_process(self._messenger)
+        set_hostname(self._hostname)
 
     def _partition_device(self):
         self._messenger.info('Partitioning "%s"...' % self._abs_target_path)
         cmd_mklabel = [
-                _COMMAND_PARTED,
+                COMMAND_PARTED,
                 '--script',
                 self._abs_target_path,
                 'mklabel', 'msdos',
@@ -315,7 +251,7 @@ class BootstrapEngine(object):
         self._executor.check_call(cmd_mklabel)
 
         cmd_mkpart = [
-                _COMMAND_PARTED,
+                COMMAND_PARTED,
                 '--align', 'optimal',
                 '--script',
                 self._abs_target_path,
@@ -325,7 +261,7 @@ class BootstrapEngine(object):
         self._executor.check_call(cmd_mkpart)
 
         cmd_boot_flag = [
-                _COMMAND_PARTED,
+                COMMAND_PARTED,
                 '--script',
                 self._abs_target_path,
                 'set', '1', 'boot', 'on',
@@ -335,7 +271,7 @@ class BootstrapEngine(object):
             try:
                 self._executor.check_call(cmd_boot_flag)
             except subprocess.CalledProcessError as e:
-                if e.returncode == _EXIT_COMMAND_NOT_FOUND:
+                if e.returncode == EXIT_COMMAND_NOT_FOUND:
                     raise
                 time.sleep(1)
             else:
@@ -344,7 +280,7 @@ class BootstrapEngine(object):
     def _kpartx_minus_a(self):
         self._messenger.info('Activating partition devices...')
         cmd_list = [
-                _COMMAND_KPARTX,
+                COMMAND_KPARTX,
                 '-l',
                 '-p', _PARTITION_DELIMITER,
                 self._abs_target_path,
@@ -361,7 +297,7 @@ class BootstrapEngine(object):
                         % self._abs_first_partition_device)
 
             cmd_add = [
-                    _COMMAND_KPARTX,
+                    COMMAND_KPARTX,
                     '-a',
                     '-p', _PARTITION_DELIMITER,
                     '-s',
@@ -370,7 +306,7 @@ class BootstrapEngine(object):
             self._executor.check_call(cmd_add)
         else:
             cmd_refresh_table = [
-                    _COMMAND_PARTPROBE,
+                    COMMAND_PARTPROBE,
                     self._abs_target_path,
                     ]
             time.sleep(1)  # increase chances of first call working, e.g. with LVM volumes
@@ -378,7 +314,7 @@ class BootstrapEngine(object):
                 try:
                     self._executor.check_call(cmd_refresh_table)
                 except subprocess.CalledProcessError as e:
-                    if e.returncode == _EXIT_COMMAND_NOT_FOUND:
+                    if e.returncode == EXIT_COMMAND_NOT_FOUND:
                         raise
                     time.sleep(1)
                 else:
@@ -395,7 +331,7 @@ class BootstrapEngine(object):
     def _format_partitions(self):
         self._messenger.info('Creating file system on "%s"...' % self._abs_first_partition_device)
         cmd = [
-                _COMMAND_MKFS_EXT4,
+                COMMAND_MKFS_EXT4,
                 '-F',
                 self._abs_first_partition_device,
                 ]
@@ -413,7 +349,7 @@ class BootstrapEngine(object):
     def _mount_disk_chroot_mounts(self):
         self._messenger.info('Mounting partitions...')
         cmd = [
-                _COMMAND_MOUNT,
+                COMMAND_MOUNT,
                 self._abs_first_partition_device,
                 self._abs_mountpoint,
                 ]
@@ -456,7 +392,7 @@ class BootstrapEngine(object):
             return
 
         self._messenger.info('Setting first partition UUID to %s...' % self._first_partition_uuid)
-        cmd = [_COMMAND_TUNE2FS,
+        cmd = [COMMAND_TUNE2FS,
                 '-U', self._first_partition_uuid,
                 self._abs_first_partition_device,
                 ]
@@ -464,7 +400,7 @@ class BootstrapEngine(object):
 
     def _gather_first_partition_uuid(self):
         cmd_blkid = [
-                _COMMAND_BLKID,
+                COMMAND_BLKID,
                 '-o', 'value',
                 '-s', 'UUID',
                 self._abs_first_partition_device,
@@ -494,7 +430,7 @@ class BootstrapEngine(object):
     def _fix_grub_cfg_root_device(self):
         self._messenger.info('Post-processing GRUB config...')
         cmd_sed = [
-                _COMMAND_SED,
+                COMMAND_SED,
                 's,root=[^ ]\+,root=UUID=%s,g' % self._first_partition_uuid,
                 '-i', os.path.join(self._abs_mountpoint, 'boot', 'grub', 'grub.cfg'),
                 ]
@@ -534,7 +470,7 @@ class BootstrapEngine(object):
         self._messenger.info('Mounting non-disk file systems...')
         for source, options, target in _NON_DISK_MOUNT_TASKS:
             cmd = [
-                    _COMMAND_MOUNT,
+                    COMMAND_MOUNT,
                     source,
                     ] \
                     + options \
@@ -554,6 +490,10 @@ class BootstrapEngine(object):
 
     def get_chroot_command_grub2_install(self):
         return self._distro.get_chroot_command_grub2_install()
+
+    def _ensure_chroot_has_grub2_installed(self):
+        env = self.make_environment(tell_mountpoint=False)
+        self._distro.ensure_chroot_has_grub2_installed(self._abs_mountpoint, env)
 
     def _install_bootloader__grub2(self):
         real_abs_target = os.path.realpath(self._abs_target_path)
@@ -608,29 +548,24 @@ class BootstrapEngine(object):
         env = self.make_environment(tell_mountpoint=False)
         return self._distro.generate_grub_cfg_from_inside_chroot(self._abs_mountpoint, env)
 
+    def _adjust_initramfs_generator_config(self):
+        self._distro.adjust_initramfs_generator_config(self._abs_mountpoint)
+
     def generate_initramfs_from_inside_chroot(self):
+        self._messenger.info('Generating initramfs...')
         env = self.make_environment(tell_mountpoint=False)
         return self._distro.generate_initramfs_from_inside_chroot(self._abs_mountpoint, env)
 
     def _create_etc_resolv_conf(self):
         output_filename = os.path.join(self._abs_mountpoint, 'etc', 'resolv.conf')
 
-        self._messenger.info('Writing file "%s" (based on file "%s")...' % (output_filename, self._abs_etc_resolv_conf))
-
-        input_f = open(self._abs_etc_resolv_conf)
-        output_f = open(output_filename, 'w')
-        for l in input_f:
-            line = l.rstrip()
-            if line.startswith('nameserver'):
-                print(line, file=output_f)
-        input_f.close()
-        output_f.close()
+        filter_copy_resolv_conf(self._messenger, self._abs_etc_resolv_conf, output_filename)
 
     def _copy_chroot_scripts(self):
         self._messenger.info('Copying chroot scripts into chroot...')
         abs_path_parent = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR)
         cmd_mkdir = [
-                _COMMAND_MKDIR,
+                COMMAND_MKDIR,
                 abs_path_parent,
                 ]
         self._executor.check_call(cmd_mkdir)
@@ -641,13 +576,13 @@ class BootstrapEngine(object):
             abs_path_source = os.path.join(self._abs_scripts_dir_chroot, basename)
             abs_path_target = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR, basename)
             cmd_copy = [
-                    _COMMAND_CP,
+                    COMMAND_CP,
                     abs_path_source,
                     abs_path_target,
                     ]
             self._executor.check_call(cmd_copy)
             cmd_chmod = [
-                    _COMMAND_CHMOD,
+                    COMMAND_CHMOD,
                     'a+x',
                     abs_path_target,
                     ]
@@ -675,32 +610,20 @@ class BootstrapEngine(object):
 
             abs_path_target = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR, basename)
             cmd_rm = [
-                    _COMMAND_RM,
+                    COMMAND_RM,
                     abs_path_target,
                     ]
             self._executor.check_call(cmd_rm)
 
         abs_path_parent = os.path.join(self._abs_mountpoint, _CHROOT_SCRIPT_TARGET_DIR)
         cmd_rmdir = [
-                _COMMAND_RMDIR,
+                COMMAND_RMDIR,
                 abs_path_parent,
                 ]
         self._executor.check_call(cmd_rmdir)
 
     def _try_unmounting(self, abs_path):
-        cmd = [
-                _COMMAND_UMOUNT,
-                abs_path,
-                ]
-        for i in range(3):
-            try:
-                self._executor.check_call(cmd)
-            except subprocess.CalledProcessError as e:
-                if e.returncode == _EXIT_COMMAND_NOT_FOUND:
-                    raise
-                time.sleep(1)
-            else:
-                break
+        return try_unmounting(self._executor, abs_path)
 
     def _unmount_nondisk_chroot_mounts(self):
         self._messenger.info('Unmounting non-disk file systems...')
@@ -724,7 +647,7 @@ class BootstrapEngine(object):
     def _kpartx_minus_d(self):
         self._messenger.info('Deactivating partition devices...')
         cmd = [
-                _COMMAND_KPARTX,
+                COMMAND_KPARTX,
                 '-d',
                 '-p', _PARTITION_DELIMITER,
                 self._abs_target_path,
@@ -733,7 +656,7 @@ class BootstrapEngine(object):
             try:
                 self._executor.check_call(cmd)
             except subprocess.CalledProcessError as e:
-                if e.returncode == _EXIT_COMMAND_NOT_FOUND:
+                if e.returncode == EXIT_COMMAND_NOT_FOUND:
                     raise
                 time.sleep(1)
             else:
@@ -811,6 +734,7 @@ class BootstrapEngine(object):
                         self._set_root_password_inside_chroot()
 
                         if self._bootloader_approach in (BOOTLOADER__CHROOT_GRUB2__DEVICE, BOOTLOADER__CHROOT_GRUB2__DRIVE):
+                            self._ensure_chroot_has_grub2_installed()
                             self._install_bootloader__grub2()
 
                         if self._bootloader_approach != BOOTLOADER__NONE:
@@ -819,7 +743,7 @@ class BootstrapEngine(object):
 
                             self._fix_grub_cfg_root_device()
 
-                        self._messenger.info('Generating initramfs...')
+                        self._adjust_initramfs_generator_config()
                         self.generate_initramfs_from_inside_chroot()
 
                         if self._abs_scripts_dir_chroot:
