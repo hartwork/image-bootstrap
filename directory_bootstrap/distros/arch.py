@@ -15,8 +15,10 @@ import tempfile
 from bs4 import BeautifulSoup
 from tarfile import TarFile
 
-from directory_bootstrap.shared.commands import check_for_commands
-from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
+from directory_bootstrap.shared.commands import check_for_commands, \
+        COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, \
+        COMMAND_UMOUNT, COMMAND_WGET
+from directory_bootstrap.shared.mount import try_unmounting
 from directory_bootstrap.shared.namespace import unshare_current_process
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
 
@@ -30,11 +32,6 @@ _NON_DISK_MOUNT_TASKS = (
         ('/dev/pts', ['-o', 'bind'], 'dev/pts'),  # for gpgme
         ('PROC', ['-t', 'proc'], 'proc'),  # for pacstrap mountpoint detection
         )
-
-_COMMAND_CHROOT = 'chroot'
-_COMMAND_GPG = 'gpg'
-_COMMAND_WGET = 'wget'
-_COMMAND_MOUNT = 'mount'
 
 
 _year = '([2-9][0-9]{3})'
@@ -74,10 +71,11 @@ class ArchBootstrapper(object):
     @staticmethod
     def get_commands_to_check_for():
         return [
-                _COMMAND_CHROOT,
-                _COMMAND_GPG,
-                _COMMAND_MOUNT,
-                _COMMAND_WGET,
+                COMMAND_CHROOT,
+                COMMAND_GPG,
+                COMMAND_MOUNT,
+                COMMAND_UMOUNT,
+                COMMAND_WGET,
                 ]
 
     def _get_keyring_listing(self):
@@ -108,7 +106,7 @@ class ArchBootstrapper(object):
 
         self._messenger.info('Downloading "%s"...' % url)
         cmd = [
-                _COMMAND_WGET,
+                COMMAND_WGET,
                 '-O%s' % filename,
                 url,
                 ]
@@ -128,7 +126,7 @@ class ArchBootstrapper(object):
 
     def _get_gpg_argv_start(self, abs_gpg_home_dir):
         return [
-                _COMMAND_GPG,
+                COMMAND_GPG,
                 '--home', abs_gpg_home_dir,
                 '--keyid-format', _GPG_DISPLAY_KEY_FORMAT,
                 '--no-autostart',
@@ -208,7 +206,7 @@ class ArchBootstrapper(object):
         env = self._make_chroot_env()
 
         cmd = [
-                _COMMAND_CHROOT,
+                COMMAND_CHROOT,
                 abs_pacstrap_inner_root,
                 'unshare', '--fork', '--pid',  # to auto-kill started gpg-agent
                 'pacman-key',
@@ -217,7 +215,7 @@ class ArchBootstrapper(object):
         self._executor.check_call(cmd, env=env)
 
         cmd = [
-                _COMMAND_CHROOT,
+                COMMAND_CHROOT,
                 abs_pacstrap_inner_root,
                 'unshare', '--fork', '--pid',  # to auto-kill started gpg-agent
                 'pacman-key',
@@ -233,7 +231,7 @@ class ArchBootstrapper(object):
                 % (os.path.join(abs_pacstrap_inner_root, rel_pacstrap_target_dir)))
         env = self._make_chroot_env()
         cmd = [
-                _COMMAND_CHROOT,
+                COMMAND_CHROOT,
                 abs_pacstrap_inner_root,
                 'pacstrap',
                 os.path.join('/', rel_pacstrap_target_dir),
@@ -242,7 +240,7 @@ class ArchBootstrapper(object):
 
     def _mount_disk_chroot_mounts(self, abs_pacstrap_target_dir):
         self._executor.check_call([
-                _COMMAND_MOUNT,
+                COMMAND_MOUNT,
                 '-o', 'bind',
                 self._abs_target_dir,
                 abs_pacstrap_target_dir,
@@ -252,7 +250,7 @@ class ArchBootstrapper(object):
         self._messenger.info('Mounting non-disk file systems...')
         for source, options, target in _NON_DISK_MOUNT_TASKS:
             self._executor.check_call([
-                    _COMMAND_MOUNT,
+                    COMMAND_MOUNT,
                     source,
                     ] \
                     + options \

@@ -5,7 +5,7 @@ import subprocess
 import time
 
 
-COMMAND_UMOUNT = 'umount'
+from directory_bootstrap.shared.commands import COMMAND_UMOUNT
 
 
 def try_unmounting(executor, abs_path):

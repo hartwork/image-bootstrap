@@ -6,15 +6,13 @@ from __future__ import print_function
 import os
 import subprocess
 
+from directory_bootstrap.shared.commands import \
+        COMMAND_FIND, COMMAND_UNAME, COMMAND_UNSHARE
+
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 from image_bootstrap.engine import \
         COMMAND_CHROOT, \
         BOOTLOADER__NONE
-
-
-_COMMAND_FIND = 'find'
-_COMMAND_UNAME = 'uname'
-_COMMAND_UNSHARE = 'unshare'
 
 
 _ETC_NETWORK_INTERFACES_CONTENT = """\
@@ -70,9 +68,9 @@ class DebianStrategy(DistroStrategy):
     def get_commands_to_check_for(self):
         return [
                     COMMAND_CHROOT,
-                    _COMMAND_FIND,
-                    _COMMAND_UNAME,
-                    _COMMAND_UNSHARE,
+                    COMMAND_FIND,
+                    COMMAND_UNAME,
+                    COMMAND_UNSHARE,
                     self._command_debootstrap,
                 ]
 
@@ -83,7 +81,7 @@ class DebianStrategy(DistroStrategy):
         return 'linux-image-%s' % architecture
 
     def check_architecture(self, architecture):
-        uname_output = subprocess.check_output([_COMMAND_UNAME, '-m'])
+        uname_output = subprocess.check_output([COMMAND_UNAME, '-m'])
         host_machine = uname_output.rstrip()
 
         trouble = False
@@ -110,7 +108,7 @@ class DebianStrategy(DistroStrategy):
             _extra_packages.append('grub-pc')
 
         cmd = [
-                _COMMAND_UNSHARE,
+                COMMAND_UNSHARE,
                 '--mount',
                 '--',
                 self._command_debootstrap,
@@ -159,7 +157,7 @@ class DebianStrategy(DistroStrategy):
     def perform_post_chroot_clean_up(self, abs_mountpoint):
         self._messenger.info('Cleaning chroot apt cache...')
         cmd = [
-                _COMMAND_FIND,
+                COMMAND_FIND,
                 os.path.join(abs_mountpoint, 'var', 'cache', 'apt', 'archives'),
                 '-type', 'f',
                 '-name', '*.deb',

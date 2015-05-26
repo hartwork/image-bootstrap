@@ -4,7 +4,6 @@
 from abc import ABCMeta, abstractmethod
 
 from image_bootstrap.engine import \
-        COMMAND_CHROOT, \
         BOOTLOADER__CHROOT_GRUB2__DRIVE
 
 

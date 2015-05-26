@@ -5,6 +5,28 @@ import errno
 import os
 
 
+COMMAND_BLKID = 'blkid'
+COMMAND_CHMOD = 'chmod'
+COMMAND_CHROOT = 'chroot'
+COMMAND_CP = 'cp'
+COMMAND_FIND = 'find'
+COMMAND_GPG = 'gpg'
+COMMAND_KPARTX = 'kpartx'
+COMMAND_MKDIR = 'mkdir'
+COMMAND_MKFS_EXT4 = 'mkfs.ext4'
+COMMAND_MOUNT = 'mount'
+COMMAND_PARTED = 'parted'
+COMMAND_PARTPROBE = 'partprobe'
+COMMAND_RM = 'rm'
+COMMAND_RMDIR = 'rmdir'
+COMMAND_SED = 'sed'
+COMMAND_TUNE2FS = 'tune2fs'
+COMMAND_UMOUNT = 'umount'
+COMMAND_UNAME = 'uname'
+COMMAND_UNSHARE = 'unshare'
+COMMAND_WGET = 'wget'
+
+
 EXIT_COMMAND_NOT_FOUND = 127
 
 

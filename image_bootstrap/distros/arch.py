@@ -6,11 +6,10 @@ import os
 
 from directory_bootstrap.distros.arch import ArchBootstrapper, \
         SUPPORTED_ARCHITECTURES
+from directory_bootstrap.shared.commands import \
+        COMMAND_CHROOT, COMMAND_SED
+
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
-
-
-_COMMAND_CHROOT = 'chroot'
-_COMMAND_SED = 'sed'
 
 
 class ArchStrategy(DistroStrategy):
@@ -31,8 +30,8 @@ class ArchStrategy(DistroStrategy):
 
     def get_commands_to_check_for(self):
         return ArchBootstrapper.get_commands_to_check_for() + [
-                _COMMAND_CHROOT,
-                _COMMAND_SED,
+                COMMAND_CHROOT,
+                COMMAND_SED,
                 ]
 
     def check_architecture(self, architecture):
@@ -65,7 +64,7 @@ class ArchStrategy(DistroStrategy):
 
     def ensure_chroot_has_grub2_installed(self, abs_mountpoint, env):
         cmd = [
-                _COMMAND_CHROOT,
+                COMMAND_CHROOT,
                 abs_mountpoint,
                 'pacman',
                 '--noconfirm',
@@ -78,7 +77,7 @@ class ArchStrategy(DistroStrategy):
 
     def generate_grub_cfg_from_inside_chroot(self, abs_mountpoint, env):
         cmd = [
-                _COMMAND_CHROOT,
+                COMMAND_CHROOT,
                 abs_mountpoint,
                 'grub-mkconfig',
                 '-o', '/boot/grub/grub.cfg',
@@ -89,7 +88,7 @@ class ArchStrategy(DistroStrategy):
         abs_linux_preset = os.path.join(abs_mountpoint, 'etc', 'mkinitcpio.d', 'linux.preset')
         self._messenger.info('Adjusting "%s"...' % abs_linux_preset)
         cmd_sed = [
-                _COMMAND_SED,
+                COMMAND_SED,
                 's,^[# \\t]*default_options=.*,default_options="-S autodetect"  # set by image-bootstrap,g',
                 '-i', abs_linux_preset,
                 ]
@@ -97,7 +96,7 @@ class ArchStrategy(DistroStrategy):
 
     def generate_initramfs_from_inside_chroot(self, abs_mountpoint, env):
         cmd_mkinitcpio = [
-                _COMMAND_CHROOT,
+                COMMAND_CHROOT,
                 abs_mountpoint,
                 'mkinitcpio',
                 '-p', 'linux',
