@@ -37,7 +37,7 @@ def find_command(command):
         if os.path.exists(abs_path):
             return abs_path
 
-    raise OSError(_EXIT_COMMAND_NOT_FOUND, 'Command "%s" not found in PATH.' \
+    raise OSError(EXIT_COMMAND_NOT_FOUND, 'Command "%s" not found in PATH.' \
         % command)
 
 
@@ -60,7 +60,7 @@ def check_for_commands(messenger, commands_to_check_for):
         try:
             abs_path = find_command(command)
         except OSError as e:
-            if e.errno != _EXIT_COMMAND_NOT_FOUND:
+            if e.errno != EXIT_COMMAND_NOT_FOUND:
                 raise
             missing_commands.append(command)
             messenger.error('Checking for %s... NOT FOUND' % command)
@@ -73,7 +73,7 @@ def check_for_commands(messenger, commands_to_check_for):
             % missing_files[0])
 
     if missing_commands:
-        raise OSError(_EXIT_COMMAND_NOT_FOUND, 'Command "%s" not found in PATH.' \
+        raise OSError(EXIT_COMMAND_NOT_FOUND, 'Command "%s" not found in PATH.' \
             % missing_commands[0])
 
     if infos_produced:
