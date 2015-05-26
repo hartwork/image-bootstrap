@@ -17,7 +17,7 @@ from tarfile import TarFile
 
 from directory_bootstrap.shared.commands import check_for_commands, \
         COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, \
-        COMMAND_UMOUNT, COMMAND_WGET
+        COMMAND_UMOUNT, COMMAND_UNSHARE, COMMAND_WGET
 from directory_bootstrap.shared.mount import try_unmounting
 from directory_bootstrap.shared.namespace import unshare_current_process
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
@@ -126,10 +126,11 @@ class ArchBootstrapper(object):
 
     def _get_gpg_argv_start(self, abs_gpg_home_dir):
         return [
+                COMMAND_UNSHARE,
+                '--fork', '--pid',  # to auto-kill started gpg-agent
                 COMMAND_GPG,
                 '--home', abs_gpg_home_dir,
                 '--keyid-format', _GPG_DISPLAY_KEY_FORMAT,
-                '--no-autostart',
                 '--batch',
             ]
 
