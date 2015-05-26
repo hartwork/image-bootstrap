@@ -18,6 +18,8 @@ In comparision to grml-debootstrap, *image-bootstrap*
  * supports using a custom `/ect/resolv.conf` file
    (e.g. to not leak your home router model name from `/ect/resolv.conf` into the image),
 
+ * supports Arch Linux,
+
  * is written in Python rather than Bash/mksh, and
 
  * has more friendly terminal output.
