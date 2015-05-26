@@ -207,18 +207,20 @@ class ArchBootstrapper(object):
         env = self._make_chroot_env()
 
         cmd = [
+                COMMAND_UNSHARE,
+                '--fork', '--pid',  # to auto-kill started gpg-agent
                 COMMAND_CHROOT,
                 abs_pacstrap_inner_root,
-                'unshare', '--fork', '--pid',  # to auto-kill started gpg-agent
                 'pacman-key',
                 '--init',
                 ]
         self._executor.check_call(cmd, env=env)
 
         cmd = [
+                COMMAND_UNSHARE,
+                '--fork', '--pid',  # to auto-kill started gpg-agent
                 COMMAND_CHROOT,
                 abs_pacstrap_inner_root,
-                'unshare', '--fork', '--pid',  # to auto-kill started gpg-agent
                 'pacman-key',
                 '--populate', 'archlinux',
                 ]
