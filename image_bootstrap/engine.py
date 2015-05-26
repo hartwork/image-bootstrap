@@ -558,7 +558,11 @@ class BootstrapEngine(object):
         env = self.make_environment(tell_mountpoint=False)
         return self._distro.generate_grub_cfg_from_inside_chroot(self._abs_mountpoint, env)
 
+    def _adjust_initramfs_generator_config(self):
+        self._distro.adjust_initramfs_generator_config(self._abs_mountpoint)
+
     def generate_initramfs_from_inside_chroot(self):
+        self._messenger.info('Generating initramfs...')
         env = self.make_environment(tell_mountpoint=False)
         return self._distro.generate_initramfs_from_inside_chroot(self._abs_mountpoint, env)
 
@@ -749,7 +753,7 @@ class BootstrapEngine(object):
 
                             self._fix_grub_cfg_root_device()
 
-                        self._messenger.info('Generating initramfs...')
+                        self._adjust_initramfs_generator_config()
                         self.generate_initramfs_from_inside_chroot()
 
                         if self._abs_scripts_dir_chroot:

@@ -47,6 +47,9 @@ class DistroStrategy(object):
     def generate_grub_cfg_from_inside_chroot(self, abs_mountpoint, env):
         pass
 
+    def adjust_initramfs_generator_config(self, abs_mountpoint):
+        pass
+
     @abstractmethod
     def generate_initramfs_from_inside_chroot(self, abs_mountpoint, env):
         pass

@@ -10,6 +10,7 @@ from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 
 
 _COMMAND_CHROOT = 'chroot'
+_COMMAND_SED = 'sed'
 
 
 class ArchStrategy(DistroStrategy):
@@ -31,6 +32,7 @@ class ArchStrategy(DistroStrategy):
     def get_commands_to_check_for(self):
         return ArchBootstrapper.get_commands_to_check_for() + [
                 _COMMAND_CHROOT,
+                _COMMAND_SED,
                 ]
 
     def check_architecture(self, architecture):
@@ -83,8 +85,24 @@ class ArchStrategy(DistroStrategy):
                 ]
         self._executor.check_call(cmd, env=env)
 
+    def adjust_initramfs_generator_config(self, abs_mountpoint):
+        abs_linux_preset = os.path.join(abs_mountpoint, 'etc', 'mkinitcpio.d', 'linux.preset')
+        self._messenger.info('Adjusting "%s"...' % abs_linux_preset)
+        cmd_sed = [
+                _COMMAND_SED,
+                's,^[# \\t]*default_options=.*,default_options="-S autodetect"  # set by image-bootstrap,g',
+                '-i', abs_linux_preset,
+                ]
+        self._executor.check_call(cmd_sed)
+
     def generate_initramfs_from_inside_chroot(self, abs_mountpoint, env):
-        pass  # TODO
+        cmd_mkinitcpio = [
+                _COMMAND_CHROOT,
+                abs_mountpoint,
+                'mkinitcpio',
+                '-p', 'linux',
+                ]
+        self._executor.check_call(cmd_mkinitcpio, env=env)
 
     def perform_post_chroot_clean_up(self, abs_mountpoint):
         pass  # TODO
