@@ -12,7 +12,8 @@ import tempfile
 import time
 
 from directory_bootstrap.shared.commands import \
-        check_for_commands, find_command, EXIT_COMMAND_NOT_FOUND, \
+        check_for_commands, find_command, check_call__keep_trying, \
+        EXIT_COMMAND_NOT_FOUND, \
         COMMAND_BLKID, COMMAND_CHMOD, COMMAND_CHROOT, \
         COMMAND_CP, COMMAND_KPARTX, COMMAND_MKDIR, \
         COMMAND_MKFS_EXT4, COMMAND_MOUNT, COMMAND_PARTED, \
@@ -265,15 +266,7 @@ class BootstrapEngine(object):
                 'set', '1', 'boot', 'on',
                 ]
         time.sleep(1)  # increase chances of first call working, e.g. with LVM volumes
-        for i in range(3):
-            try:
-                self._executor.check_call(cmd_boot_flag)
-            except subprocess.CalledProcessError as e:
-                if e.returncode == EXIT_COMMAND_NOT_FOUND:
-                    raise
-                time.sleep(1)
-            else:
-                break
+        check_call__keep_trying(self._executor, cmd_boot_flag)
 
     def _create_partition_devices(self):
         self._messenger.info('Activating partition devices...')
@@ -626,15 +619,7 @@ class BootstrapEngine(object):
                 '-d',
                 self._abs_target_path,
                 ]
-        for i in range(3):
-            try:
-                self._executor.check_call(cmd)
-            except subprocess.CalledProcessError as e:
-                if e.returncode == EXIT_COMMAND_NOT_FOUND:
-                    raise
-                time.sleep(1)
-            else:
-                break
+        check_call__keep_trying(self._executor, cmd)
 
     def _rmdir_mountpount(self):
         self._messenger.info('Removing directory "%s"...' % self._abs_mountpoint)

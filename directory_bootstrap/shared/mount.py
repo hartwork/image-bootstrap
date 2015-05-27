@@ -5,7 +5,8 @@ import subprocess
 import time
 
 
-from directory_bootstrap.shared.commands import COMMAND_UMOUNT
+from directory_bootstrap.shared.commands import COMMAND_UMOUNT, \
+        check_call__keep_trying
 
 
 def try_unmounting(executor, abs_path):
@@ -13,10 +14,4 @@ def try_unmounting(executor, abs_path):
             COMMAND_UMOUNT,
             abs_path,
             ]
-    for i in range(3):
-        try:
-            executor.check_call(cmd)
-        except subprocess.CalledProcessError:
-            time.sleep(1)
-        else:
-            break
+    check_call__keep_trying(executor, cmd)

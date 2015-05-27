@@ -3,6 +3,8 @@
 
 import errno
 import os
+import time
+import subprocess
 
 
 COMMAND_BLKID = 'blkid'
@@ -28,6 +30,18 @@ COMMAND_WGET = 'wget'
 
 
 EXIT_COMMAND_NOT_FOUND = 127
+
+
+def check_call__keep_trying(executor, cmd):
+	for i in range(3):
+		try:
+			executor.check_call(cmd)
+		except subprocess.CalledProcessError as e:
+			if e.returncode == EXIT_COMMAND_NOT_FOUND:
+				raise
+			time.sleep(1)
+		else:
+			break
 
 
 def find_command(command):
