@@ -277,7 +277,7 @@ class BootstrapEngine(object):
             else:
                 break
 
-    def _kpartx_minus_a(self):
+    def _create_partition_devices(self):
         self._messenger.info('Activating partition devices...')
         cmd_list = [
                 COMMAND_KPARTX,
@@ -644,7 +644,7 @@ class BootstrapEngine(object):
         self._messenger.info('Unmounting partitions...')
         self._try_unmounting(self._abs_mountpoint)
 
-    def _kpartx_minus_d(self):
+    def _remove_partition_devices(self):
         self._messenger.info('Deactivating partition devices...')
         cmd = [
                 COMMAND_KPARTX,
@@ -701,7 +701,7 @@ class BootstrapEngine(object):
         self._unshare()
         self._partition_device()
         self._set_disk_id_in_mbr()
-        self._kpartx_minus_a()
+        self._create_partition_devices()
         try:
             self._format_partitions()
 
@@ -761,4 +761,4 @@ class BootstrapEngine(object):
             finally:
                 self._rmdir_mountpount()
         finally:
-            self._kpartx_minus_d()
+            self._remove_partition_devices()
