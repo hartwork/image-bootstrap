@@ -289,7 +289,7 @@ class BootstrapEngine(object):
         if True:
             cmd_add = [
                     COMMAND_KPARTX,
-                    '-a',
+                    '-u',
                     '-s',
                     self._abs_target_path,
                     ]
