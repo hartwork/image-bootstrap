@@ -249,6 +249,12 @@ class BootstrapEngine(object):
                 ]
         self._executor.check_call(cmd_mklabel)
 
+        # Make existing partition devices leave
+        check_call__keep_trying(self._executor, [
+                COMMAND_PARTPROBE,
+                self._abs_target_path,
+                ])
+
         cmd_mkpart = [
                 COMMAND_PARTED,
                 '--align', 'optimal',
