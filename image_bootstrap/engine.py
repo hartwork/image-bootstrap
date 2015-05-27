@@ -257,8 +257,8 @@ class BootstrapEngine(object):
 
         cmd_mkpart = [
                 COMMAND_PARTED,
-                '--align', 'optimal',
                 '--script',
+                '--align', 'optimal',
                 self._abs_target_path,
                 'mkpart',
                 'primary', 'ext4', '1', '100%',
