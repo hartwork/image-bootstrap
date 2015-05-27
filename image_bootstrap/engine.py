@@ -47,8 +47,6 @@ _NON_DISK_MOUNT_TASKS = (
 _DISK_ID_OFFSET = 440
 _DISK_ID_COUNT_BYTES = 4
 
-_PARTITION_DELIMITER = 'p'  # Keep at "p" to not break LVM support
-
 
 class BootstrapEngine(object):
     def __init__(self,
@@ -282,43 +280,20 @@ class BootstrapEngine(object):
         cmd_list = [
                 COMMAND_KPARTX,
                 '-l',
-                '-p', _PARTITION_DELIMITER,
                 self._abs_target_path,
                 ]
         output = self._executor.check_output(cmd_list)
         device_name = output.split('\n')[0].split(' : ')[0]
         self._abs_first_partition_device = '/dev/mapper/%s' % device_name
 
-        is_loop_device = device_name.startswith('loop')
-
-        if is_loop_device:
-            if os.path.exists(self._abs_first_partition_device):
-                raise OSError(errno.EEXIST, "File exists: '%s'" \
-                        % self._abs_first_partition_device)
-
+        if True:
             cmd_add = [
                     COMMAND_KPARTX,
                     '-a',
-                    '-p', _PARTITION_DELIMITER,
                     '-s',
                     self._abs_target_path,
                     ]
             self._executor.check_call(cmd_add)
-        else:
-            cmd_refresh_table = [
-                    COMMAND_PARTPROBE,
-                    self._abs_target_path,
-                    ]
-            time.sleep(1)  # increase chances of first call working, e.g. with LVM volumes
-            for i in range(3):
-                try:
-                    self._executor.check_call(cmd_refresh_table)
-                except subprocess.CalledProcessError as e:
-                    if e.returncode == EXIT_COMMAND_NOT_FOUND:
-                        raise
-                    time.sleep(1)
-                else:
-                    break
 
         for i in range(3):
             if os.path.exists(self._abs_first_partition_device):
@@ -649,7 +624,6 @@ class BootstrapEngine(object):
         cmd = [
                 COMMAND_KPARTX,
                 '-d',
-                '-p', _PARTITION_DELIMITER,
                 self._abs_target_path,
                 ]
         for i in range(3):
