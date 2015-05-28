@@ -212,7 +212,7 @@ class ArchBootstrapper(object):
         filter_copy_resolv_conf(self._messenger, self._abs_resolv_conf, target)
 
     def _initialize_pacman_keyring(self, abs_pacstrap_inner_root):
-        self._messenger.info('Initializing pacman keyring... (may take 2 to 4 minutes)')
+        self._messenger.info('Initializing pacman keyring... (may take 2 to 7 minutes)')
         before = datetime.datetime.now()
 
         env = self._make_chroot_env()
