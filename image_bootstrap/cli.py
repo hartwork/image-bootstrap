@@ -4,9 +4,10 @@
 import os
 import sys
 import subprocess
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from directory_bootstrap.shared.executor import Executor
+from directory_bootstrap.shared.loaders._argparse import \
+        ArgumentParser, RawDescriptionHelpFormatter
 from directory_bootstrap.shared.messenger import Messenger, BANNER, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
 from directory_bootstrap.shared.metadata import DESCRIPTION, VERSION_STR

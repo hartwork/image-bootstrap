@@ -1,10 +1,11 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-import argparse
 import os
 import re
 import sys
+
+import directory_bootstrap.shared.loaders._argparse as argparse
 
 from directory_bootstrap.distros.arch import ArchBootstrapper, \
         date_argparse_type, SUPPORTED_ARCHITECTURES

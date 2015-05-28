@@ -7,17 +7,19 @@ import datetime
 import errno
 import os
 import re
-import requests
 import shutil
 import subprocess
+import sys
 import tempfile
 
-from bs4 import BeautifulSoup
 from tarfile import TarFile
+
+import directory_bootstrap.shared.loaders._requests as requests
 
 from directory_bootstrap.shared.commands import check_for_commands, \
         COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, \
         COMMAND_UMOUNT, COMMAND_UNSHARE, COMMAND_WGET
+from directory_bootstrap.shared.loaders._bs4 import BeautifulSoup
 from directory_bootstrap.shared.mount import try_unmounting
 from directory_bootstrap.shared.namespace import unshare_current_process
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf

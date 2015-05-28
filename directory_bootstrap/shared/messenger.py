@@ -6,8 +6,7 @@ from __future__ import print_function
 import re
 import sys
 
-from colorama import Fore, Style
-
+from directory_bootstrap.shared.loaders._colorama import Fore, Style
 from directory_bootstrap.shared.metadata import GITHUB_HOME_URL, VERSION_STR, RELEASE_DATE_STR
 
 

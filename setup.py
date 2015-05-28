@@ -27,6 +27,7 @@ if __name__ == '__main__':
                 'directory_bootstrap',
                 'directory_bootstrap.distros',
                 'directory_bootstrap.shared',
+                'directory_bootstrap.shared.loaders',
             ],
             data_files=[
                 ('sbin/', [PACKAGE_NAME, 'directory-bootstrap']),
