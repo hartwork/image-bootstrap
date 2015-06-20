@@ -126,9 +126,25 @@ Done.
 
 Without `--color never`, the output above is actually in color.
 
+
+Speeding things up
+------------------
+
+Apt-Cacher NG
+~~~~~~~~~~~~~
 When creating multiple images,
 a local instance of https://www.unix-ag.uni-kl.de/~bloch/acng/[Apt-Cacher NG] and
 passing `--mirror http://localhost:3142/debian` to *image-bootstrap* may come in handy.
+
+Polipo
+~~~~~~
+For a distribution-agnostic cache, using
+https://github.com/jech/polipo[Polipo] can greatly speed up consecutive runs.
+Invoke *image-bootstrap* with
+------------------------------------------------------------------------------------------
+# http_proxy=http://127.0.0.1:8123/ image-bootstrap ...
+------------------------------------------------------------------------------------------
+when using Polipo with default port configuration.
 
 
 Debian package
