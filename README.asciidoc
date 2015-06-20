@@ -1,3 +1,6 @@
+:toc:
+
+
 About
 -----
 *image-bootstrap* started out as a re-write of
