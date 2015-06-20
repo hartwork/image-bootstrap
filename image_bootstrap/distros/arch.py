@@ -110,19 +110,37 @@ class ArchStrategy(DistroStrategy):
         pass  # TODO
 
     def install_sudo(self, abs_mountpoint, env):
-        raise NotImplementedError()
+        self._install_packages(['sudo'], abs_mountpoint, env)
 
     def install_cloud_init_and_friends(self, abs_mountpoint, env):
-        raise NotImplementedError()
+        self._install_packages(['cloud-init'], abs_mountpoint, env)
 
     def get_cloud_init_datasource_cfg_path(self):
-        raise NotImplementedError()
+        return '/etc/cloud/cloud.cfg.d/90_datasource.cfg'
 
     def install_sshd(self, abs_mountpoint, env):
-        raise NotImplementedError()
+        self._install_packages(['openssh'], abs_mountpoint, env)
+
+    def _make_services_autostart(self, service_names, abs_mountpoint, env):
+        for service_name in service_names:
+            self._messenger.info('Making service "%s" start automatically...' % service_name)
+            cmd = [
+                COMMAND_CHROOT,
+                abs_mountpoint,
+                'systemctl',
+                'enable',
+                service_name,
+                ]
+            self._executor.check_call(cmd, env=env)
 
     def make_openstack_services_autostart(self, abs_mountpoint, env):
-        raise NotImplementedError()
+        self._make_services_autostart([
+                'sshd',
+                'cloud-init-local',
+                'cloud-init',
+                'cloud-config',
+                'cloud-final',
+                ], abs_mountpoint, env)
 
     @classmethod
     def add_parser_to(clazz, distros):
