@@ -67,6 +67,7 @@ class BootstrapEngine(object):
             command_grub2_install,
             bootloader_approach,
             bootloader_force,
+            with_openstack,
             ):
         self._messenger = messenger
         self._executor = executor
@@ -84,6 +85,7 @@ class BootstrapEngine(object):
         self._command_grub2_install = command_grub2_install
         self._bootloader_approach = bootloader_approach
         self._bootloader_force = bootloader_force
+        self._with_openstack = with_openstack
 
         self._abs_mountpoint = None
         self._abs_first_partition_device = None
