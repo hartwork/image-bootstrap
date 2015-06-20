@@ -276,6 +276,9 @@ command names:
 
 Known limitations
 -----------------
+
+Installing Debian _wheezy_ to loop devices
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 GRUB 1.99 has trouble installing to loop devices.
 As a result, using *image-bootstrap* to install e.g. Debian _wheezy_ to a loop device
 requires
@@ -283,3 +286,28 @@ requires
  . bootloader approach `host-grub2-device` or `host-grub2-drive` and
 
  . a more recent version of GRUB 2.x on the system running *image-bootstrap*.
+
+
+Installing to partition block devices
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Linux does not like partitions in partitions much.
+It can be tricked using device mapper, though.
+
+This is how to install to a partition using another partition as a temporary target.
+The temporary target must
+
+ * be 2 GiB in space or more (to hold the whole distribution) and
+
+ * smaller or equal than the actualy target (for the later copy to work).
+
+------------------------------------------------------------------------------------------
+# dmsetup create dm-linear-vda4 --table "0 $(blockdev --getsz /dev/vda4) linear /dev/vda4 0"
+# image-bootstrap --openstack arch /dev/mapper/dm-linear-vda4
+# partprobe /dev/mapper/dm-linear-vda4
+# pv /dev/mapper/dm-linear-vda4p1 > /dev/vda2
+# dmsetup remove dm-linear-vda4p1
+# dmsetup remove dm-linear-vda4
+------------------------------------------------------------------------------------------
+(`/dev/vda2` is the real target, `/dev/vda4` the temporary one.)
+
+There are other ways to achieve the same.
