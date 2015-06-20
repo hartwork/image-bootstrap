@@ -165,6 +165,34 @@ class DebianStrategy(DistroStrategy):
                 ]
         self._executor.check_call(cmd)
 
+    def _install_packages(self, package_names, abs_mountpoint, env):
+        self._messenger.info('Installing %s...' % ', '.join(package_names))
+        env.setdefault('DEBIAN_FRONTEND', 'noninteractive')
+        cmd = [
+                COMMAND_CHROOT,
+                abs_mountpoint,
+                'apt-get',
+                'install',
+                '-y',
+                ] + list(package_names)
+        self._executor.check_call(cmd, env=env)
+
+    def install_sudo(self, abs_mountpoint, env):
+        self._install_packages(['sudo'], abs_mountpoint, env)
+
+    def install_cloud_init_and_friends(self, abs_mountpoint, env):
+        self._install_packages(['cloud-init', 'cloud-utils', 'cloud-initramfs-growroot'],
+                abs_mountpoint, env)
+
+    def get_cloud_init_datasource_cfg_path(self):
+        return '/etc/cloud/cloud.cfg.d/90_dpkg.cfg'  # existing file
+
+    def install_sshd(self, abs_mountpoint, env):
+        self._install_packages(['openssh-server'], abs_mountpoint, env)
+
+    def make_openstack_services_autostart(self, abs_mountpoint, env):
+        pass  # autostarted in Debian, already
+
     @classmethod
     def add_parser_to(clazz, distros):
         debian = distros.add_parser(clazz.DISTRO_KEY, help=clazz.DISTRO_NAME_LONG)
