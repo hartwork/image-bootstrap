@@ -109,8 +109,8 @@ def _main__level_two():
         help='approach to take during bootloader installation (default: %(default)s)')
     machine.add_argument('--bootloader-force', default=False, action='store_true',
         help='apply more force when installing bootloader (default: disabled)')
-    machine.add_argument('--hostname', required=True, metavar='NAME',
-        help='hostname to set')
+    machine.add_argument('--hostname', default='machine', metavar='NAME',
+        help='hostname to set (default: "%(default)s")')
     machine.add_argument('--openstack', dest='with_openstack', default=False, action='store_true',
         help='prepare for use with OpenStack (default: disabled)')
     password_options = machine.add_mutually_exclusive_group()
