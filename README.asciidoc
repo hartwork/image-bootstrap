@@ -149,7 +149,7 @@ A dump of the current `--help` output would be:
 usage: image-bootstrap [-h] [--version] [--color {never,always,auto}]
                        [--debug] [--quiet] [--verbose] [--arch ARCHITECTURE]
                        [--bootloader {auto,chroot-grub2-device,chroot-grub2-drive,host-grub2-device,host-grub2-drive,none}]
-                       [--bootloader-force] --hostname NAME
+                       [--bootloader-force] [--hostname NAME] [--openstack]
                        [--password PASSWORD | --password-file FILE]
                        [--resolv-conf FILE] [--disk-id ID]
                        [--first-partition-uuid UUID] [--scripts-pre DIRECTORY]
@@ -180,7 +180,7 @@ machine configuration:
                         (default: auto)
   --bootloader-force    apply more force when installing bootloader (default:
                         disabled)
-  --hostname NAME       hostname to set
+  --hostname NAME       hostname to set (default: "machine")
   --openstack           prepare for use with OpenStack (default: disabled)
   --password PASSWORD   root password to set (default: password log-in
                         disabled)
