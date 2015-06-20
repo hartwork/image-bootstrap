@@ -57,6 +57,26 @@ class DistroStrategy(object):
     def perform_post_chroot_clean_up(self, abs_mountpoint):
         pass
 
+    @abstractmethod
+    def install_sudo(self, abs_mountpoint, env):
+        pass
+
+    @abstractmethod
+    def install_cloud_init_and_friends(self, abs_mountpoint, env):
+        pass
+
+    @abstractmethod
+    def get_cloud_init_datasource_cfg_path(self):
+        pass
+
+    @abstractmethod
+    def install_sshd(self, abs_mountpoint, env):
+        pass
+
+    @abstractmethod
+    def make_openstack_services_autostart(self, abs_mountpoint, env):
+        pass
+
     @classmethod
     def add_parser_to(clazz, distros):
         raise NotImplementedError()
