@@ -48,8 +48,8 @@ In comparision to grml-debootstrap, *image-bootstrap*
 *directory-bootstrap* came into life with the arrival of support for Arch Linux.
 
 
-Example
--------
+Example run
+-----------
 The following is a complete demo of installing Debian jessie to LVM volume `/dev/vg/lv`
 and launching the resulting image using KVM.
 ------------------------------------------------------------------------------------------
@@ -168,8 +168,8 @@ image-bootstrap_0.8.1_all.deb
 ------------------------------------------------------------------------------------------
 
 
-Usage
------
+Usage (`--help` output)
+-----------------------
 
 In general, the usage is:
 ------------------------------------------------------------------------------------------
