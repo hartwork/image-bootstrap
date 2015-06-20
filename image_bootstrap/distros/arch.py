@@ -106,6 +106,21 @@ class ArchStrategy(DistroStrategy):
     def perform_post_chroot_clean_up(self, abs_mountpoint):
         pass  # TODO
 
+    def install_sudo(self, abs_mountpoint, env):
+        raise NotImplementedError()
+
+    def install_cloud_init_and_friends(self, abs_mountpoint, env):
+        raise NotImplementedError()
+
+    def get_cloud_init_datasource_cfg_path(self):
+        raise NotImplementedError()
+
+    def install_sshd(self, abs_mountpoint, env):
+        raise NotImplementedError()
+
+    def make_openstack_services_autostart(self, abs_mountpoint, env):
+        raise NotImplementedError()
+
     @classmethod
     def add_parser_to(clazz, distros):
         arch = distros.add_parser(clazz.DISTRO_KEY, help=clazz.DISTRO_NAME_LONG)
