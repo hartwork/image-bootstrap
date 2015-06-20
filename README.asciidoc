@@ -3,6 +3,24 @@
 
 About
 -----
+Welcome to the home of *image-bootstrap* (and its little brother *directory-bootstrap*).
+
+*image-bootstrap* is a command line tool to generate bootable virtual machine images
+and write them to a given _block device_. +
+Linux distributions supported by *image-bootstrap* currently include:
+Arch, Debian, Ubuntu. +
+When passing the `--openstack` parameter, images are
+http://docs.openstack.org/image-guide/content/ch_openstack_images.html[prepared for use with OpenStack].
+
+*directory-bootstrap* is a command line tool to install non-Debian Linux distributions
+into a given _directory_ (similar to https://wiki.debian.org/Debootstrap[debootstrap]
+for Debian/Ubuntu). +
+Distributions supported by *directory-bootstrap* currently include:
+Arch Linux.
+
+
+History
+-------
 *image-bootstrap* started out as a re-write of
 https://github.com/grml/grml-debootstrap[grml-debootstrap].
 Primarily, it can be used to create Debian/Ubuntu or Arch images ready to be launched as a virtual machine.
@@ -26,6 +44,8 @@ In comparision to grml-debootstrap, *image-bootstrap*
  * is written in Python rather than Bash/mksh, and
 
  * has more friendly terminal output.
+
+*directory-bootstrap* came into life with the arrival of support for Arch Linux.
 
 
 Example
