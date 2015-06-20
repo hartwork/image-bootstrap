@@ -57,6 +57,9 @@ class DistroStrategy(object):
     def perform_post_chroot_clean_up(self, abs_mountpoint):
         pass
 
+    def get_cloud_username(self):
+        return self.DISTRO_KEY
+
     @abstractmethod
     def install_sudo(self, abs_mountpoint, env):
         pass

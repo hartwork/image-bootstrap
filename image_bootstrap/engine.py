@@ -671,7 +671,7 @@ class BootstrapEngine(object):
         return self._distro.install_sudo(self._abs_mountpoint, env)
 
     def _create_sudo_nopasswd_user(self):
-        user_name = self._distro.DISTRO_KEY
+        user_name = self._distro.get_cloud_username()
         self._messenger.info('Creating user "%s"...' % user_name)
         cmd = [
                 COMMAND_CHROOT,
@@ -705,7 +705,7 @@ class BootstrapEngine(object):
         lines_to_write = []
         for line in content.split('\n'):
             if line.startswith('     name:'):
-                line = '     name: %s' % self._distro.DISTRO_KEY
+                line = '     name: %s' % self._distro.get_cloud_username()
 
             lines_to_write.append(line)
 
