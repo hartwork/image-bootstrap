@@ -1,8 +1,11 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
+from __future__ import print_function
+
 import os
 
+from textwrap import dedent
 
 from directory_bootstrap.distros.arch import ArchBootstrapper, \
         SUPPORTED_ARCHITECTURES
@@ -60,7 +63,19 @@ class ArchStrategy(DistroStrategy):
         bootstrap.run()
 
     def create_network_configuration(self, abs_mountpoint):
-        pass  # TODO
+        self._messenger.info('Making sure that network interfaces get named eth*...')
+        os.symlink('/dev/null', os.path.join(abs_mountpoint, 'etc/udev/rules.d/80-net-setup-link.rules'))
+
+        network_filename = os.path.join(abs_mountpoint, 'etc/systemd/network/eth0-dhcp.network')
+        self._messenger.info('Writing file "%s"...' % network_filename)
+        with open(network_filename, 'w') as f:
+            print(dedent("""
+                    [Match]
+                    Name=eth0
+
+                    [Network]
+                    DHCP=both
+                    """), file=f)
 
     def _install_packages(self, package_names, abs_mountpoint, env):
         cmd = [
@@ -135,6 +150,7 @@ class ArchStrategy(DistroStrategy):
 
     def make_openstack_services_autostart(self, abs_mountpoint, env):
         self._make_services_autostart([
+                'systemd-networkd',
                 'sshd',
                 'cloud-init-local',
                 'cloud-init',
