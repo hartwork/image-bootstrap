@@ -10,7 +10,7 @@ from textwrap import dedent
 from directory_bootstrap.distros.arch import ArchBootstrapper, \
         SUPPORTED_ARCHITECTURES
 from directory_bootstrap.shared.commands import \
-        COMMAND_CHROOT, COMMAND_SED
+        COMMAND_CHROOT, COMMAND_SED, COMMAND_FIND
 
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 
@@ -34,6 +34,7 @@ class ArchStrategy(DistroStrategy):
     def get_commands_to_check_for(self):
         return ArchBootstrapper.get_commands_to_check_for() + [
                 COMMAND_CHROOT,
+                COMMAND_FIND,
                 COMMAND_SED,
                 ]
 
@@ -122,7 +123,14 @@ class ArchStrategy(DistroStrategy):
         self._executor.check_call(cmd_mkinitcpio, env=env)
 
     def perform_post_chroot_clean_up(self, abs_mountpoint):
-        pass  # TODO
+        self._messenger.info('Cleaning chroot pacman cache...')
+        cmd = [
+                COMMAND_FIND,
+                os.path.join(abs_mountpoint, 'var/cache/pacman/pkg/'),
+                '-type', 'f',
+                '-delete',
+                ]
+        self._executor.check_call(cmd)
 
     def install_sudo(self, abs_mountpoint, env):
         self._install_packages(['sudo'], abs_mountpoint, env)
