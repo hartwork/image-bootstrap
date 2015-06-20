@@ -69,6 +69,7 @@ def _main__level_three(messenger, options):
             options.command_grub2_install,
             options.bootloader_approach,
             options.bootloader_force,
+            options.with_openstack,
             )
 
     distro_class = getattr(options, DISTRO_CLASS_FIELD)
@@ -110,6 +111,8 @@ def _main__level_two():
         help='apply more force when installing bootloader (default: disabled)')
     machine.add_argument('--hostname', required=True, metavar='NAME',
         help='hostname to set')
+    machine.add_argument('--openstack', dest='with_openstack', default=False, action='store_true',
+        help='prepare for use with OpenStack (default: disabled)')
     password_options = machine.add_mutually_exclusive_group()
     password_options.add_argument('--password', dest='root_password', metavar='PASSWORD',
         help='root password to set (default: password log-in disabled)')

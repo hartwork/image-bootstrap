@@ -181,6 +181,7 @@ machine configuration:
   --bootloader-force    apply more force when installing bootloader (default:
                         disabled)
   --hostname NAME       hostname to set
+  --openstack           prepare for use with OpenStack (default: disabled)
   --password PASSWORD   root password to set (default: password log-in
                         disabled)
   --password-file FILE  file to read root password from (default: password

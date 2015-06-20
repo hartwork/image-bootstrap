@@ -1,8 +1,11 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
+from __future__ import print_function
+
 import os
 
+from textwrap import dedent
 
 from directory_bootstrap.distros.arch import ArchBootstrapper, \
         SUPPORTED_ARCHITECTURES
@@ -60,17 +63,32 @@ class ArchStrategy(DistroStrategy):
         bootstrap.run()
 
     def create_network_configuration(self, abs_mountpoint):
-        pass  # TODO
+        self._messenger.info('Making sure that network interfaces get named eth*...')
+        os.symlink('/dev/null', os.path.join(abs_mountpoint, 'etc/udev/rules.d/80-net-setup-link.rules'))
 
-    def ensure_chroot_has_grub2_installed(self, abs_mountpoint, env):
+        network_filename = os.path.join(abs_mountpoint, 'etc/systemd/network/eth0-dhcp.network')
+        self._messenger.info('Writing file "%s"...' % network_filename)
+        with open(network_filename, 'w') as f:
+            print(dedent("""
+                    [Match]
+                    Name=eth0
+
+                    [Network]
+                    DHCP=both
+                    """), file=f)
+
+    def _install_packages(self, package_names, abs_mountpoint, env):
         cmd = [
                 COMMAND_CHROOT,
                 abs_mountpoint,
                 'pacman',
                 '--noconfirm',
-                '--sync', 'grub',
-                ]
+                '--sync',
+                ] + list(package_names)
         self._executor.check_call(cmd, env=env)
+
+    def ensure_chroot_has_grub2_installed(self, abs_mountpoint, env):
+        self._install_packages(['grub'], abs_mountpoint, env)
 
     def get_chroot_command_grub2_install(self):
         return 'grub-install'
@@ -105,6 +123,40 @@ class ArchStrategy(DistroStrategy):
 
     def perform_post_chroot_clean_up(self, abs_mountpoint):
         pass  # TODO
+
+    def install_sudo(self, abs_mountpoint, env):
+        self._install_packages(['sudo'], abs_mountpoint, env)
+
+    def install_cloud_init_and_friends(self, abs_mountpoint, env):
+        self._install_packages(['cloud-init'], abs_mountpoint, env)
+
+    def get_cloud_init_datasource_cfg_path(self):
+        return '/etc/cloud/cloud.cfg.d/90_datasource.cfg'
+
+    def install_sshd(self, abs_mountpoint, env):
+        self._install_packages(['openssh'], abs_mountpoint, env)
+
+    def _make_services_autostart(self, service_names, abs_mountpoint, env):
+        for service_name in service_names:
+            self._messenger.info('Making service "%s" start automatically...' % service_name)
+            cmd = [
+                COMMAND_CHROOT,
+                abs_mountpoint,
+                'systemctl',
+                'enable',
+                service_name,
+                ]
+            self._executor.check_call(cmd, env=env)
+
+    def make_openstack_services_autostart(self, abs_mountpoint, env):
+        self._make_services_autostart([
+                'systemd-networkd',
+                'sshd',
+                'cloud-init-local',
+                'cloud-init',
+                'cloud-config',
+                'cloud-final',
+                ], abs_mountpoint, env)
 
     @classmethod
     def add_parser_to(clazz, distros):
