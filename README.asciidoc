@@ -6,6 +6,7 @@
 * <<SpeedingThingsUp,Speeding things up>>
 ** <<AptCacherNG,Apt-Cacher NG>>
 ** <<Polipo,Polipo>>
+** <<haveged,haveged>>
 * <<DebianPackage,Debian package>>
 * <<HelpOutput,Usage (`--help` output)>>
 * <<KnownLimitations,Known limitations>>
@@ -163,6 +164,19 @@ Invoke *image-bootstrap* with
 # http_proxy=http://127.0.0.1:8123/ image-bootstrap ...
 ------------------------------------------------------------------------------------------
 when using Polipo with default port configuration.
+
+[[haveged]]
+haveged
+~~~~~~~
+During image creation, cryptographic keys may need to be generated, e.g.
+for thr OpenSSH server, at least temporarily.  As key generation relies
+on availability of entropy, image creation may take longer in environments that
+are slow at adding to the entropy pool.
+To speed things up, running http://www.issihosts.com/haveged/[haveged]
+at the host system _could_ be an option, especially since all keys should be deleted
+from images, eventually. Otherwise, there is a risk of ending up with multiple
+systems having the same key allowing for attacks.
+I am unsure of the quality of entropy that haveged produces.  Use is at your own risk.
 
 
 [[DebianPackage]]
