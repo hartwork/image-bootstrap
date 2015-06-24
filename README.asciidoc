@@ -7,7 +7,7 @@
 ** <<AptCacherNG,Apt-Cacher NG>>
 ** <<Polipo,Polipo>>
 * <<DebianPackage,Debian package>>
-* <<HelpOutput,Usage (--help output)>>
+* <<HelpOutput,Usage (`--help` output)>>
 * <<KnownLimitations,Known limitations>>
 ** <<DebianWheezyLoopDevice,Installing Debian wheezy to loop devices>>
 ** <<PartitionBlockTarget,Installing to partition block devices>>
