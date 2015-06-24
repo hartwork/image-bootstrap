@@ -1,6 +1,19 @@
-:toc:
+**Table of Contents**
+
+* <<About,About>>
+* <<History,History>>
+* <<ExampleRun,Example run>>
+* <<SpeedingThingsUp,Speeding things up>>
+** <<AptCacherNG,Apt-Cacher NG>>
+** <<Polipo,Polipo>>
+* <<DebianPackage,Debian package>>
+* <<HelpOutput,Usage (--help output)>>
+* <<KnownLimitations,Known limitations>>
+** <<DebianWheezyLoopDevice,Installing Debian wheezy to loop devices>>
+** <<PartitionBlockTarget,Installing to partition block devices>>
 
 
+[[About]]
 About
 -----
 Welcome to the home of *image-bootstrap* (and its little brother *directory-bootstrap*).
@@ -19,6 +32,7 @@ Distributions supported by *directory-bootstrap* currently include:
 Arch Linux.
 
 
+[[History]]
 History
 -------
 *image-bootstrap* started out as a re-write of
@@ -48,6 +62,7 @@ In comparision to grml-debootstrap, *image-bootstrap*
 *directory-bootstrap* came into life with the arrival of support for Arch Linux.
 
 
+[[ExampleRun]]
 Example run
 -----------
 The following is a complete demo of installing Debian jessie to LVM volume `/dev/vg/lv`
@@ -127,15 +142,18 @@ Done.
 Without `--color never`, the output above is actually in color.
 
 
+[[SpeedingThingsUp]]
 Speeding things up
 ------------------
 
+[[AptCacherNG]]
 Apt-Cacher NG
 ~~~~~~~~~~~~~
 When creating multiple images,
 a local instance of https://www.unix-ag.uni-kl.de/~bloch/acng/[Apt-Cacher NG] and
 passing `--mirror http://localhost:3142/debian` to *image-bootstrap* may come in handy.
 
+[[Polipo]]
 Polipo
 ~~~~~~
 For a distribution-agnostic cache, using
@@ -147,6 +165,7 @@ Invoke *image-bootstrap* with
 when using Polipo with default port configuration.
 
 
+[[DebianPackage]]
 Debian package
 --------------
 As long as *image-bootstrap* as not available _in_ Debian, you can
@@ -168,6 +187,7 @@ image-bootstrap_0.8.1_all.deb
 ------------------------------------------------------------------------------------------
 
 
+[[HelpOutput]]
 Usage (`--help` output)
 -----------------------
 
@@ -290,9 +310,11 @@ command names:
 ------------------------------------------------------------------------------------------
 
 
+[[KnownLimitations]]
 Known limitations
 -----------------
 
+[[PartitionBlockTarget]]
 Installing Debian _wheezy_ to loop devices
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 GRUB 1.99 has trouble installing to loop devices.
@@ -304,6 +326,7 @@ requires
  . a more recent version of GRUB 2.x on the system running *image-bootstrap*.
 
 
+[[DebianWheezyLoopDevice]]
 Installing to partition block devices
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Linux does not like partitions in partitions much.
