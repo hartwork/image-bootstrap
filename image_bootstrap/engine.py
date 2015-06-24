@@ -811,9 +811,6 @@ class BootstrapEngine(object):
 
                             self._fix_grub_cfg_root_device()
 
-                        self._adjust_initramfs_generator_config()
-                        self.generate_initramfs_from_inside_chroot()
-
                         if self._with_openstack:
                             # Essentials
                             self._install_sudo()
@@ -829,6 +826,9 @@ class BootstrapEngine(object):
 
                             # Essentials (that better go last)
                             self._delete_sshd_keys()
+
+                        self._adjust_initramfs_generator_config()
+                        self.generate_initramfs_from_inside_chroot()
 
                         if self._abs_scripts_dir_chroot:
                             self._copy_chroot_scripts()
