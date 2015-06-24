@@ -729,6 +729,16 @@ class BootstrapEngine(object):
         env = self.make_environment(tell_mountpoint=False)
         return self._distro.make_openstack_services_autostart(self._abs_mountpoint, env)
 
+    def _disable_clearing_tty1(self):
+        noclear_file_path = os.path.join(self._abs_mountpoint, 'etc/systemd/system/getty@tty1.service.d/noclear.conf')
+        self._messenger.info('Disabling clearing of tty1 (file "%s")...' % noclear_file_path)
+        os.makedirs(os.path.dirname(noclear_file_path), 0755)
+        with open(noclear_file_path, 'w') as f:
+            print(dedent("""\
+                    [Service]
+                    TTYVTDisallocate=no
+                    """), file=f)
+
     def run(self):
         self._unshare()
         self._partition_device()
@@ -785,6 +795,8 @@ class BootstrapEngine(object):
                             self._configure_cloud_init_and_friends()
                             self._install_sshd()
                             self._make_openstack_services_autostart()
+
+                            self._disable_clearing_tty1()
 
                         if self._abs_scripts_dir_chroot:
                             self._copy_chroot_scripts()
