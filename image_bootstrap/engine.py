@@ -789,6 +789,7 @@ class BootstrapEngine(object):
                         self.generate_initramfs_from_inside_chroot()
 
                         if self._with_openstack:
+                            # Essentials
                             self._install_sudo()
                             self._create_sudo_nopasswd_user()
                             self._install_cloud_init_and_friends()
@@ -796,6 +797,7 @@ class BootstrapEngine(object):
                             self._install_sshd()
                             self._make_openstack_services_autostart()
 
+                            # Goodies
                             self._disable_clearing_tty1()
 
                         if self._abs_scripts_dir_chroot:
