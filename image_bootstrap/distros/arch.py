@@ -10,7 +10,7 @@ from textwrap import dedent
 from directory_bootstrap.distros.arch import ArchBootstrapper, \
         SUPPORTED_ARCHITECTURES
 from directory_bootstrap.shared.commands import \
-        COMMAND_CHROOT, COMMAND_SED, COMMAND_FIND
+        COMMAND_CHROOT, COMMAND_SED, COMMAND_FIND, COMMAND_WGET
 
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 
@@ -36,6 +36,7 @@ class ArchStrategy(DistroStrategy):
                 COMMAND_CHROOT,
                 COMMAND_FIND,
                 COMMAND_SED,
+                COMMAND_WGET,
                 ]
 
     def check_architecture(self, architecture):
@@ -135,8 +136,25 @@ class ArchStrategy(DistroStrategy):
     def install_sudo(self, abs_mountpoint, env):
         self._install_packages(['sudo'], abs_mountpoint, env)
 
+    def _fetch_install_chmod(self, url, abs_mountpoint, local_path, permissions):
+        full_local_path = os.path.join(abs_mountpoint, local_path.lstrip('/'))
+        cmd = [
+                COMMAND_WGET,
+                '-O%s' % full_local_path,
+                url,
+                ]
+        self._executor.check_call(cmd)
+        os.chmod(full_local_path, permissions)
+
+    def _install_growpart(self, abs_mountpoint):
+        self._messenger.info('Fetching growpart of cloud-utils...')
+        self._fetch_install_chmod(
+                'https://bazaar.launchpad.net/~cloud-utils-dev/cloud-utils/trunk/download/head:/growpart-20110225134600-d84xgz6209r194ob-1/growpart',
+                abs_mountpoint, '/usr/bin/growpart', 0755)
+
     def install_cloud_init_and_friends(self, abs_mountpoint, env):
         self._install_packages(['cloud-init'], abs_mountpoint, env)
+        self._install_growpart(abs_mountpoint)
 
     def get_cloud_init_datasource_cfg_path(self):
         return '/etc/cloud/cloud.cfg.d/90_datasource.cfg'
