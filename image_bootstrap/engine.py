@@ -739,6 +739,15 @@ class BootstrapEngine(object):
                     TTYVTDisallocate=no
                     """), file=f)
 
+    def _disable_pcspkr_autoloading(self):
+        file_name = os.path.join(self._abs_mountpoint, 'etc/modprobe.d/pcspkr_no_autoload.conf')
+        self._messenger.info('Disabling auto-loading of pcspkr kernel module...')
+        with open(file_name, 'w') as f:
+            print(dedent("""\
+                # disable auto-loading of pcspkr module, by image-bootstrap
+                blacklist pcspkr
+                """), file=f)
+
     def run(self):
         self._unshare()
         self._partition_device()
@@ -799,6 +808,7 @@ class BootstrapEngine(object):
 
                             # Goodies
                             self._disable_clearing_tty1()
+                            self._disable_pcspkr_autoloading()
 
                         if self._abs_scripts_dir_chroot:
                             self._copy_chroot_scripts()
