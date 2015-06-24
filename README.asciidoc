@@ -4,9 +4,9 @@
 * <<History,History>>
 * <<ExampleRun,Example run>>
 * <<SpeedingThingsUp,Speeding things up>>
-** <<AptCacherNG,Apt-Cacher NG>>
-** <<Polipo,Polipo>>
-** <<haveged,haveged>>
+** <<AptCacherNG,Apt-Cacher NG -- a cache specific to Debian/Ubuntu>>
+** <<Polipo,Polipo -- a generic HTTP cache>>
+** <<haveged,haveged -- an entropy generator>>
 * <<DebianPackage,Debian package>>
 * <<HelpOutput,Usage (`--help` output)>>
 * <<KnownLimitations,Known limitations>>
@@ -148,15 +148,15 @@ Speeding things up
 ------------------
 
 [[AptCacherNG]]
-Apt-Cacher NG
-~~~~~~~~~~~~~
+Apt-Cacher NG -- a cache specific to Debian/Ubuntu
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 When creating multiple images,
 a local instance of https://www.unix-ag.uni-kl.de/~bloch/acng/[Apt-Cacher NG] and
 passing `--mirror http://localhost:3142/debian` to *image-bootstrap* may come in handy.
 
 [[Polipo]]
-Polipo
-~~~~~~
+Polipo -- a generic HTTP cache
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 For a distribution-agnostic cache, using
 https://github.com/jech/polipo[Polipo] can greatly speed up consecutive runs.
 Invoke *image-bootstrap* with
@@ -166,8 +166,8 @@ Invoke *image-bootstrap* with
 when using Polipo with default port configuration.
 
 [[haveged]]
-haveged
-~~~~~~~
+haveged -- an entropy generator
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 During image creation, cryptographic keys may need to be generated, e.g.
 for thr OpenSSH server, at least temporarily.  As key generation relies
 on availability of entropy, image creation may take longer in environments that
