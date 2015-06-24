@@ -765,6 +765,11 @@ class BootstrapEngine(object):
                 blacklist pcspkr
                 """), file=f)
 
+    def _allow_autostart_of_services(self, allow):
+        # The idea is to avoid starting services in the chroot
+        # that we would only need to kill one way or another
+        self._distro.allow_autostart_of_services(self._abs_mountpoint, allow)
+
     def run(self):
         self._unshare()
         self._partition_device()
@@ -799,6 +804,7 @@ class BootstrapEngine(object):
                         self._install_bootloader__grub2()
                     self._mount_nondisk_chroot_mounts()
                     try:
+                        self._allow_autostart_of_services(False)
                         self._set_root_password_inside_chroot()
 
                         if self._bootloader_approach in (BOOTLOADER__CHROOT_GRUB2__DEVICE, BOOTLOADER__CHROOT_GRUB2__DRIVE):
@@ -836,6 +842,8 @@ class BootstrapEngine(object):
                                 self._run_chroot_scripts()
                             finally:
                                 self._remove_chroot_scripts()
+
+                        self._allow_autostart_of_services(True)
                     finally:
                         self._unmount_nondisk_chroot_mounts()
                     self.perform_post_chroot_clean_up()

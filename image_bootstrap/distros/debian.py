@@ -6,6 +6,8 @@ from __future__ import print_function
 import os
 import subprocess
 
+from textwrap import dedent
+
 from directory_bootstrap.shared.commands import \
         COMMAND_FIND, COMMAND_UNAME, COMMAND_UNSHARE
 
@@ -95,6 +97,29 @@ class DebianStrategy(DistroStrategy):
             raise _ArchitectureMachineMismatch(architecture, host_machine)
 
         return architecture
+
+    def allow_autostart_of_services(self, abs_mountpoint, allow):
+        policy_rc_d_path = os.path.join(abs_mountpoint, 'usr/sbin/policy-rc.d')
+
+        verb_activate = 'Re-activating' if allow else 'Deactivating'
+        verb_create = 'removing' if allow else 'writing'
+        self._messenger.info('%s auto-starting of services from package installations (by %s file "%s")...'
+                % (verb_activate, verb_create, policy_rc_d_path))
+
+        if allow:
+            try:
+                os.remove(policy_rc_d_path)
+            except OSError as e:
+                if e.errno != errno.ENOENT:
+                    raise
+        else:
+            # https://people.debian.org/~hmh/invokerc.d-policyrc.d-specification.txt
+            with open(policy_rc_d_path, 'w') as f:
+                print(dedent("""\
+                        #! /bin/sh
+                        exit 101
+                        """), file=f)
+                os.fchmod(f.fileno(), 0755)
 
     def run_directory_bootstrap(self, abs_mountpoint, architecture, bootloader_approach):
         self._messenger.info('Bootstrapping %s "%s" into "%s"...'

@@ -27,6 +27,10 @@ class DistroStrategy(object):
         pass
 
     @abstractmethod
+    def allow_autostart_of_services(self, abs_mountpoint, allow):
+        pass
+
+    @abstractmethod
     def run_directory_bootstrap(self, abs_mountpoint, architecture, bootloader_approach):
         pass
 

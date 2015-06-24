@@ -48,6 +48,9 @@ class ArchStrategy(DistroStrategy):
 
         return architecture
 
+    def allow_autostart_of_services(self, abs_mountpoint, allow):
+        pass  # services are not auto-started on Arch
+
     def run_directory_bootstrap(self, abs_mountpoint, architecture, bootloader_approach):
         self._messenger.info('Bootstrapping %s into "%s"...'
                 % (self.DISTRO_NAME_SHORT, abs_mountpoint))
