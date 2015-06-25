@@ -128,7 +128,7 @@ class ArchStrategy(DistroStrategy):
         self._executor.check_call(cmd_mkinitcpio, env=env)
 
     def _setup_pacman_reanimation(self, abs_mountpoint, env):
-        self._messenger.info('Installing havaged (for reanimate-pacman, only)...')
+        self._messenger.info('Installing haveged (for reanimate-pacman, only)...')
         self._install_packages(['haveged'], abs_mountpoint, env)
 
         local_reanimate_path = '/usr/sbin/reanimate-pacman'
