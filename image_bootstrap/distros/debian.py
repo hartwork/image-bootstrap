@@ -179,6 +179,9 @@ class DebianStrategy(DistroStrategy):
                 ]
         self._executor.check_call(cmd, env=env)
 
+    def perform_in_chroot_shipping_clean_up(self, abs_mountpoint, env):
+        pass  # nothing, yet
+
     def perform_post_chroot_clean_up(self, abs_mountpoint):
         self._messenger.info('Cleaning chroot apt cache...')
         cmd = [

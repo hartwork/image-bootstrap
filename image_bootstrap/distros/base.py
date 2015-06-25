@@ -58,6 +58,10 @@ class DistroStrategy(object):
         pass
 
     @abstractmethod
+    def perform_in_chroot_shipping_clean_up(self, abs_mountpoint, env):
+        pass
+
+    @abstractmethod
     def perform_post_chroot_clean_up(self, abs_mountpoint):
         pass
 

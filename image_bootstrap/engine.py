@@ -610,6 +610,10 @@ class BootstrapEngine(object):
             abs_path = os.path.join(self._abs_mountpoint, target)
             self._try_unmounting(abs_path)
 
+    def _perform_in_chroot_shipping_clean_up(self):
+        env = self.make_environment(tell_mountpoint=False)
+        self._distro.perform_in_chroot_shipping_clean_up(self._abs_mountpoint, env)
+
     def perform_post_chroot_clean_up(self):
         return self._distro.perform_post_chroot_clean_up(self._abs_mountpoint)
 
@@ -832,6 +836,7 @@ class BootstrapEngine(object):
 
                             # Essentials (that better go last)
                             self._delete_sshd_keys()
+                            self._perform_in_chroot_shipping_clean_up()
 
                         self._adjust_initramfs_generator_config()
                         self.generate_initramfs_from_inside_chroot()

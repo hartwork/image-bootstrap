@@ -10,7 +10,7 @@ from textwrap import dedent
 from directory_bootstrap.distros.arch import ArchBootstrapper, \
         SUPPORTED_ARCHITECTURES
 from directory_bootstrap.shared.commands import \
-        COMMAND_CHROOT, COMMAND_SED, COMMAND_FIND, COMMAND_WGET
+        COMMAND_CHROOT, COMMAND_SED, COMMAND_FIND, COMMAND_RM, COMMAND_WGET
 
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 
@@ -35,6 +35,7 @@ class ArchStrategy(DistroStrategy):
         return ArchBootstrapper.get_commands_to_check_for() + [
                 COMMAND_CHROOT,
                 COMMAND_FIND,
+                COMMAND_RM,
                 COMMAND_SED,
                 COMMAND_WGET,
                 ]
@@ -125,6 +126,62 @@ class ArchStrategy(DistroStrategy):
                 '-p', 'linux',
                 ]
         self._executor.check_call(cmd_mkinitcpio, env=env)
+
+    def _setup_pacman_reanimation(self, abs_mountpoint, env):
+        self._messenger.info('Installing havaged (for reanimate-pacman, only)...')
+        self._install_packages(['haveged'], abs_mountpoint, env)
+
+        local_reanimate_path = '/usr/sbin/reanimate-pacman'
+
+        full_reanimate_path = os.path.join(abs_mountpoint, local_reanimate_path.lstrip('/'))
+        self._messenger.info('Writing file "%s"...' % full_reanimate_path)
+        with open(full_reanimate_path, 'w') as f:
+            print(dedent("""\
+                    #! /bin/bash
+                    if [[ -e /etc/pacman.d/gnupg ]]; then
+                            exit 0
+                    fi
+
+                    haveged -F &
+                    haveged_pid=$!
+
+                    /usr/bin/pacman-key --init
+                    /usr/bin/pacman-key --populate archlinux
+
+                    kill -9 "${haveged_pid}"
+                    """), file=f)
+            os.fchmod(f.fileno(), 0755)
+
+        pacman_reanimation_service = os.path.join(abs_mountpoint,
+                'etc/systemd/system/pacman-reanimation.service')
+        self._messenger.info('Writing file "%s"...' % pacman_reanimation_service)
+        with open(pacman_reanimation_service, 'w') as f:
+            print(dedent("""\
+                    [Unit]
+                    Description=Pacman reanimation
+
+                    [Service]
+                    ExecStart=/bin/true
+                    ExecStartPost=%s
+
+                    [Install]
+                    WantedBy=multi-user.target
+                    """ % local_reanimate_path), file=f)
+
+        self._make_services_autostart(['pacman-reanimation'], abs_mountpoint, env)
+
+    def perform_in_chroot_shipping_clean_up(self, abs_mountpoint, env):
+        self._setup_pacman_reanimation(abs_mountpoint, env)
+
+        # NOTE: After this, calling pacman needs reanimation, first
+        pacman_gpg_path = os.path.join(abs_mountpoint, 'etc/pacman.d/gnupg')
+        self._messenger.info('Deleting pacman keys at "%s"...' % pacman_gpg_path)
+        cmd = [
+                COMMAND_RM,
+                '-Rv', pacman_gpg_path,
+                ]
+        self._executor.check_call(cmd)
+
 
     def perform_post_chroot_clean_up(self, abs_mountpoint):
         self._messenger.info('Cleaning chroot pacman cache...')
