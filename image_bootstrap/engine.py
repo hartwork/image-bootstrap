@@ -746,6 +746,21 @@ class BootstrapEngine(object):
                 ]
         self._executor.check_call(cmd)
 
+    def _clean_machine_id(self):
+        dbus_machine_id = os.path.join(self._abs_mountpoint, 'var/lib/dbus/machine-id')
+        try:
+            os.remove(dbus_machine_id)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+        else:
+            self._messenger.info('Removing file "%s"...' % dbus_machine_id)
+
+        etc_machine_id = os.path.join(self._abs_mountpoint, 'etc/machine-id')
+        self._messenger.info('Truncating file "%s"...' % etc_machine_id)
+        with open(etc_machine_id, 'w') as f:
+            f.truncate(0)
+
     def _make_openstack_services_autostart(self):
         env = self.make_environment(tell_mountpoint=False)
         return self._distro.make_openstack_services_autostart(self._abs_mountpoint, env)
@@ -836,6 +851,7 @@ class BootstrapEngine(object):
 
                             # Essentials (that better go last)
                             self._delete_sshd_keys()
+                            self._clean_machine_id()
                             self._perform_in_chroot_shipping_clean_up()
 
                         self._adjust_initramfs_generator_config()
