@@ -849,11 +849,6 @@ class BootstrapEngine(object):
                             self._disable_clearing_tty1()
                             self._disable_pcspkr_autoloading()
 
-                            # Essentials (that better go last)
-                            self._delete_sshd_keys()
-                            self._clean_machine_id()
-                            self._perform_in_chroot_shipping_clean_up()
-
                         self._adjust_initramfs_generator_config()
                         self.generate_initramfs_from_inside_chroot()
 
@@ -863,6 +858,12 @@ class BootstrapEngine(object):
                                 self._run_chroot_scripts()
                             finally:
                                 self._remove_chroot_scripts()
+
+                        if self._with_openstack:
+                            # Essentials (that better go last)
+                            self._delete_sshd_keys()
+                            self._clean_machine_id()
+                            self._perform_in_chroot_shipping_clean_up()
 
                         self._allow_autostart_of_services(True)
                     finally:
