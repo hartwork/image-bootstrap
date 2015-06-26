@@ -62,6 +62,7 @@ class BootstrapEngine(object):
             abs_etc_resolv_conf,
             disk_id,
             first_partition_uuid,
+            machine_id,
             abs_scripts_dir_pre,
             abs_scripts_dir_chroot,
             abs_scripts_dir_post,
@@ -79,6 +80,7 @@ class BootstrapEngine(object):
         self._abs_root_password_file = abs_root_password_file
         self._abs_etc_resolv_conf = abs_etc_resolv_conf
         self._disk_id = disk_id
+        self._machine_id = machine_id
         self._abs_scripts_dir_pre = abs_scripts_dir_pre
         self._abs_scripts_dir_chroot = abs_scripts_dir_chroot
         self._abs_scripts_dir_post = abs_scripts_dir_post
@@ -395,6 +397,13 @@ class BootstrapEngine(object):
         f = open(filename, 'w')
         print('/dev/disk/by-uuid/%s / auto defaults 0 1' % self._first_partition_uuid, file=f)
         f.close()
+
+    def _create_etc_machine_id(self):
+        if self._machine_id:
+            etc_machine_id = os.path.join(self._abs_mountpoint, 'etc/machine-id')
+            self._messenger.info('Writing file "%s"...' % etc_machine_id)
+            with open(etc_machine_id, 'w') as f:
+                print(self._machine_id, file=f)
 
     def _create_etc_hostname(self):
         filename = os.path.join(self._abs_mountpoint, 'etc', 'hostname')
@@ -817,6 +826,7 @@ class BootstrapEngine(object):
                     self._create_etc_hostname()  # re-write
                     self._create_etc_resolv_conf()  # re-write
                     self._create_etc_fstab()
+                    self._create_etc_machine_id()  # potentially re-write
                     self.create_network_configuration()
                     self._run_pre_scripts()
                     if self._bootloader_approach in (BOOTLOADER__HOST_GRUB2__DEVICE, BOOTLOADER__HOST_GRUB2__DRIVE):

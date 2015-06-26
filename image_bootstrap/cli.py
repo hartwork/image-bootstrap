@@ -27,6 +27,7 @@ from image_bootstrap.distros.arch import ArchStrategy
 from image_bootstrap.distros.debian import DebianStrategy
 from image_bootstrap.distros.ubuntu import UbuntuStrategy
 from image_bootstrap.types.disk_id import disk_id_type
+from image_bootstrap.types.machine_id import machine_id_type
 from image_bootstrap.types.uuid import uuid_type
 
 
@@ -62,6 +63,7 @@ def _main__level_three(messenger, options):
             os.path.abspath(options.resolv_conf),
             options.disk_id,
             options.first_partition_uuid,
+            options.machine_id,
             options.scripts_dir_pre and os.path.abspath(options.scripts_dir_pre),
             options.scripts_dir_chroot and os.path.abspath(options.scripts_dir_chroot),
             options.scripts_dir_post and os.path.abspath(options.scripts_dir_post),
@@ -124,6 +126,8 @@ def _main__level_two():
         help='specific disk identifier to apply, e.g. 0x12345678')
     machine.add_argument('--first-partition-uuid', dest='first_partition_uuid', metavar='UUID', type=uuid_type,
         help='specific UUID to apply to first partition, e.g. c1b9d5a2-f162-11cf-9ece-0020afc76f16')
+    machine.add_argument('--machine-id', dest='machine_id', metavar='ID', type=machine_id_type,
+        help='specific machine identifier to apply, e.g. c1b9d5a2f16211cf9ece0020afc76f16')
 
     script_dirs = parser.add_argument_group('script integration')
     script_dirs.add_argument('--scripts-pre', dest='scripts_dir_pre', metavar='DIRECTORY',
