@@ -765,10 +765,11 @@ class BootstrapEngine(object):
         else:
             self._messenger.info('Removing file "%s"...' % dbus_machine_id)
 
-        etc_machine_id = os.path.join(self._abs_mountpoint, 'etc/machine-id')
-        self._messenger.info('Truncating file "%s"...' % etc_machine_id)
-        with open(etc_machine_id, 'w') as f:
-            f.truncate(0)
+        if not self._machine_id:  # i.e. keep if explicit ID requested
+            etc_machine_id = os.path.join(self._abs_mountpoint, 'etc/machine-id')
+            self._messenger.info('Truncating file "%s"...' % etc_machine_id)
+            with open(etc_machine_id, 'w') as f:
+                f.truncate(0)
 
     def _make_openstack_services_autostart(self):
         env = self.make_environment(tell_mountpoint=False)
