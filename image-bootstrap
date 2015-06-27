@@ -2,8 +2,10 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from image_bootstrap.cli import main
-
-
 if __name__ == '__main__':
-    main()
+    try:
+        from image_bootstrap.cli import main
+    except KeyboardInterrupt:
+        pass
+    else:
+        main()
