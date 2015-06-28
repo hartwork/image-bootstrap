@@ -37,6 +37,27 @@ BOOTLOADER__HOST_GRUB2__DEVICE = 'host-grub2-device'
 BOOTLOADER__HOST_GRUB2__DRIVE = 'host-grub2-drive'
 BOOTLOADER__NONE = 'none'
 
+
+BOOTLOADER__ANY_GRUB = (
+        BOOTLOADER__CHROOT_GRUB2__DEVICE,
+        BOOTLOADER__CHROOT_GRUB2__DRIVE,
+        BOOTLOADER__HOST_GRUB2__DEVICE,
+        BOOTLOADER__HOST_GRUB2__DRIVE,
+        )
+BOOTLOADER__ANY_GRUB2__DRIVE = (
+        BOOTLOADER__CHROOT_GRUB2__DRIVE,
+        BOOTLOADER__HOST_GRUB2__DRIVE,
+        )
+BOOTLOADER__CHROOT_GRUB2 = (
+        BOOTLOADER__CHROOT_GRUB2__DEVICE,
+        BOOTLOADER__CHROOT_GRUB2__DRIVE,
+        )
+BOOTLOADER__HOST_GRUB2 = (
+        BOOTLOADER__HOST_GRUB2__DEVICE,
+        BOOTLOADER__HOST_GRUB2__DRIVE,
+        )
+
+
 _MOUNTPOINT_PARENT_DIR = '/mnt'
 _CHROOT_SCRIPT_TARGET_DIR = 'root/chroot-scripts/'
 
@@ -141,10 +162,7 @@ class BootstrapEngine(object):
         if self._command_grub2_install:
             return  # Explicit command given, no detection needed
 
-        if self._bootloader_approach not in (
-                BOOTLOADER__HOST_GRUB2__DEVICE,
-                BOOTLOADER__HOST_GRUB2__DRIVE,
-                ):
+        if self._bootloader_approach not in BOOTLOADER__HOST_GRUB2:
             return  # Host grub2-install not used, no detection needed
 
         COMMAND_GRUB_INSTALL = 'grub-install'
@@ -487,8 +505,8 @@ class BootstrapEngine(object):
         real_abs_target = os.path.realpath(self._abs_target_path)
         message = self._create_bootloader_install_message(real_abs_target)
 
-        use_chroot = self._bootloader_approach in (BOOTLOADER__CHROOT_GRUB2__DEVICE, BOOTLOADER__CHROOT_GRUB2__DRIVE)
-        use_device_map = self._bootloader_approach in (BOOTLOADER__CHROOT_GRUB2__DRIVE, BOOTLOADER__HOST_GRUB2__DRIVE)
+        use_chroot = self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2
+        use_device_map = self._bootloader_approach in BOOTLOADER__ANY_GRUB2__DRIVE
 
         if use_device_map:
             # Write device map just for being able to call grub-install
@@ -830,18 +848,18 @@ class BootstrapEngine(object):
                     self._create_etc_machine_id()  # potentially re-write
                     self.create_network_configuration()
                     self._run_pre_scripts()
-                    if self._bootloader_approach in (BOOTLOADER__HOST_GRUB2__DEVICE, BOOTLOADER__HOST_GRUB2__DRIVE):
+                    if self._bootloader_approach in BOOTLOADER__HOST_GRUB2:
                         self._install_bootloader__grub2()
                     self._mount_nondisk_chroot_mounts()
                     try:
                         self._allow_autostart_of_services(False)
                         self._set_root_password_inside_chroot()
 
-                        if self._bootloader_approach in (BOOTLOADER__CHROOT_GRUB2__DEVICE, BOOTLOADER__CHROOT_GRUB2__DRIVE):
+                        if self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2:
                             self._ensure_chroot_has_grub2_installed()
                             self._install_bootloader__grub2()
 
-                        if self._bootloader_approach != BOOTLOADER__NONE:
+                        if self._bootloader_approach in BOOTLOADER__ANY_GRUB:
                             self._messenger.info('Generating GRUB configuration...')
                             self.generate_grub_cfg_from_inside_chroot()
 

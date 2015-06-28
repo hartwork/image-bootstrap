@@ -14,7 +14,7 @@ from directory_bootstrap.shared.commands import \
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 from image_bootstrap.engine import \
         COMMAND_CHROOT, \
-        BOOTLOADER__NONE
+        BOOTLOADER__ANY_GRUB
 
 
 _ETC_NETWORK_INTERFACES_CONTENT = """\
@@ -129,8 +129,10 @@ class DebianStrategy(DistroStrategy):
                 'initramfs-tools',  # for update-initramfs
                 self.get_kernel_package_name(architecture),
                 ]
-        if bootloader_approach != BOOTLOADER__NONE:
+        if bootloader_approach in BOOTLOADER__ANY_GRUB:
             _extra_packages.append('grub-pc')
+        else:
+            raise NotImplementedError('Unsupported bootloader for %s' % self.DISTRO_NAME_SHORT)
 
         cmd = [
                 COMMAND_UNSHARE,
