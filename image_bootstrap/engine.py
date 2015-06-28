@@ -17,7 +17,8 @@ from directory_bootstrap.shared.commands import \
         check_for_commands, find_command, check_call__keep_trying, \
         EXIT_COMMAND_NOT_FOUND, \
         COMMAND_BLKID, COMMAND_CHMOD, COMMAND_CHROOT, \
-        COMMAND_CP, COMMAND_FIND, COMMAND_KPARTX, COMMAND_MKDIR, \
+        COMMAND_CP, COMMAND_EXTLINUX, COMMAND_FIND, \
+        COMMAND_INSTALL_MBR, COMMAND_KPARTX, COMMAND_MKDIR, \
         COMMAND_MKFS_EXT4, COMMAND_MOUNT, COMMAND_PARTED, \
         COMMAND_PARTPROBE, COMMAND_RM, COMMAND_RMDIR, \
         COMMAND_SED, COMMAND_TUNE2FS
@@ -33,6 +34,7 @@ from image_bootstrap.types.uuid import require_valid_uuid
 BOOTLOADER__AUTO = 'auto'
 BOOTLOADER__CHROOT_GRUB2__DEVICE = 'chroot-grub2-device'
 BOOTLOADER__CHROOT_GRUB2__DRIVE = 'chroot-grub2-drive'
+BOOTLOADER__HOST_EXTLINUX = 'host-extlinux'
 BOOTLOADER__HOST_GRUB2__DEVICE = 'host-grub2-device'
 BOOTLOADER__HOST_GRUB2__DRIVE = 'host-grub2-drive'
 BOOTLOADER__NONE = 'none'
@@ -131,7 +133,8 @@ class BootstrapEngine(object):
                     % self._bootloader_approach)
 
     def get_commands_to_check_for(self):
-        return list(self._distro.get_commands_to_check_for()) + [
+        res = list(self._distro.get_commands_to_check_for())
+        res += [
                 COMMAND_BLKID,
                 COMMAND_CHMOD,
                 COMMAND_CHROOT,
@@ -150,6 +153,14 @@ class BootstrapEngine(object):
                 COMMAND_UMOUNT,
                 self._command_grub2_install,
                 ]
+
+        if self._bootloader_approach == BOOTLOADER__HOST_EXTLINUX:
+            res += [
+                    COMMAND_EXTLINUX,
+                    COMMAND_INSTALL_MBR,
+                    ]
+
+        return res
 
     def _protect_against_grub_legacy(self, command):
         output = subprocess.check_output([command, '--version'])
@@ -501,6 +512,49 @@ class BootstrapEngine(object):
         env = self.make_environment(tell_mountpoint=False)
         self._distro.ensure_chroot_has_grub2_installed(self._abs_mountpoint, env)
 
+    def _install_bootloader__extlinux(self):
+        assert self._first_partition_uuid
+        d = {
+            'distro_key': self._distro.DISTRO_KEY,
+            'distro_name_long': self._distro.DISTRO_NAME_LONG,
+            'uuid': self._first_partition_uuid,
+            'vmlinuz': self._distro.get_vmlinuz_path(),
+            'initramfs': self._distro.get_initramfs_path(),
+        }
+
+        boot_extlinux = os.path.join(self._abs_mountpoint, 'boot/extlinux/')
+        extlinux_conf = os.path.join(boot_extlinux, 'extlinux.conf')
+
+        os.makedirs(boot_extlinux)
+
+        self._messenger.info('Writing file "%s"...' % extlinux_conf)
+        with open(extlinux_conf, 'w') as f:
+            print(dedent("""\
+                    DEFAULT  %(distro_key)s
+                    TIMEOUT  1
+
+                    LABEL    %(distro_key)s
+                    SAY      Booting %(distro_name_long)s...
+                    KERNEL   %(vmlinuz)s
+                    APPEND   initrd=%(initramfs)s root=/dev/disk/by-uuid/%(uuid)s
+                    INITRD   %(initramfs)s
+                    """ % d), file=f)
+
+        self._messenger.info('Installing extlinux to "%s"...' % boot_extlinux)
+        cmd_extlinux = [
+                COMMAND_EXTLINUX,
+                '--install',
+                boot_extlinux,
+                ]
+        self._executor.check_call(cmd_extlinux)
+
+        self._messenger.info('Writing MBR of "%s"...' % self._abs_target_path)
+        cmd_mbr = [
+                COMMAND_INSTALL_MBR,
+                self._abs_target_path,
+                ]
+        self._executor.check_call(cmd_mbr)
+
     def _install_bootloader__grub2(self):
         real_abs_target = os.path.realpath(self._abs_target_path)
         message = self._create_bootloader_install_message(real_abs_target)
@@ -850,6 +904,8 @@ class BootstrapEngine(object):
                     self._run_pre_scripts()
                     if self._bootloader_approach in BOOTLOADER__HOST_GRUB2:
                         self._install_bootloader__grub2()
+                    elif self._bootloader_approach == BOOTLOADER__HOST_EXTLINUX:
+                        self._install_bootloader__extlinux()
                     self._mount_nondisk_chroot_mounts()
                     try:
                         self._allow_autostart_of_services(False)

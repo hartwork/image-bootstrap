@@ -244,6 +244,12 @@ class ArchStrategy(DistroStrategy):
                 'cloud-final',
                 ], abs_mountpoint, env)
 
+    def get_vmlinuz_path(self):
+        return '/boot/vmlinuz-linux'
+
+    def get_initramfs_path(self):
+        return '/boot/initramfs-linux.img'
+
     @classmethod
     def add_parser_to(clazz, distros):
         arch = distros.add_parser(clazz.DISTRO_KEY, help=clazz.DISTRO_NAME_LONG)

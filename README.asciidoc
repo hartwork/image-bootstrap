@@ -221,7 +221,7 @@ A dump of the current `--help` output would be:
 # image-bootstrap --help
 usage: image-bootstrap [-h] [--version] [--color {never,always,auto}]
                        [--debug] [--quiet] [--verbose] [--arch ARCHITECTURE]
-                       [--bootloader {auto,chroot-grub2-device,chroot-grub2-drive,host-grub2-device,host-grub2-drive,none}]
+                       [--bootloader {auto,chroot-grub2-device,chroot-grub2-drive,host-extlinux,host-grub2-device,host-grub2-drive,none}]
                        [--bootloader-force] [--hostname NAME] [--openstack]
                        [--password PASSWORD | --password-file FILE]
                        [--resolv-conf FILE] [--disk-id ID]
@@ -248,7 +248,7 @@ text output configuration:
 
 machine configuration:
   --arch ARCHITECTURE   architecture (e.g. amd64)
-  --bootloader {auto,chroot-grub2-device,chroot-grub2-drive,host-grub2-device,host-grub2-drive,none}
+  --bootloader {auto,chroot-grub2-device,chroot-grub2-drive,host-extlinux,host-grub2-device,host-grub2-drive,none}
                         approach to take during bootloader installation
                         (default: auto)
   --bootloader-force    apply more force when installing bootloader (default:

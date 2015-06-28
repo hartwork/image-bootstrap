@@ -88,6 +88,14 @@ class DistroStrategy(object):
     def make_openstack_services_autostart(self, abs_mountpoint, env):
         pass
 
+    @abstractmethod
+    def get_vmlinuz_path(self):
+        pass
+
+    @abstractmethod
+    def get_initramfs_path(self):
+        pass
+
     @classmethod
     def add_parser_to(clazz, distros):
         raise NotImplementedError()

@@ -14,7 +14,8 @@ from directory_bootstrap.shared.commands import \
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 from image_bootstrap.engine import \
         COMMAND_CHROOT, \
-        BOOTLOADER__ANY_GRUB
+        BOOTLOADER__ANY_GRUB, \
+        BOOTLOADER__HOST_EXTLINUX
 
 
 _ETC_NETWORK_INTERFACES_CONTENT = """\
@@ -131,6 +132,8 @@ class DebianStrategy(DistroStrategy):
                 ]
         if bootloader_approach in BOOTLOADER__ANY_GRUB:
             _extra_packages.append('grub-pc')
+        elif bootloader_approach == BOOTLOADER__HOST_EXTLINUX:
+            pass
         else:
             raise NotImplementedError('Unsupported bootloader for %s' % self.DISTRO_NAME_SHORT)
 
@@ -222,6 +225,12 @@ class DebianStrategy(DistroStrategy):
 
     def make_openstack_services_autostart(self, abs_mountpoint, env):
         pass  # autostarted in Debian, already
+
+    def get_vmlinuz_path(self):
+        return '/vmlinuz'
+
+    def get_initramfs_path(self):
+        return '/initrd.img'
 
     @classmethod
     def add_parser_to(clazz, distros):
