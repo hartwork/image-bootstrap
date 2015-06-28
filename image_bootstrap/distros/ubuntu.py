@@ -4,6 +4,7 @@
 import os
 
 from image_bootstrap.distros.debian import DebianStrategy
+from image_bootstrap.engine import BOOTLOADER__HOST_EXTLINUX
 
 
 class UbuntuStrategy(DebianStrategy):
@@ -13,6 +14,9 @@ class UbuntuStrategy(DebianStrategy):
     DEFAULT_RELEASE = 'trusty'
     DEFAULT_MIRROR_URL = 'http://archive.ubuntu.com/ubuntu'
     APT_CACHER_NG_URL = 'http://localhost:3142/ubuntu'
+
+    def select_bootloader(self):
+        return BOOTLOADER__HOST_EXTLINUX
 
     def get_kernel_package_name(self, architecture):
         return 'linux-image-generic'
