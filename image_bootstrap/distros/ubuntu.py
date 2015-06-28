@@ -14,3 +14,9 @@ class UbuntuStrategy(DebianStrategy):
 
     def get_kernel_package_name(self, architecture):
         return 'linux-image-generic'
+
+    def install_cloud_init_and_friends(self, abs_mountpoint, env):
+        # Do not install cloud-initramfs-growroot (from universe)
+        # if cloud-init and growpart alone work just fine
+        self._install_packages(['cloud-init', 'cloud-utils'],
+                abs_mountpoint, env)
