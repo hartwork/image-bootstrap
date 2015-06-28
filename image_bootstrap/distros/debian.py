@@ -201,7 +201,7 @@ class DebianStrategy(DistroStrategy):
                 abs_mountpoint,
                 'apt-get',
                 'install',
-                '-y',
+                '-y', '--no-install-recommends', '-V',
                 ] + list(package_names)
         self._executor.check_call(cmd, env=env)
 
