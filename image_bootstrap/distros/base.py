@@ -35,7 +35,7 @@ class DistroStrategy(object):
         pass
 
     @abstractmethod
-    def create_network_configuration(self, abs_mountpoint):
+    def create_network_configuration(self, abs_mountpoint, use_mtu_tristate):
         pass
 
     @abstractmethod

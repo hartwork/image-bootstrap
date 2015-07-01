@@ -442,7 +442,8 @@ class BootstrapEngine(object):
         f.close()
 
     def create_network_configuration(self):
-        return self._distro.create_network_configuration(self._abs_mountpoint)
+        use_mtu_tristate = True if self._with_openstack else None
+        return self._distro.create_network_configuration(self._abs_mountpoint, use_mtu_tristate)
 
     def _fix_grub_cfg_root_device(self):
         self._messenger.info('Post-processing GRUB config...')

@@ -68,20 +68,35 @@ class ArchStrategy(DistroStrategy):
                 )
         bootstrap.run()
 
-    def create_network_configuration(self, abs_mountpoint):
+    def create_network_configuration(self, abs_mountpoint, use_mtu_tristate):
         self._messenger.info('Making sure that network interfaces get named eth*...')
         os.symlink('/dev/null', os.path.join(abs_mountpoint, 'etc/udev/rules.d/80-net-setup-link.rules'))
 
         network_filename = os.path.join(abs_mountpoint, 'etc/systemd/network/eth0-dhcp.network')
         self._messenger.info('Writing file "%s"...' % network_filename)
         with open(network_filename, 'w') as f:
-            print(dedent("""
-                    [Match]
-                    Name=eth0
+            if use_mtu_tristate is None:
+                print(dedent("""\
+                        [Match]
+                        Name=eth0
 
-                    [Network]
-                    DHCP=both
-                    """), file=f)
+                        [Network]
+                        DHCP=both
+                        """), file=f)
+            else:
+                d = {
+                    'use_mtu': 'true' if use_mtu_tristate else 'false',
+                }
+                print(dedent("""\
+                        [Match]
+                        Name=eth0
+
+                        [Network]
+                        DHCP=both
+
+                        [DHCP]
+                        UseMTU=%(use_mtu)s
+                        """ % d), file=f)
 
     def _install_packages(self, package_names, abs_mountpoint, env):
         cmd = [

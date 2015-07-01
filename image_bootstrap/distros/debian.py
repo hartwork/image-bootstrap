@@ -153,12 +153,15 @@ class DebianStrategy(DistroStrategy):
                 ]
         self._executor.check_call(cmd)
 
-    def create_network_configuration(self, abs_mountpoint):
+    def create_network_configuration(self, abs_mountpoint, use_mtu_tristate):
         filename = os.path.join(abs_mountpoint, 'etc', 'network', 'interfaces')
         self._messenger.info('Writing file "%s"...' % filename)
         f = open(filename, 'w')
         print(_ETC_NETWORK_INTERFACES_CONTENT, file=f)
         f.close()
+
+        # TODO For non-None use_mtu_tristate, force DHCP client option 26/interface-mtu
+        use_mtu_tristate
 
     def ensure_chroot_has_grub2_installed(self, abs_mountpoint, env):
         pass  # debootstrap has already pulled GRUB 2.x in
