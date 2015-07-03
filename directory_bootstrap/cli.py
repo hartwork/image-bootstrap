@@ -7,8 +7,7 @@ import sys
 
 import directory_bootstrap.shared.loaders._argparse as argparse
 
-from directory_bootstrap.distros.arch import ArchBootstrapper, \
-        SUPPORTED_ARCHITECTURES
+from directory_bootstrap.distros.arch import ArchBootstrapper
 from directory_bootstrap.distros.base import BOOTSTRAPPER_CLASS_FIELD
 from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.messenger import Messenger, \
@@ -50,9 +49,6 @@ def _main__level_two():
             help='directory to use for downloads (default: %(default)s)')
 
     system = parser.add_argument_group('system configuration')
-    system.add_argument('--arch', dest='architecture', default='x86_64',
-            choices=SUPPORTED_ARCHITECTURES,
-            help='architecture (e.g. x86_64)')
     system.add_argument('--resolv-conf', metavar='FILE', default='/etc/resolv.conf',
         help='file to copy nameserver entries from (default: %(default)s)')
 

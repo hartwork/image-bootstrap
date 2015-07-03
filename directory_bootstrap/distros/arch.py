@@ -320,6 +320,9 @@ class ArchBootstrapper(DirectoryBootstrapper):
 
     @classmethod
     def add_arguments_to(clazz, distro):
+        distro.add_argument('--arch', dest='architecture', default='x86_64',
+                choices=SUPPORTED_ARCHITECTURES,
+                help='architecture (e.g. x86_64)')
         distro.add_argument('--image-date', type=date_argparse_type, metavar='YYYY-MM-DD',
                 help='date to use boostrap image of (e.g. 2015-05-01, default: latest available)')
         distro.add_argument('--mirror', dest='mirror_url', metavar='URL',
