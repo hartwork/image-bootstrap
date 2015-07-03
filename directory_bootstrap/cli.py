@@ -45,6 +45,10 @@ def _main__level_two():
 
     add_output_control_options(parser)
 
+    general = parser.add_argument_group('general configuration')
+    general.add_argument('--cache-dir', metavar='DIRECTORY', default='/var/cache/directory-bootstrap/',
+            help='directory to use for downloads (default: %(default)s)')
+
     system = parser.add_argument_group('system configuration')
     system.add_argument('--arch', dest='architecture', default='x86_64',
             choices=SUPPORTED_ARCHITECTURES,
