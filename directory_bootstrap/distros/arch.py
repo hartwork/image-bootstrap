@@ -16,12 +16,12 @@ from tarfile import TarFile
 
 import directory_bootstrap.shared.loaders._requests as requests
 
-from directory_bootstrap.shared.commands import check_for_commands, \
+from directory_bootstrap.distros.base import DirectoryBootstrapper
+from directory_bootstrap.shared.commands import \
         COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, \
-        COMMAND_UMOUNT, COMMAND_UNSHARE, COMMAND_WGET
+        COMMAND_UMOUNT, COMMAND_UNSHARE
 from directory_bootstrap.shared.loaders._bs4 import BeautifulSoup
 from directory_bootstrap.shared.mount import try_unmounting
-from directory_bootstrap.shared.namespace import unshare_current_process
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
 
 
@@ -54,7 +54,9 @@ def date_argparse_type(text):
 date_argparse_type.__name__ = 'date'
 
 
-class ArchBootstrapper(object):
+class ArchBootstrapper(DirectoryBootstrapper):
+    DISTRO_KEY = 'arch'
+
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
                 architecture, image_date_triple_or_none, mirror_url,
                 abs_resolv_conf):
@@ -67,17 +69,13 @@ class ArchBootstrapper(object):
         self._mirror_url = mirror_url
         self._abs_resolv_conf = abs_resolv_conf
 
-    def check_for_commands(self):
-        check_for_commands(self._messenger, self.get_commands_to_check_for())
-
     @staticmethod
     def get_commands_to_check_for():
-        return [
+        return DirectoryBootstrapper.get_commands_to_check_for() + [
                 COMMAND_CHROOT,
                 COMMAND_GPG,
                 COMMAND_MOUNT,
                 COMMAND_UMOUNT,
-                COMMAND_WGET,
                 ]
 
     def _get_keyring_listing(self):
@@ -101,29 +99,16 @@ class ArchBootstrapper(object):
 
         return sorted(dates)[-1]
 
-    def _download_url_to_file(self, url, filename):
-        if os.path.exists(filename):
-            self._messenger.info('Re-using cache file "%s".' % filename)
-            return
-
-        self._messenger.info('Downloading "%s"...' % url)
-        cmd = [
-                COMMAND_WGET,
-                '-O%s' % filename,
-                url,
-                ]
-        self._executor.check_call(cmd)
-
     def _download_keyring_package(self, package_yyyymmdd, suffix=''):
         filename = os.path.join(self._abs_cache_dir, 'archlinux-keyring-%s.tar.gz%s' % (package_yyyymmdd, suffix))
         url = 'https://sources.archlinux.org/other/archlinux-keyring/archlinux-keyring-%s.tar.gz%s' % (package_yyyymmdd, suffix)
-        self._download_url_to_file(url, filename)
+        self.download_url_to_file(url, filename)
         return filename
 
     def _download_image(self, image_yyyy_mm_dd, suffix=''):
         filename = os.path.join(self._abs_cache_dir, 'archlinux-bootstrap-%s-%s.tar.gz%s' % (image_yyyy_mm_dd, self._architecture, suffix))
         url = 'https://mirrors.kernel.org/archlinux/iso/%s/archlinux-bootstrap-%s-%s.tar.gz%s' % (image_yyyy_mm_dd, image_yyyy_mm_dd, self._architecture, suffix)
-        self._download_url_to_file(url, filename)
+        self.download_url_to_file(url, filename)
         return filename
 
     def _get_gpg_argv_start(self, abs_gpg_home_dir):
@@ -281,9 +266,6 @@ class ArchBootstrapper(object):
             abs_path = os.path.join(abs_pacstrap_inner_root, target)
             try_unmounting(self._executor, abs_path)
 
-    def unshare(self):
-        unshare_current_process(self._messenger)
-
     def run(self):
         self._ensure_directory_writable(self._abs_cache_dir, 0755)
 
@@ -345,3 +327,16 @@ class ArchBootstrapper(object):
         distro.add_argument('--mirror', dest='mirror_url', metavar='URL',
                 default='http://mirror.rackspace.com/archlinux/$repo/os/$arch',
                 help='pacman mirror to use (default: %(default)s)')
+
+    @classmethod
+    def create(clazz, messenger, executor, options):
+        return clazz(
+                messenger,
+                executor,
+                os.path.abspath(options.target_dir),
+                os.path.abspath(options.cache_dir),
+                options.architecture,
+                options.image_date,
+                options.mirror_url,
+                os.path.abspath(options.resolv_conf),
+                )

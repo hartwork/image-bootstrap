@@ -8,7 +8,8 @@ import sys
 import directory_bootstrap.shared.loaders._argparse as argparse
 
 from directory_bootstrap.distros.arch import ArchBootstrapper, \
-        date_argparse_type, SUPPORTED_ARCHITECTURES
+        SUPPORTED_ARCHITECTURES
+from directory_bootstrap.distros.base import BOOTSTRAPPER_CLASS_FIELD
 from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.messenger import Messenger, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
@@ -27,16 +28,9 @@ def _main__level_three(messenger, options):
     executor = Executor(messenger, stdout=child_process_stdout)
 
 
-    bootstrap = ArchBootstrapper(
-            messenger,
-            executor,
-            os.path.abspath(options.target_dir),
-            os.path.abspath(options.cache_dir),
-            options.architecture,
-            options.image_date,
-            options.mirror_url,
-            os.path.abspath(options.resolv_conf),
-            )
+    bootstrapper_class = getattr(options, BOOTSTRAPPER_CLASS_FIELD)
+    bootstrap = bootstrapper_class.create(messenger, executor, options)
+
     bootstrap.check_for_commands()
     bootstrap.unshare()
     bootstrap.run()
@@ -63,8 +57,12 @@ def _main__level_two():
                     'on options specific to that distribution.',
             metavar='DISTRIBUTION', help='choice of distribution, pick from:')
 
-    arch = distros.add_parser('arch')
-    ArchBootstrapper.add_arguments_to(arch)
+
+    for strategy_clazz in (
+            ArchBootstrapper,
+            ):
+        strategy_clazz.add_parser_to(distros)
+
 
     parser.add_argument('target_dir', metavar='DIRECTORY')
 
