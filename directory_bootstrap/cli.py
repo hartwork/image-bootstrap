@@ -9,6 +9,7 @@ import directory_bootstrap.shared.loaders._argparse as argparse
 
 from directory_bootstrap.distros.arch import ArchBootstrapper
 from directory_bootstrap.distros.base import BOOTSTRAPPER_CLASS_FIELD
+from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.messenger import Messenger, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
@@ -60,6 +61,7 @@ def _main__level_two():
 
     for strategy_clazz in (
             ArchBootstrapper,
+            GentooBootstrapper,
             ):
         strategy_clazz.add_parser_to(distros)
 
