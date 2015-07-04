@@ -53,10 +53,12 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 architecture, mirror_url, max_age_days,
                 stage3_date_triple_or_none, repository_date_triple_or_none,
                 abs_resolv_conf):
-        self._messenger = messenger
-        self._executor = executor
-        self._abs_target_dir = abs_target_dir
-        self._abs_cache_dir = abs_cache_dir
+        super(GentooBootstrapper, self).__init__(
+                messenger,
+                executor,
+                abs_target_dir,
+                abs_cache_dir,
+                )
         self._architecture = architecture
         self._mirror_base_url = mirror_url.rstrip('/')
         self._max_age_days = max_age_days

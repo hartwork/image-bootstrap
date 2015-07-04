@@ -38,6 +38,12 @@ date_argparse_type.__name__ = 'date'
 class DirectoryBootstrapper(object):
     __metaclass__ = ABCMeta
 
+    def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir):
+        self._messenger = messenger
+        self._executor = executor
+        self._abs_target_dir = abs_target_dir
+        self._abs_cache_dir = abs_cache_dir
+
     @classmethod
     def add_parser_to(clazz, distros):
         distro = distros.add_parser(clazz.DISTRO_KEY)

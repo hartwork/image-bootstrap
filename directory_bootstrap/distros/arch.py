@@ -47,10 +47,12 @@ class ArchBootstrapper(DirectoryBootstrapper):
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
                 architecture, image_date_triple_or_none, mirror_url,
                 abs_resolv_conf):
-        self._messenger = messenger
-        self._executor = executor
-        self._abs_target_dir = abs_target_dir
-        self._abs_cache_dir = abs_cache_dir
+        super(ArchBootstrapper, self).__init__(
+                messenger,
+                executor,
+                abs_target_dir,
+                abs_cache_dir,
+                )
         self._architecture = architecture
         self._image_date_triple_or_none = image_date_triple_or_none
         self._mirror_url = mirror_url
