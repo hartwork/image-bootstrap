@@ -288,45 +288,45 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
     def run(self):
         abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
+        try:
+            abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
 
-        abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
+            stage3_listing = self.get_url_content(self._get_stage3_listing_url())
+            snapshot_listing = self.get_url_content(self._get_portage_snapshot_listing_url())
 
-        stage3_listing = self.get_url_content(self._get_stage3_listing_url())
-        snapshot_listing = self.get_url_content(self._get_portage_snapshot_listing_url())
+            if self._stage3_date_triple_or_none is None:
+                stage3_date_str = self._find_latest_stage3_date(stage3_listing)
+                self._require_fresh_enough(self._parse_stage3_listing_date(stage3_date_str))
+            else:
+                stage3_date_str = '%04d%02d%02d' % self._stage3_date_triple_or_none
 
-        if self._stage3_date_triple_or_none is None:
-            stage3_date_str = self._find_latest_stage3_date(stage3_listing)
-            self._require_fresh_enough(self._parse_stage3_listing_date(stage3_date_str))
-        else:
-            stage3_date_str = '%04d%02d%02d' % self._stage3_date_triple_or_none
+            if self._repository_date_triple_or_none is None:
+                snapshot_date_str = self._find_latest_snapshot_date(snapshot_listing)
+                self._require_fresh_enough(self._parse_snapshot_listing_date(snapshot_date_str))
+            else:
+                snapshot_date_str = '%04d%02d%02d' % self._repository_date_triple_or_none
 
-        if self._repository_date_triple_or_none is None:
-            snapshot_date_str = self._find_latest_snapshot_date(snapshot_listing)
-            self._require_fresh_enough(self._parse_snapshot_listing_date(snapshot_date_str))
-        else:
-            snapshot_date_str = '%04d%02d%02d' % self._repository_date_triple_or_none
+            stage3_tarball, stage3_digests_asc \
+                    = self._download_stage3(stage3_date_str)
 
-        stage3_tarball, stage3_digests_asc \
-                = self._download_stage3(stage3_date_str)
+            snapshot_tarball, snapshot_gpgsig, snapshot_md5sum, snapshot_uncompressed_md5sum \
+                    = self._download_snapshot(snapshot_date_str)
 
-        snapshot_tarball, snapshot_gpgsig, snapshot_md5sum, snapshot_uncompressed_md5sum \
-                = self._download_snapshot(snapshot_date_str)
+            snapshot_tarball_uncompressed = self._uncompress_tarball(snapshot_tarball)
 
-        snapshot_tarball_uncompressed = self._uncompress_tarball(snapshot_tarball)
+            stage3_digests = os.path.join(abs_temp_dir, os.path.basename(stage3_digests_asc)[:-len('.asc')])
+            self._verify_clearsigned_gpg_signature(stage3_digests_asc, stage3_digests, abs_gpg_home_dir)
+            self._verify_detachted_gpg_signature(snapshot_tarball, snapshot_gpgsig, abs_gpg_home_dir)
 
-        stage3_digests = os.path.join(abs_temp_dir, os.path.basename(stage3_digests_asc)[:-len('.asc')])
-        self._verify_clearsigned_gpg_signature(stage3_digests_asc, stage3_digests, abs_gpg_home_dir)
-        self._verify_detachted_gpg_signature(snapshot_tarball, snapshot_gpgsig, abs_gpg_home_dir)
+            self._verify_sha512_sum(stage3_tarball, stage3_digests)
+            self._verify_md5_sum(snapshot_tarball, snapshot_md5sum)
+            self._verify_md5_sum(snapshot_tarball_uncompressed, snapshot_uncompressed_md5sum)
 
-        self._verify_sha512_sum(stage3_tarball, stage3_digests)
-        self._verify_md5_sum(snapshot_tarball, snapshot_md5sum)
-        self._verify_md5_sum(snapshot_tarball_uncompressed, snapshot_uncompressed_md5sum)
-
-        self._extract_tarball(stage3_tarball, self._abs_target_dir)
-        self._extract_tarball(snapshot_tarball_uncompressed, os.path.join(self._abs_target_dir, 'usr'))
-
-        self._messenger.info('Cleaning up "%s"...' % abs_temp_dir)
-        shutil.rmtree(abs_temp_dir)
+            self._extract_tarball(stage3_tarball, self._abs_target_dir)
+            self._extract_tarball(snapshot_tarball_uncompressed, os.path.join(self._abs_target_dir, 'usr'))
+        finally:
+            self._messenger.info('Cleaning up "%s"...' % abs_temp_dir)
+            shutil.rmtree(abs_temp_dir)
 
     @classmethod
     def add_arguments_to(clazz, distro):
