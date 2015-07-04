@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+import datetime
 import errno
 import os
 import re
@@ -31,11 +32,18 @@ class _ChecksumVerifiationFailed(Exception):
                 % (filename, algorithm))
 
 
+class _NotFreshEnoughException(Exception):
+    def __init__(self, (year, month, day), max_age_days):
+        super(_NotFreshEnoughException, self).__init__(
+                '%04d-%02d-%02d was more than %d days ago, rejecting as too old' \
+                % (year, month, day, max_age_days))
+
+
 class GentooBootstrapper(DirectoryBootstrapper):
     DISTRO_KEY = 'gentoo'
 
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
-                architecture, mirror_url,
+                architecture, mirror_url, max_age_days,
                 stage3_date_triple_or_none, repository_date_triple_or_none,
                 abs_resolv_conf):
         self._messenger = messenger
@@ -44,6 +52,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
         self._abs_cache_dir = abs_cache_dir
         self._architecture = architecture
         self._mirror_base_url = mirror_url.rstrip('/')
+        self._max_age_days = max_age_days
         self._stage3_date_triple_or_none = stage3_date_triple_or_none
         self._repository_date_triple_or_none = repository_date_triple_or_none
         self._abs_resolv_conf = abs_resolv_conf
@@ -177,17 +186,33 @@ class GentooBootstrapper(DirectoryBootstrapper):
         with TarFile.open(tarball_filename) as tf:
             tf.extractall(path=abs_target_root)
 
+    def _require_fresh_enough(self, (year, month, day)):
+        date_to_check = datetime.date(year, month, day)
+        today = datetime.date.today()
+        if (today - date_to_check).days > self._max_age_days:
+            raise _NotFreshEnoughException((year, month, day), self._max_age_days)
+
+    def _parse_stage3_listing_date(self, stage3_date_str):
+        m = _stage3_folder_date_matcher.match(stage3_date_str)
+        return (int(m.group(1)), int(m.group(2)), int(m.group(3)))
+
+    def _parse_snapshot_listing_date(self, snapshot_date_str):
+        m = _snapshot_date_matcher.match(snapshot_date_str)
+        return (int(m.group(1)), int(m.group(2)), int(m.group(3)))
+
     def run(self):
         stage3_listing = self.get_url_content(self._get_stage3_listing_url())
         snapshot_listing = self.get_url_content(self._get_portage_snapshot_listing_url())
 
         if self._stage3_date_triple_or_none is None:
             stage3_date_str = self._find_latest_stage3_date(stage3_listing)
+            self._require_fresh_enough(self._parse_stage3_listing_date(stage3_date_str))
         else:
             stage3_date_str = '%04d%02d%02d' % self._stage3_date_triple_or_none
 
         if self._repository_date_triple_or_none is None:
             snapshot_date_str = self._find_latest_snapshot_date(snapshot_listing)
+            self._require_fresh_enough(self._parse_snapshot_listing_date(snapshot_date_str))
         else:
             snapshot_date_str = '%04d%02d%02d' % self._repository_date_triple_or_none
 
@@ -218,6 +243,8 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 help='date to use stage3 of (e.g. 2015-05-01, default: latest available)')
         distro.add_argument('--repository-date', type=date_argparse_type, metavar='YYYY-MM-DD',
                 help='date to use portage repository snapshot of (e.g. 2015-05-01, default: latest available)')
+        distro.add_argument('--max-age-days', type=int, metavar='DAYS', default=14,
+                help='age in days to tolerate as recent enough (security feature, default: %(default)s days)')
         distro.add_argument('--mirror', dest='mirror_url', metavar='URL',
                 default=_DEFAULT_MIRROR,
                 help='mirror to use (default: %(default)s)')
@@ -231,6 +258,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 os.path.abspath(options.cache_dir),
                 options.architecture,
                 options.mirror_url,
+                options.max_age_days,
                 options.stage3_date,
                 options.repository_date,
                 os.path.abspath(options.resolv_conf),
