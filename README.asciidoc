@@ -30,7 +30,7 @@ http://docs.openstack.org/image-guide/content/ch_openstack_images.html[prepared 
 into a given _directory_ (similar to https://wiki.debian.org/Debootstrap[debootstrap]
 for Debian/Ubuntu). +
 Distributions supported by *directory-bootstrap* currently include:
-Arch Linux.
+Arch Linux and Gentoo.
 
 
 [[History]]
@@ -61,6 +61,7 @@ In comparision to grml-debootstrap, *image-bootstrap*
  * has more friendly terminal output.
 
 *directory-bootstrap* came into life with the arrival of support for Arch Linux.
+Support for Gentoo followed, after.
 
 
 [[ExampleRun]]
