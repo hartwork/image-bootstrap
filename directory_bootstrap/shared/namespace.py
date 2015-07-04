@@ -3,6 +3,8 @@
 
 from ctypes import CDLL, c_int, get_errno, cast, c_char_p
 
+import os
+
 
 _CLONE_NEWNS = 0x00020000
 _CLONE_NEWUTS = 0x04000000
