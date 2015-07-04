@@ -298,6 +298,8 @@ class GentooBootstrapper(DirectoryBootstrapper):
             raise OSError(errno.ENOENT, 'File "%s" does not exists' % output_filename)
 
     def run(self):
+        self.ensure_directories_writable()
+
         abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
         try:
             abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
