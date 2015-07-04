@@ -7,6 +7,8 @@ import errno
 import os
 import re
 
+from tarfile import TarFile
+
 from directory_bootstrap.distros.base import DirectoryBootstrapper
 from directory_bootstrap.shared.commands import COMMAND_MD5SUM, \
         COMMAND_SHA512SUM, COMMAND_UNXZ
@@ -168,7 +170,9 @@ class GentooBootstrapper(DirectoryBootstrapper):
         return uncompressed_tarball_filename
 
     def _extract_tarball(self, tarball_filename, abs_target_root):
-        raise NotImplementedError()
+        self._messenger.info('Extracting file "%s" to "%s"...' % (tarball_filename, abs_target_root))
+        with TarFile.open(tarball_filename) as tf:
+            tf.extractall(path=abs_target_root)
 
     def run(self):
         stage3_listing = self.get_url_content(self._get_stage3_listing_url())
@@ -194,7 +198,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
         self._verify_md5_sum(snapshot_tarball_uncompressed, snapshot_uncompressed_md5sum)
 
         self._extract_tarball(stage3_tarball, self._abs_target_dir)
-        self._extract_tarball(snapshot_tarball_uncompressed, os.path.join(self._abs_target_dir, 'usr/portage'))
+        self._extract_tarball(snapshot_tarball_uncompressed, os.path.join(self._abs_target_dir, 'usr'))
 
     @classmethod
     def add_arguments_to(clazz, distro):
