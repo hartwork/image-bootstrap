@@ -13,4 +13,7 @@ except ImportError as e:
         'Thank you!', file=sys.stderr)
     sys.exit(1)
 
+# Mark as used
+resource_filename
+
 del sys

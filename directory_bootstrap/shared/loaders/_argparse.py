@@ -14,4 +14,8 @@ except ImportError:
         'Thank you!', file=sys.stderr)
     sys.exit(1)
 
+# Mark as used
+ArgumentParser
+RawDescriptionHelpFormatter
+
 del sys

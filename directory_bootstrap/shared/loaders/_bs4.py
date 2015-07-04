@@ -13,4 +13,7 @@ except ImportError:
         'Thank you!', file=sys.stderr)
     sys.exit(1)
 
+# Mark as used
+BeautifulSoup
+
 del sys

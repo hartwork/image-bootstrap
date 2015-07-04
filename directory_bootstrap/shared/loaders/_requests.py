@@ -13,4 +13,7 @@ except ImportError as e:
         'Thank you!', file=sys.stderr)
     sys.exit(1)
 
+# Mark as used
+get
+
 del sys
