@@ -11,8 +11,9 @@ import shutil
 import subprocess
 import tempfile
 
-from pkg_resources import resource_filename
 from tarfile import TarFile
+
+from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
 
 import directory_bootstrap.resources.gentoo as resources
 from directory_bootstrap.distros.base import DirectoryBootstrapper, date_argparse_type
