@@ -13,6 +13,7 @@ from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.messenger import Messenger, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
+from directory_bootstrap.shared.metadata import VERSION_STR
 from directory_bootstrap.shared.output_control import \
         add_output_control_options, is_color_wanted, run_handle_errors
 
@@ -42,6 +43,7 @@ def _main__level_three(messenger, options):
 
 def _main__level_two():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--version', action='version', version=VERSION_STR)
 
     add_output_control_options(parser)
 
