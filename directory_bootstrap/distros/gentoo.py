@@ -9,7 +9,7 @@ import re
 
 from tarfile import TarFile
 
-from directory_bootstrap.distros.base import DirectoryBootstrapper
+from directory_bootstrap.distros.base import DirectoryBootstrapper, date_argparse_type
 from directory_bootstrap.shared.commands import COMMAND_MD5SUM, \
         COMMAND_SHA512SUM, COMMAND_UNXZ
 
@@ -36,6 +36,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
                 architecture, mirror_url,
+                stage3_date_triple_or_none, repository_date_triple_or_none,
                 abs_resolv_conf):
         self._messenger = messenger
         self._executor = executor
@@ -43,6 +44,8 @@ class GentooBootstrapper(DirectoryBootstrapper):
         self._abs_cache_dir = abs_cache_dir
         self._architecture = architecture
         self._mirror_base_url = mirror_url.rstrip('/')
+        self._stage3_date_triple_or_none = stage3_date_triple_or_none
+        self._repository_date_triple_or_none = repository_date_triple_or_none
         self._abs_resolv_conf = abs_resolv_conf
 
     @staticmethod
@@ -178,14 +181,21 @@ class GentooBootstrapper(DirectoryBootstrapper):
         stage3_listing = self.get_url_content(self._get_stage3_listing_url())
         snapshot_listing = self.get_url_content(self._get_portage_snapshot_listing_url())
 
-        latest_stage3_date_str = self._find_latest_stage3_date(stage3_listing)
-        latest_snapshot_date_str = self._find_latest_snapshot_date(snapshot_listing)
+        if self._stage3_date_triple_or_none is None:
+            stage3_date_str = self._find_latest_stage3_date(stage3_listing)
+        else:
+            stage3_date_str = '%04d%02d%02d' % self._stage3_date_triple_or_none
+
+        if self._repository_date_triple_or_none is None:
+            snapshot_date_str = self._find_latest_snapshot_date(snapshot_listing)
+        else:
+            snapshot_date_str = '%04d%02d%02d' % self._repository_date_triple_or_none
 
         stage3_tarball, stage3_digests, stage3_digests_asc \
-                = self._download_stage3(latest_stage3_date_str)
+                = self._download_stage3(stage3_date_str)
 
         snapshot_tarball, snapshot_gpgsig, snapshot_md5sum, snapshot_uncompressed_md5sum \
-                = self._download_snapshot(latest_snapshot_date_str)
+                = self._download_snapshot(snapshot_date_str)
 
         snapshot_tarball_uncompressed = self._uncompress_tarball(snapshot_tarball)
 
@@ -204,6 +214,10 @@ class GentooBootstrapper(DirectoryBootstrapper):
     def add_arguments_to(clazz, distro):
         distro.add_argument('--arch', dest='architecture', default='amd64',
                 help='architecture (e.g. amd64)')
+        distro.add_argument('--stage3-date', type=date_argparse_type, metavar='YYYY-MM-DD',
+                help='date to use stage3 of (e.g. 2015-05-01, default: latest available)')
+        distro.add_argument('--repository-date', type=date_argparse_type, metavar='YYYY-MM-DD',
+                help='date to use portage repository snapshot of (e.g. 2015-05-01, default: latest available)')
         distro.add_argument('--mirror', dest='mirror_url', metavar='URL',
                 default=_DEFAULT_MIRROR,
                 help='mirror to use (default: %(default)s)')
@@ -217,5 +231,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 os.path.abspath(options.cache_dir),
                 options.architecture,
                 options.mirror_url,
+                options.stage3_date,
+                options.repository_date,
                 os.path.abspath(options.resolv_conf),
                 )
