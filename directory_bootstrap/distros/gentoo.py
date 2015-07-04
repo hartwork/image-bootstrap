@@ -295,15 +295,15 @@ class GentooBootstrapper(DirectoryBootstrapper):
         try:
             abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
 
-            stage3_listing = self.get_url_content(self._get_stage3_listing_url())
             if self._stage3_date_triple_or_none is None:
+                stage3_listing = self.get_url_content(self._get_stage3_listing_url())
                 stage3_date_str = self._find_latest_stage3_date(stage3_listing)
                 self._require_fresh_enough(self._parse_stage3_listing_date(stage3_date_str))
             else:
                 stage3_date_str = '%04d%02d%02d' % self._stage3_date_triple_or_none
 
-            snapshot_listing = self.get_url_content(self._get_portage_snapshot_listing_url())
             if self._repository_date_triple_or_none is None:
+                snapshot_listing = self.get_url_content(self._get_portage_snapshot_listing_url())
                 snapshot_date_str = self._find_latest_snapshot_date(snapshot_listing)
                 self._require_fresh_enough(self._parse_snapshot_listing_date(snapshot_date_str))
             else:
