@@ -14,8 +14,6 @@ import tempfile
 
 from tarfile import TarFile
 
-import directory_bootstrap.shared.loaders._requests as requests
-
 from directory_bootstrap.distros.base import DirectoryBootstrapper
 from directory_bootstrap.shared.commands import \
         COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, \
@@ -80,13 +78,11 @@ class ArchBootstrapper(DirectoryBootstrapper):
 
     def _get_keyring_listing(self):
         self._messenger.info('Downloading keyring listing...')
-        r = requests.get('https://sources.archlinux.org/other/archlinux-keyring/')    
-        return r.text
+        return self.get_url_content('https://sources.archlinux.org/other/archlinux-keyring/')
 
     def _get_image_listing(self):
         self._messenger.info('Downloading image listing...')
-        r = requests.get('https://mirrors.kernel.org/archlinux/iso/')    
-        return r.text
+        return self.get_url_content('https://mirrors.kernel.org/archlinux/iso/')
 
     def _extract_latest_date(self, listing_html, date_matcher):
         soup = BeautifulSoup(listing_html)

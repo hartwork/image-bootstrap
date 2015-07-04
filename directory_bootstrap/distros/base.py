@@ -7,6 +7,8 @@ import os
 
 from abc import ABCMeta, abstractmethod
 
+import directory_bootstrap.shared.loaders._requests as requests
+
 from directory_bootstrap.shared.commands import check_for_commands, COMMAND_WGET
 from directory_bootstrap.shared.namespace import unshare_current_process
 
@@ -46,6 +48,9 @@ class DirectoryBootstrapper(object):
     @classmethod
     def create(clazz, messenger, executor, options):
         raise NotImplementedError()
+
+    def get_url_content(self, url):
+        return requests.get(url).text
 
     def download_url_to_file(self, url, filename):
         if os.path.exists(filename):
