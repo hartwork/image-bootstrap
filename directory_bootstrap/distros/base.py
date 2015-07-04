@@ -46,7 +46,7 @@ class DirectoryBootstrapper(object):
 
     @classmethod
     def add_parser_to(clazz, distros):
-        distro = distros.add_parser(clazz.DISTRO_KEY)
+        distro = distros.add_parser(clazz.DISTRO_KEY, help=clazz.DISTRO_NAME_LONG)
         distro.set_defaults(**{BOOTSTRAPPER_CLASS_FIELD: clazz})
         clazz.add_arguments_to(distro)
 

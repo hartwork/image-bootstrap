@@ -48,6 +48,7 @@ class _NotFreshEnoughException(Exception):
 
 class GentooBootstrapper(DirectoryBootstrapper):
     DISTRO_KEY = 'gentoo'
+    DISTRO_NAME_LONG = 'Gentoo'
 
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
                 architecture, mirror_url, max_age_days,

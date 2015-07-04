@@ -43,6 +43,7 @@ _image_date_matcher = re.compile('%s\\.%s\\.%s' % (_year, _month, _day))
 
 class ArchBootstrapper(DirectoryBootstrapper):
     DISTRO_KEY = 'arch'
+    DISTRO_NAME_LONG = 'Arch Linux'
 
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
                 architecture, image_date_triple_or_none, mirror_url,
