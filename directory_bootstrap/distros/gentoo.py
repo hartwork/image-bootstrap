@@ -8,7 +8,8 @@ import os
 import re
 
 from directory_bootstrap.distros.base import DirectoryBootstrapper
-from directory_bootstrap.shared.commands import COMMAND_MD5SUM, COMMAND_UNXZ
+from directory_bootstrap.shared.commands import COMMAND_MD5SUM, \
+        COMMAND_SHA512SUM, COMMAND_UNXZ
 
 
 _DEFAULT_MIRROR = 'http://distfiles.gentoo.org/'
@@ -19,6 +20,13 @@ _day = '(0[1-9]|[12][0-9]|3[01])'
 
 _stage3_folder_date_matcher = re.compile('^%s%s%s' % (_year, _month, _day))
 _snapshot_date_matcher = re.compile('%s%s%s' % (_year, _month, _day))
+
+
+class _ChecksumVerifiationFailed(Exception):
+    def __init__(self, algorithm, filename):
+        super(_ChecksumVerifiationFailed, self).__init__(
+                'File "%s" failed %s verification' \
+                % (filename, algorithm))
 
 
 class GentooBootstrapper(DirectoryBootstrapper):
@@ -39,6 +47,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
     def get_commands_to_check_for():
         return DirectoryBootstrapper.get_commands_to_check_for() + [
                 COMMAND_MD5SUM,
+                COMMAND_SHA512SUM,
                 COMMAND_UNXZ,
                 ]
 
@@ -92,8 +101,36 @@ class GentooBootstrapper(DirectoryBootstrapper):
     def _verify_gpg_signature(self, testee_file, signature_file):
         raise NotImplementedError()
 
-    def _verify_sha512_sum(self, stage3_tarball, stage3_digests):
-        raise NotImplementedError()
+    def _verify_sha512_sum(self, testee_file, digests_file):
+        expected_sha512sum = None
+        testee_file_basename = os.path.basename(testee_file)
+        with open(digests_file, 'r') as f:
+            upcoming_sha512 = False
+            for l in f:
+                line = l.rstrip()
+                if upcoming_sha512:
+                    sha512, basename = line.split('  ')
+                    if basename == testee_file_basename:
+                        if expected_sha512sum is None:
+                            expected_sha512sum = sha512
+                        else:
+                            raise ValueError('File "%s" mentions "%s" multiple times' \
+                    % (digests_file, testee_file_basename))
+
+                upcoming_sha512 = line == '# SHA512 HASH'
+
+        if expected_sha512sum is None:
+            raise ValueError('File "%s" does not mention "%s"' \
+                    % (digests_file, testee_file_basename))
+
+        expected_sha512sum_output = '%s  %s\n' % (expected_sha512sum, testee_file)
+        sha512sum_output = self._executor.check_output([
+                COMMAND_SHA512SUM,
+                testee_file,
+                ])
+
+        if sha512sum_output != expected_sha512sum_output:
+            raise _ChecksumVerifiationFailed('SHA512', testee_file)
 
     def _verify_md5_sum(self, snapshot_tarball, snapshot_md5sum):
         needle = os.path.basename(snapshot_tarball) + '\n'
