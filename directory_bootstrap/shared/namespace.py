@@ -3,6 +3,7 @@
 
 from ctypes import CDLL, c_int, get_errno, cast, c_char_p
 
+import errno
 import os
 
 
