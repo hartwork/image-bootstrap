@@ -18,7 +18,6 @@ from directory_bootstrap.distros.base import DirectoryBootstrapper
 from directory_bootstrap.shared.commands import \
         COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, \
         COMMAND_UMOUNT, COMMAND_UNSHARE
-from directory_bootstrap.shared.loaders._bs4 import BeautifulSoup
 from directory_bootstrap.shared.mount import try_unmounting
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
 
@@ -83,17 +82,6 @@ class ArchBootstrapper(DirectoryBootstrapper):
     def _get_image_listing(self):
         self._messenger.info('Downloading image listing...')
         return self.get_url_content('https://mirrors.kernel.org/archlinux/iso/')
-
-    def _extract_latest_date(self, listing_html, date_matcher):
-        soup = BeautifulSoup(listing_html)
-        dates = []
-        for link in soup.find_all('a'):
-            m = date_matcher.search(link.get('href'))
-            if not m:
-                continue
-            dates.append(m.group(0))
-
-        return sorted(dates)[-1]
 
     def _download_keyring_package(self, package_yyyymmdd, suffix=''):
         filename = os.path.join(self._abs_cache_dir, 'archlinux-keyring-%s.tar.gz%s' % (package_yyyymmdd, suffix))
@@ -271,12 +259,12 @@ class ArchBootstrapper(DirectoryBootstrapper):
         try:
             if self._image_date_triple_or_none is None:
                 image_listing_html = self._get_image_listing()
-                image_yyyy_mm_dd = self._extract_latest_date(image_listing_html, _image_date_matcher)
+                image_yyyy_mm_dd = self.extract_latest_date(image_listing_html, _image_date_matcher)
             else:
                 image_yyyy_mm_dd = '%04s.%02d.%02d' % self._image_date_triple_or_none
 
             keyring_listing_html = self._get_keyring_listing()
-            package_yyyymmdd = self._extract_latest_date(keyring_listing_html, _keyring_package_date_matcher)
+            package_yyyymmdd = self.extract_latest_date(keyring_listing_html, _keyring_package_date_matcher)
 
             package_sig_filename = self._download_keyring_package(package_yyyymmdd, '.sig')
             package_filename = self._download_keyring_package(package_yyyymmdd)

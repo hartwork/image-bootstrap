@@ -9,6 +9,8 @@ from abc import ABCMeta, abstractmethod
 
 import directory_bootstrap.shared.loaders._requests as requests
 
+from directory_bootstrap.shared.loaders._bs4 import BeautifulSoup
+
 from directory_bootstrap.shared.commands import check_for_commands, COMMAND_WGET
 from directory_bootstrap.shared.namespace import unshare_current_process
 
@@ -36,6 +38,17 @@ class DirectoryBootstrapper(object):
 
     def unshare(self):
         unshare_current_process(self._messenger)
+
+    def extract_latest_date(self, listing_html, date_matcher):
+        soup = BeautifulSoup(listing_html)
+        dates = []
+        for link in soup.find_all('a'):
+            m = date_matcher.search(link.get('href'))
+            if not m:
+                continue
+            dates.append(m.group(0))
+
+        return sorted(dates)[-1]
 
     @abstractmethod
     def run(self):
