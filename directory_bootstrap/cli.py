@@ -8,7 +8,8 @@ import sys
 import directory_bootstrap.shared.loaders._argparse as argparse
 
 from directory_bootstrap.distros.arch import ArchBootstrapper
-from directory_bootstrap.distros.base import BOOTSTRAPPER_CLASS_FIELD
+from directory_bootstrap.distros.base import BOOTSTRAPPER_CLASS_FIELD, \
+        add_general_directory_bootstrapping_options
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.messenger import Messenger, \
@@ -48,8 +49,7 @@ def _main__level_two():
     add_output_control_options(parser)
 
     general = parser.add_argument_group('general configuration')
-    general.add_argument('--cache-dir', metavar='DIRECTORY', default='/var/cache/directory-bootstrap/',
-            help='directory to use for downloads (default: %(default)s)')
+    add_general_directory_bootstrapping_options(general)
 
     system = parser.add_argument_group('system configuration')
     system.add_argument('--resolv-conf', metavar='FILE', default='/etc/resolv.conf',

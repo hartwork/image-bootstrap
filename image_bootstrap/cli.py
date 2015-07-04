@@ -5,6 +5,8 @@ import os
 import sys
 import subprocess
 
+from directory_bootstrap.distros.base import \
+        add_general_directory_bootstrapping_options
 from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.loaders._argparse import \
         ArgumentParser, RawDescriptionHelpFormatter
@@ -142,6 +144,9 @@ def _main__level_two():
     commands = parser.add_argument_group('command names')
     commands.add_argument('--grub2-install', metavar='COMMAND', dest='command_grub2_install',
         help='override grub2-install command')
+
+    general = parser.add_argument_group('general configuration')
+    add_general_directory_bootstrapping_options(general)
 
     distros = parser.add_subparsers(title='subcommands (choice of distribution)',
             description='Run "%(prog)s DISTRIBUTION --help" for details '

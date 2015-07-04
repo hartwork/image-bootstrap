@@ -35,6 +35,12 @@ def date_argparse_type(text):
 date_argparse_type.__name__ = 'date'
 
 
+def add_general_directory_bootstrapping_options(general):
+    general.add_argument('--cache-dir', metavar='DIRECTORY',
+            default='/var/cache/directory-bootstrap/',
+            help='directory to use for downloads (default: %(default)s)')
+
+
 class DirectoryBootstrapper(object):
     __metaclass__ = ABCMeta
 
