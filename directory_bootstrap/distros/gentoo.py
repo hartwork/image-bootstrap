@@ -4,11 +4,19 @@
 from __future__ import print_function
 
 import os
+import re
 
 from directory_bootstrap.distros.base import DirectoryBootstrapper
 
 
 _DEFAULT_MIRROR = 'http://distfiles.gentoo.org/'
+
+_year = '([2-9][0-9]{3})'
+_month = '(0[1-9]|1[12])'
+_day = '(0[1-9]|[12][0-9]|3[01])'
+
+_stage3_folder_date_matcher = re.compile('^%s%s%s' % (_year, _month, _day))
+_snapshot_date_matcher = re.compile('%s%s%s' % (_year, _month, _day))
 
 
 class GentooBootstrapper(DirectoryBootstrapper):
@@ -36,10 +44,10 @@ class GentooBootstrapper(DirectoryBootstrapper):
         return '%s/releases/snapshots/current/' % self._mirror_base_url
 
     def _find_latest_stage3_date(self, stage3_listing):
-        raise NotImplementedError()
+        return self.extract_latest_date(stage3_listing, _stage3_folder_date_matcher)
 
     def _find_latest_snapshot_date(self, snapshot_listing):
-        raise NotImplementedError()
+        return self.extract_latest_date(snapshot_listing, _snapshot_date_matcher)
 
     def _download_stage3(self, stage3_date_str):
         res = [None, None, None]
