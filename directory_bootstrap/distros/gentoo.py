@@ -125,6 +125,9 @@ class GentooBootstrapper(DirectoryBootstrapper):
         raise NotImplementedError()
 
     def _verify_sha512_sum(self, testee_file, digests_file):
+        self._messenger.info('Verifying SHA512 checksum of file "%s"...' \
+                % testee_file)
+
         expected_sha512sum = None
         testee_file_basename = os.path.basename(testee_file)
         with open(digests_file, 'r') as f:
@@ -156,6 +159,9 @@ class GentooBootstrapper(DirectoryBootstrapper):
             raise _ChecksumVerifiationFailed('SHA512', testee_file)
 
     def _verify_md5_sum(self, snapshot_tarball, snapshot_md5sum):
+        self._messenger.info('Verifying MD5 checksum of file "%s"...' \
+                % snapshot_tarball)
+
         needle = os.path.basename(snapshot_tarball) + '\n'
         with open(snapshot_md5sum, 'r') as f:
             if f.read().count(needle) != 1:
@@ -178,7 +184,10 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
         uncompressed_tarball_filename = tarball_filename[:-len(extension)]
 
-        if not os.path.exists(uncompressed_tarball_filename):
+        if os.path.exists(uncompressed_tarball_filename):
+            self._messenger.info('Re-using cache file "%s".' % uncompressed_tarball_filename)
+        else:
+            self._messenger.info('Uncompressing file "%s"...' % tarball_filename)
             self._executor.check_call([
                     COMMAND_UNXZ,
                     '--keep',
@@ -266,7 +275,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
         return abs_gpg_home_dir
 
     def _verify_detachted_gpg_signature(self, candidate_filename, signature_filename, abs_gpg_home_dir):
-        self._messenger.info('Verifying integrity of file "%s"...' % candidate_filename)
+        self._messenger.info('Verifying GnuPG signature of file "%s"...' % candidate_filename)
         cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
                 '--verify',
                 signature_filename,
@@ -275,7 +284,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
         self._executor.check_call(cmd)
 
     def _verify_clearsigned_gpg_signature(self, clearsigned_filename, output_filename, abs_gpg_home_dir):
-        self._messenger.info('Verifying integrity of file "%s", writing file "%s"...' \
+        self._messenger.info('Verifying GnuPG signature of file "%s", writing file "%s"...' \
                 % (clearsigned_filename, output_filename))
 
         if os.path.exists(output_filename):
@@ -296,24 +305,30 @@ class GentooBootstrapper(DirectoryBootstrapper):
             abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
 
             if self._stage3_date_triple_or_none is None:
+                self._messenger.info('Searching for available stage3 tarballs...')
                 stage3_listing = self.get_url_content(self._get_stage3_listing_url())
                 stage3_date_str = self._find_latest_stage3_date(stage3_listing)
+                self._messenger.info('Found "%s" to be latest.' % stage3_date_str)
                 self._require_fresh_enough(self._parse_stage3_listing_date(stage3_date_str))
             else:
                 stage3_date_str = '%04d%02d%02d' % self._stage3_date_triple_or_none
 
             if self._repository_date_triple_or_none is None:
+                self._messenger.info('Searching for available portage repository snapshots...')
                 snapshot_listing = self.get_url_content(self._get_portage_snapshot_listing_url())
                 snapshot_date_str = self._find_latest_snapshot_date(snapshot_listing)
+                self._messenger.info('Found "%s" to be latest.' % snapshot_date_str)
                 self._require_fresh_enough(self._parse_snapshot_listing_date(snapshot_date_str))
             else:
                 snapshot_date_str = '%04d%02d%02d' % self._repository_date_triple_or_none
 
+            self._messenger.info('Downloading portage repository snapshot...')
             snapshot_tarball, snapshot_gpgsig, snapshot_md5sum, snapshot_uncompressed_md5sum \
                     = self._download_snapshot(snapshot_date_str)
             self._verify_detachted_gpg_signature(snapshot_tarball, snapshot_gpgsig, abs_gpg_home_dir)
             self._verify_md5_sum(snapshot_tarball, snapshot_md5sum)
 
+            self._messenger.info('Downloading stage3 tarball...')
             stage3_tarball, stage3_digests_asc \
                     = self._download_stage3(stage3_date_str)
             stage3_digests = os.path.join(abs_temp_dir, os.path.basename(stage3_digests_asc)[:-len('.asc')])
