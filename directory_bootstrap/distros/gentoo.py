@@ -8,7 +8,7 @@ import os
 import re
 
 from directory_bootstrap.distros.base import DirectoryBootstrapper
-from directory_bootstrap.shared.commands import COMMAND_UNXZ
+from directory_bootstrap.shared.commands import COMMAND_MD5SUM, COMMAND_UNXZ
 
 
 _DEFAULT_MIRROR = 'http://distfiles.gentoo.org/'
@@ -38,6 +38,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
     @staticmethod
     def get_commands_to_check_for():
         return DirectoryBootstrapper.get_commands_to_check_for() + [
+                COMMAND_MD5SUM,
                 COMMAND_UNXZ,
                 ]
 
@@ -95,7 +96,19 @@ class GentooBootstrapper(DirectoryBootstrapper):
         raise NotImplementedError()
 
     def _verify_md5_sum(self, snapshot_tarball, snapshot_md5sum):
-        raise NotImplementedError()
+        needle = os.path.basename(snapshot_tarball) + '\n'
+        with open(snapshot_md5sum, 'r') as f:
+            if f.read().count(needle) != 1:
+                raise ValueError('File "%s" does not mention "%s" exactly once' \
+                        % (snapshot_md5sum, snapshot_tarball))
+
+        cwd = os.path.dirname(snapshot_md5sum)
+        self._executor.check_call([
+                COMMAND_MD5SUM,
+                '--strict',
+                '--check',
+                snapshot_md5sum,
+                ], cwd=cwd)
 
     def _uncompress_tarball(self, tarball_filename):
         extension = '.xz'
