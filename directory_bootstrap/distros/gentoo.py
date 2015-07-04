@@ -17,7 +17,7 @@ from tarfile import TarFile
 import directory_bootstrap.resources.gentoo as resources
 from directory_bootstrap.distros.base import DirectoryBootstrapper, date_argparse_type
 from directory_bootstrap.shared.commands import COMMAND_GPG, COMMAND_MD5SUM, \
-        COMMAND_SHA512SUM, COMMAND_UNXZ
+        COMMAND_SHA512SUM, COMMAND_TAR, COMMAND_UNXZ
 
 
 _DEFAULT_MIRROR = 'http://distfiles.gentoo.org/'
@@ -71,6 +71,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 COMMAND_GPG,
                 COMMAND_MD5SUM,
                 COMMAND_SHA512SUM,
+                COMMAND_TAR,
                 COMMAND_UNXZ,
                 ]
 
@@ -191,8 +192,11 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
     def _extract_tarball(self, tarball_filename, abs_target_root):
         self._messenger.info('Extracting file "%s" to "%s"...' % (tarball_filename, abs_target_root))
-        with TarFile.open(tarball_filename) as tf:
-            tf.extractall(path=abs_target_root)
+        self._executor.check_call([
+                COMMAND_TAR,
+                'xpf',
+                tarball_filename,
+            ], cwd=abs_target_root)
 
     def _require_fresh_enough(self, (year, month, day)):
         date_to_check = datetime.date(year, month, day)
