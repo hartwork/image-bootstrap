@@ -3,10 +3,12 @@
 
 from __future__ import print_function
 
+import errno
 import os
 import re
 
 from directory_bootstrap.distros.base import DirectoryBootstrapper
+from directory_bootstrap.shared.commands import COMMAND_UNXZ
 
 
 _DEFAULT_MIRROR = 'http://distfiles.gentoo.org/'
@@ -35,7 +37,9 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
     @staticmethod
     def get_commands_to_check_for():
-        return DirectoryBootstrapper.get_commands_to_check_for()
+        return DirectoryBootstrapper.get_commands_to_check_for() + [
+                COMMAND_UNXZ,
+                ]
 
     def _get_stage3_listing_url(self):
         return '%s/releases/%s/autobuilds/' % (self._mirror_base_url, self._architecture)
@@ -94,7 +98,24 @@ class GentooBootstrapper(DirectoryBootstrapper):
         raise NotImplementedError()
 
     def _uncompress_tarball(self, tarball_filename):
-        raise NotImplementedError()
+        extension = '.xz'
+
+        if not tarball_filename.endswith(extension):
+            raise ValueError('Filename "%s" does not end with "%s"' % (tarball_filename, extension))
+
+        uncompressed_tarball_filename = tarball_filename[:-len(extension)]
+
+        if not os.path.exists(uncompressed_tarball_filename):
+            self._executor.check_call([
+                    COMMAND_UNXZ,
+                    '--keep',
+                    tarball_filename,
+                    ])
+
+            if not os.path.exists(uncompressed_tarball_filename):
+                raise OSError(errno.ENOENT, 'File "%s" does not exists' % uncompressed_tarball_filename)
+
+        return uncompressed_tarball_filename
 
     def _extract_tarball(self, tarball_filename, abs_target_root):
         raise NotImplementedError()

@@ -28,6 +28,7 @@ COMMAND_TUNE2FS = 'tune2fs'
 COMMAND_UMOUNT = 'umount'
 COMMAND_UNAME = 'uname'
 COMMAND_UNSHARE = 'unshare'
+COMMAND_UNXZ = 'unxz'
 COMMAND_WGET = 'wget'
 
 
