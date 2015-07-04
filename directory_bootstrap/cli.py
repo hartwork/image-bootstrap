@@ -1,10 +1,6 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-import os
-import re
-import sys
-
 import directory_bootstrap.shared.loaders._argparse as argparse
 
 from directory_bootstrap.distros.arch import ArchBootstrapper
@@ -13,7 +9,7 @@ from directory_bootstrap.distros.base import BOOTSTRAPPER_CLASS_FIELD, \
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.messenger import Messenger, \
-        VERBOSITY_QUIET, VERBOSITY_VERBOSE
+        VERBOSITY_VERBOSE
 from directory_bootstrap.shared.metadata import VERSION_STR
 from directory_bootstrap.shared.output_control import \
         add_output_control_options, is_color_wanted, run_handle_errors

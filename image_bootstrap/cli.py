@@ -2,8 +2,6 @@
 # Licensed under AGPL v3 or later
 
 import os
-import sys
-import subprocess
 
 from directory_bootstrap.distros.base import \
         add_general_directory_bootstrapping_options
@@ -11,7 +9,7 @@ from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.loaders._argparse import \
         ArgumentParser, RawDescriptionHelpFormatter
 from directory_bootstrap.shared.messenger import Messenger, BANNER, \
-        VERBOSITY_QUIET, VERBOSITY_VERBOSE
+        VERBOSITY_VERBOSE
 from directory_bootstrap.shared.metadata import DESCRIPTION, VERSION_STR
 from directory_bootstrap.shared.output_control import \
         add_output_control_options, is_color_wanted, run_handle_errors

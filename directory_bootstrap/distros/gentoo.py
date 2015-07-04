@@ -11,8 +11,6 @@ import shutil
 import subprocess
 import tempfile
 
-from tarfile import TarFile
-
 from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
 
 import directory_bootstrap.resources.gentoo as resources

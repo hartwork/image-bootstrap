@@ -4,12 +4,9 @@
 from __future__ import print_function
 
 import datetime
-import errno
 import os
 import re
 import shutil
-import subprocess
-import sys
 import tempfile
 
 from tarfile import TarFile
