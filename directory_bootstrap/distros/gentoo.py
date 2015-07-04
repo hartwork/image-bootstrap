@@ -7,15 +7,21 @@ import datetime
 import errno
 import os
 import re
+import shutil
+import subprocess
+import tempfile
 
+from pkg_resources import resource_filename
 from tarfile import TarFile
 
+import directory_bootstrap.resources.gentoo as resources
 from directory_bootstrap.distros.base import DirectoryBootstrapper, date_argparse_type
-from directory_bootstrap.shared.commands import COMMAND_MD5SUM, \
+from directory_bootstrap.shared.commands import COMMAND_GPG, COMMAND_MD5SUM, \
         COMMAND_SHA512SUM, COMMAND_UNXZ
 
 
 _DEFAULT_MIRROR = 'http://distfiles.gentoo.org/'
+_GPG_DISPLAY_KEY_FORMAT = '0xlong'
 
 _year = '([2-9][0-9]{3})'
 _month = '(0[1-9]|1[12])'
@@ -57,9 +63,12 @@ class GentooBootstrapper(DirectoryBootstrapper):
         self._repository_date_triple_or_none = repository_date_triple_or_none
         self._abs_resolv_conf = abs_resolv_conf
 
+        self._gpg_supports_no_autostart = None
+
     @staticmethod
     def get_commands_to_check_for():
         return DirectoryBootstrapper.get_commands_to_check_for() + [
+                COMMAND_GPG,
                 COMMAND_MD5SUM,
                 COMMAND_SHA512SUM,
                 COMMAND_UNXZ,
@@ -78,10 +87,9 @@ class GentooBootstrapper(DirectoryBootstrapper):
         return self.extract_latest_date(snapshot_listing, _snapshot_date_matcher)
 
     def _download_stage3(self, stage3_date_str):
-        res = [None, None, None]
+        res = [None, None]
         for target_index, basename in (
-                (2, 'stage3-amd64-%s.tar.bz2.DIGESTS.asc' % stage3_date_str),
-                (1, 'stage3-amd64-%s.tar.bz2.DIGESTS' % stage3_date_str),
+                (1, 'stage3-amd64-%s.tar.bz2.DIGESTS.asc' % stage3_date_str),
                 (0, 'stage3-amd64-%s.tar.bz2' % stage3_date_str),
                 ):
             filename = os.path.join(self._abs_cache_dir, basename)
@@ -112,7 +120,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
         return res
 
-    def _verify_gpg_signature(self, testee_file, signature_file):
+    def _verify_detachted_gpg_signature(self, testee_file, signature_file):
         raise NotImplementedError()
 
     def _verify_sha512_sum(self, testee_file, digests_file):
@@ -200,7 +208,89 @@ class GentooBootstrapper(DirectoryBootstrapper):
         m = _snapshot_date_matcher.match(snapshot_date_str)
         return (int(m.group(1)), int(m.group(2)), int(m.group(3)))
 
+    def _get_gpg_argv_start(self, abs_gpg_home_dir):
+        assert self._gpg_supports_no_autostart is not None
+
+        res = [
+                COMMAND_GPG,
+                '--home', abs_gpg_home_dir,
+                '--keyid-format', _GPG_DISPLAY_KEY_FORMAT,
+                '--batch',
+            ]
+
+        if self._gpg_supports_no_autostart:
+            res += [
+                '--no-autostart',
+                ]
+
+        return res
+
+    def _check_gpg_for_no_autostart_support(self, abs_gpg_home_dir):
+        self._messenger.info('Checking if GnuPG understands the --no-autostart option...')
+        cmd_prefix = [
+            COMMAND_GPG,
+            '--home', abs_gpg_home_dir,
+            '--list-keys',
+            ]
+
+        try:
+            self._executor.check_call(cmd_prefix + ['--no-autostart'])
+        except subprocess.CalledProcessError:
+            # Does it work without it, at least or is there some unrelated trouble?
+            self._executor.check_call(cmd_prefix)
+
+            self._gpg_supports_no_autostart = False
+            self._messenger.info('No, it does not.')
+        else:
+            self._gpg_supports_no_autostart = True
+            self._messenger.info('Yes, it does.')
+
+    def _initialize_gpg_home(self, abs_temp_dir):
+        abs_gpg_home_dir = os.path.join(abs_temp_dir, 'gpg_home')
+
+        self._messenger.info('Initializing temporary GnuPG home at "%s"...' % abs_gpg_home_dir)
+        os.mkdir(abs_gpg_home_dir, 0700)
+
+        self._check_gpg_for_no_autostart_support(abs_gpg_home_dir)
+
+        release_pubring_gpg = resource_filename(resources.__name__, 'pubring.gpg')
+        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
+                '--import', release_pubring_gpg,
+            ]
+        self._executor.check_call(cmd)
+
+        return abs_gpg_home_dir
+
+    def _verify_detachted_gpg_signature(self, candidate_filename, signature_filename, abs_gpg_home_dir):
+        self._messenger.info('Verifying integrity of file "%s"...' % candidate_filename)
+        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
+                '--verify',
+                signature_filename,
+                candidate_filename,
+            ]
+        self._executor.check_call(cmd)
+
+    def _verify_clearsigned_gpg_signature(self, clearsigned_filename, output_filename, abs_gpg_home_dir):
+        self._messenger.info('Verifying integrity of file "%s", writing file "%s"...' \
+                % (clearsigned_filename, output_filename))
+
+        if os.path.exists(output_filename):
+            raise OSError(errno.EEXIST, 'File "%s" exists' % output_filename)
+
+        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
+                '--output', output_filename,
+                '--decrypt', clearsigned_filename,
+                ]
+        self._executor.check_call(cmd)
+
+        if not os.path.exists(output_filename):
+            raise OSError(errno.ENOENT, 'File "%s" does not exists' % output_filename)
+
     def run(self):
+        abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
+
+        abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
+
         stage3_listing = self.get_url_content(self._get_stage3_listing_url())
         snapshot_listing = self.get_url_content(self._get_portage_snapshot_listing_url())
 
@@ -216,7 +306,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
         else:
             snapshot_date_str = '%04d%02d%02d' % self._repository_date_triple_or_none
 
-        stage3_tarball, stage3_digests, stage3_digests_asc \
+        stage3_tarball, stage3_digests_asc \
                 = self._download_stage3(stage3_date_str)
 
         snapshot_tarball, snapshot_gpgsig, snapshot_md5sum, snapshot_uncompressed_md5sum \
@@ -224,9 +314,9 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
         snapshot_tarball_uncompressed = self._uncompress_tarball(snapshot_tarball)
 
-        self._verify_gpg_signature(stage3_digests, stage3_digests_asc)
-        self._verify_gpg_signature(stage3_md5sum, stage3_gpgsig)
-        self._verify_gpg_signature(stage3_unpacked_md5sum, stage3_gpgsig)
+        stage3_digests = os.path.join(abs_temp_dir, os.path.basename(stage3_digests_asc)[:-len('.asc')])
+        self._verify_clearsigned_gpg_signature(stage3_digests_asc, stage3_digests, abs_gpg_home_dir)
+        self._verify_detachted_gpg_signature(snapshot_tarball, snapshot_gpgsig, abs_gpg_home_dir)
 
         self._verify_sha512_sum(stage3_tarball, stage3_digests)
         self._verify_md5_sum(snapshot_tarball, snapshot_md5sum)
@@ -234,6 +324,9 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
         self._extract_tarball(stage3_tarball, self._abs_target_dir)
         self._extract_tarball(snapshot_tarball_uncompressed, os.path.join(self._abs_target_dir, 'usr'))
+
+        self._messenger.info('Cleaning up "%s"...' % abs_temp_dir)
+        shutil.rmtree(abs_temp_dir)
 
     @classmethod
     def add_arguments_to(clazz, distro):
