@@ -226,9 +226,10 @@ usage: image-bootstrap [-h] [--version] [--color {never,always,auto}]
                        [--bootloader-force] [--hostname NAME] [--openstack]
                        [--password PASSWORD | --password-file FILE]
                        [--resolv-conf FILE] [--disk-id ID]
-                       [--first-partition-uuid UUID] [--scripts-pre DIRECTORY]
-                       [--scripts-chroot DIRECTORY] [--scripts-post DIRECTORY]
-                       [--grub2-install COMMAND]
+                       [--first-partition-uuid UUID] [--machine-id ID]
+                       [--scripts-pre DIRECTORY] [--scripts-chroot DIRECTORY]
+                       [--scripts-post DIRECTORY] [--grub2-install COMMAND]
+                       [--cache-dir DIRECTORY]
                        DISTRIBUTION ... DEVICE
 
 Command line tool for creating bootable virtual machine images
@@ -281,6 +282,11 @@ script integration:
 command names:
   --grub2-install COMMAND
                         override grub2-install command
+
+general configuration:
+  --cache-dir DIRECTORY
+                        directory to use for downloads (default: /var/cache
+                        /directory-bootstrap/)
 
 subcommands (choice of distribution):
   Run "image-bootstrap DISTRIBUTION --help" for details on options specific to that distribution.
