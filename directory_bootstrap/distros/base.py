@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import os
+import re
 
 from abc import ABCMeta, abstractmethod
 
@@ -16,6 +17,21 @@ from directory_bootstrap.shared.namespace import unshare_current_process
 
 
 BOOTSTRAPPER_CLASS_FIELD = 'bootstrapper_class'
+
+_year = '([2-9][0-9]{3})'
+_month = '(0[1-9]|1[12])'
+_day = '(0[1-9]|[12][0-9]|3[01])'
+
+_argparse_date_matcher = re.compile('^%s-%s-%s$' % (_year, _month, _day))
+
+
+def date_argparse_type(text):
+    m = _argparse_date_matcher.match(text)
+    if m is None:
+        raise ValueError('Not a well-formed date: "%s"' % text)
+    return tuple((int(m.group(i)) for i in range(1, 3 + 1)))
+
+date_argparse_type.__name__ = 'date'
 
 
 class DirectoryBootstrapper(object):

@@ -14,7 +14,7 @@ import tempfile
 
 from tarfile import TarFile
 
-from directory_bootstrap.distros.base import DirectoryBootstrapper
+from directory_bootstrap.distros.base import DirectoryBootstrapper, date_argparse_type
 from directory_bootstrap.shared.commands import \
         COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, \
         COMMAND_UMOUNT, COMMAND_UNSHARE
@@ -39,16 +39,6 @@ _day = '(0[1-9]|[12][0-9]|3[01])'
 
 _keyring_package_date_matcher = re.compile('%s%s%s' % (_year, _month, _day))
 _image_date_matcher = re.compile('%s\\.%s\\.%s' % (_year, _month, _day))
-_argparse_date_matcher = re.compile('^%s-%s-%s$' % (_year, _month, _day))
-
-
-def date_argparse_type(text):
-    m = _argparse_date_matcher.match(text)
-    if m is None:
-        raise ValueError('Not a well-formed date: "%s"' % text)
-    return tuple((int(m.group(i)) for i in range(1, 3 + 1)))
-
-date_argparse_type.__name__ = 'date'
 
 
 class ArchBootstrapper(DirectoryBootstrapper):
