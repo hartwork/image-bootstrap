@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+import errno
 import os
 import re
 
@@ -93,3 +94,24 @@ class DirectoryBootstrapper(object):
                 url,
                 ]
         self._executor.check_call(cmd)
+
+    def _ensure_directory_writable(self, abs_path, creation_mode):
+        try:
+            os.makedirs(abs_path, creation_mode)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+            self._messenger.info('Checking access to "%s"...' % abs_path)
+            if not os.path.exists(abs_path):
+                raise IOError(errno.ENOENT, 'No such file or directory: \'%s\'' % abs_path)
+
+            if not os.access(os.path.join(abs_path, ''), os.W_OK):
+                raise IOError(errno.EACCES, 'Permission denied: \'%s\'' % abs_path)
+        else:
+            # NOTE: Sounding like future is intentional.
+            self._messenger.info('Creating directory "%s"...' % abs_path)
+
+    def ensure_directories_writable(self):
+        self._ensure_directory_writable(self._abs_cache_dir, 0755)
+        self._ensure_directory_writable(self._abs_target_dir, 0700)
