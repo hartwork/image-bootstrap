@@ -121,9 +121,6 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
         return res
 
-    def _verify_detachted_gpg_signature(self, testee_file, signature_file):
-        raise NotImplementedError()
-
     def _verify_sha512_sum(self, testee_file, digests_file):
         self._messenger.info('Verifying SHA512 checksum of file "%s"...' \
                 % testee_file)
