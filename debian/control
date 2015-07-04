@@ -9,7 +9,7 @@ Homepage: https://github.com/hartwork/image-bootstrap
 Package: image-bootstrap
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
- python-colorama, python-bs4, python-requests,
+ python-colorama, python-bs4, python-requests, python-pkg-resources,
  debootstrap | cdebootstrap | cdebootstrap-static,
  debian-archive-keyring, ubuntu-keyring, gnupg,
  extlinux, mbr,

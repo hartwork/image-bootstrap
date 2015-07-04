@@ -14,12 +14,13 @@ class Executor(object):
         self._default_stdout = stdout or sys.stdout
         self._default_stderr = stdout or sys.stderr
 
-    def check_call(self, argv, env=None):
+    def check_call(self, argv, env=None, cwd=None):
         self._messenger.announce_command(argv)
         subprocess.check_call(argv,
                 stdout=self._default_stdout,
                 stderr=self._default_stderr,
                 env=env,
+                cwd=cwd,
                 )
 
     def check_output(self, argv):

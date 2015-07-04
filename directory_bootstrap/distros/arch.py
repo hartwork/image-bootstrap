@@ -14,14 +14,11 @@ import tempfile
 
 from tarfile import TarFile
 
-import directory_bootstrap.shared.loaders._requests as requests
-
-from directory_bootstrap.shared.commands import check_for_commands, \
+from directory_bootstrap.distros.base import DirectoryBootstrapper, date_argparse_type
+from directory_bootstrap.shared.commands import \
         COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, \
-        COMMAND_UMOUNT, COMMAND_UNSHARE, COMMAND_WGET
-from directory_bootstrap.shared.loaders._bs4 import BeautifulSoup
+        COMMAND_UMOUNT, COMMAND_UNSHARE
 from directory_bootstrap.shared.mount import try_unmounting
-from directory_bootstrap.shared.namespace import unshare_current_process
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
 
 
@@ -42,88 +39,53 @@ _day = '(0[1-9]|[12][0-9]|3[01])'
 
 _keyring_package_date_matcher = re.compile('%s%s%s' % (_year, _month, _day))
 _image_date_matcher = re.compile('%s\\.%s\\.%s' % (_year, _month, _day))
-_argparse_date_matcher = re.compile('^%s-%s-%s$' % (_year, _month, _day))
 
 
-def date_argparse_type(text):
-    m = _argparse_date_matcher.match(text)
-    if m is None:
-        raise ValueError('Not a well-formed date: "%s"' % text)
-    return tuple((int(m.group(i)) for i in range(1, 3 + 1)))
+class ArchBootstrapper(DirectoryBootstrapper):
+    DISTRO_KEY = 'arch'
+    DISTRO_NAME_LONG = 'Arch Linux'
 
-date_argparse_type.__name__ = 'date'
-
-
-class ArchBootstrapper(object):
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
                 architecture, image_date_triple_or_none, mirror_url,
                 abs_resolv_conf):
-        self._messenger = messenger
-        self._executor = executor
-        self._abs_target_dir = abs_target_dir
-        self._abs_cache_dir = abs_cache_dir
+        super(ArchBootstrapper, self).__init__(
+                messenger,
+                executor,
+                abs_target_dir,
+                abs_cache_dir,
+                )
         self._architecture = architecture
         self._image_date_triple_or_none = image_date_triple_or_none
         self._mirror_url = mirror_url
         self._abs_resolv_conf = abs_resolv_conf
 
-    def check_for_commands(self):
-        check_for_commands(self._messenger, self.get_commands_to_check_for())
-
     @staticmethod
     def get_commands_to_check_for():
-        return [
+        return DirectoryBootstrapper.get_commands_to_check_for() + [
                 COMMAND_CHROOT,
                 COMMAND_GPG,
                 COMMAND_MOUNT,
                 COMMAND_UMOUNT,
-                COMMAND_WGET,
                 ]
 
     def _get_keyring_listing(self):
         self._messenger.info('Downloading keyring listing...')
-        r = requests.get('https://sources.archlinux.org/other/archlinux-keyring/')    
-        return r.text
+        return self.get_url_content('https://sources.archlinux.org/other/archlinux-keyring/')
 
     def _get_image_listing(self):
         self._messenger.info('Downloading image listing...')
-        r = requests.get('https://mirrors.kernel.org/archlinux/iso/')    
-        return r.text
-
-    def _extract_latest_date(self, listing_html, date_matcher):
-        soup = BeautifulSoup(listing_html)
-        dates = []
-        for link in soup.find_all('a'):
-            m = date_matcher.search(link.get('href'))
-            if not m:
-                continue
-            dates.append(m.group(0))
-
-        return sorted(dates)[-1]
-
-    def _download_url_to_file(self, url, filename):
-        if os.path.exists(filename):
-            self._messenger.info('Re-using cache file "%s".' % filename)
-            return
-
-        self._messenger.info('Downloading "%s"...' % url)
-        cmd = [
-                COMMAND_WGET,
-                '-O%s' % filename,
-                url,
-                ]
-        self._executor.check_call(cmd)
+        return self.get_url_content('https://mirrors.kernel.org/archlinux/iso/')
 
     def _download_keyring_package(self, package_yyyymmdd, suffix=''):
         filename = os.path.join(self._abs_cache_dir, 'archlinux-keyring-%s.tar.gz%s' % (package_yyyymmdd, suffix))
         url = 'https://sources.archlinux.org/other/archlinux-keyring/archlinux-keyring-%s.tar.gz%s' % (package_yyyymmdd, suffix)
-        self._download_url_to_file(url, filename)
+        self.download_url_to_file(url, filename)
         return filename
 
     def _download_image(self, image_yyyy_mm_dd, suffix=''):
         filename = os.path.join(self._abs_cache_dir, 'archlinux-bootstrap-%s-%s.tar.gz%s' % (image_yyyy_mm_dd, self._architecture, suffix))
         url = 'https://mirrors.kernel.org/archlinux/iso/%s/archlinux-bootstrap-%s-%s.tar.gz%s' % (image_yyyy_mm_dd, image_yyyy_mm_dd, self._architecture, suffix)
-        self._download_url_to_file(url, filename)
+        self.download_url_to_file(url, filename)
         return filename
 
     def _get_gpg_argv_start(self, abs_gpg_home_dir):
@@ -162,23 +124,6 @@ class ArchBootstrapper(object):
                 candidate_filename,
             ]
         self._executor.check_call(cmd)
-
-    def _ensure_directory_writable(self, abs_path, creation_mode):
-        try:
-            os.makedirs(abs_path, creation_mode)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-
-            self._messenger.info('Checking access to "%s"...' % abs_path)
-            if not os.path.exists(abs_path):
-                raise IOError(errno.ENOENT, 'No such file or directory: \'%s\'' % abs_path)
-
-            if not os.access(os.path.join(abs_path, ''), os.W_OK):
-                raise IOError(errno.EACCES, 'Permission denied: \'%s\'' % abs_path)
-        else:
-            # NOTE: Sounding like future is intentional.
-            self._messenger.info('Creating directory "%s"...' % abs_path)
 
     def _extract_image(self, image_filename, abs_temp_dir):
         abs_pacstrap_outer_root = os.path.join(abs_temp_dir, 'pacstrap_root', '')
@@ -281,24 +226,19 @@ class ArchBootstrapper(object):
             abs_path = os.path.join(abs_pacstrap_inner_root, target)
             try_unmounting(self._executor, abs_path)
 
-    def unshare(self):
-        unshare_current_process(self._messenger)
-
     def run(self):
-        self._ensure_directory_writable(self._abs_cache_dir, 0755)
-
-        self._ensure_directory_writable(self._abs_target_dir, 0700)
+        self.ensure_directories_writable()
 
         abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
         try:
             if self._image_date_triple_or_none is None:
                 image_listing_html = self._get_image_listing()
-                image_yyyy_mm_dd = self._extract_latest_date(image_listing_html, _image_date_matcher)
+                image_yyyy_mm_dd = self.extract_latest_date(image_listing_html, _image_date_matcher)
             else:
                 image_yyyy_mm_dd = '%04s.%02d.%02d' % self._image_date_triple_or_none
 
             keyring_listing_html = self._get_keyring_listing()
-            package_yyyymmdd = self._extract_latest_date(keyring_listing_html, _keyring_package_date_matcher)
+            package_yyyymmdd = self.extract_latest_date(keyring_listing_html, _keyring_package_date_matcher)
 
             package_sig_filename = self._download_keyring_package(package_yyyymmdd, '.sig')
             package_filename = self._download_keyring_package(package_yyyymmdd)
@@ -338,10 +278,24 @@ class ArchBootstrapper(object):
 
     @classmethod
     def add_arguments_to(clazz, distro):
+        distro.add_argument('--arch', dest='architecture', default='x86_64',
+                choices=SUPPORTED_ARCHITECTURES,
+                help='architecture (e.g. x86_64)')
         distro.add_argument('--image-date', type=date_argparse_type, metavar='YYYY-MM-DD',
                 help='date to use boostrap image of (e.g. 2015-05-01, default: latest available)')
-        distro.add_argument('--cache-dir', metavar='DIRECTORY', default='/var/cache/directory-bootstrap/',
-                help='directory to use for downloads (default: %(default)s)')
         distro.add_argument('--mirror', dest='mirror_url', metavar='URL',
                 default='http://mirror.rackspace.com/archlinux/$repo/os/$arch',
                 help='pacman mirror to use (default: %(default)s)')
+
+    @classmethod
+    def create(clazz, messenger, executor, options):
+        return clazz(
+                messenger,
+                executor,
+                os.path.abspath(options.target_dir),
+                os.path.abspath(options.cache_dir),
+                options.architecture,
+                options.image_date,
+                options.mirror_url,
+                os.path.abspath(options.resolv_conf),
+                )

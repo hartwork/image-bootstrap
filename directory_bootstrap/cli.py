@@ -7,11 +7,14 @@ import sys
 
 import directory_bootstrap.shared.loaders._argparse as argparse
 
-from directory_bootstrap.distros.arch import ArchBootstrapper, \
-        date_argparse_type, SUPPORTED_ARCHITECTURES
+from directory_bootstrap.distros.arch import ArchBootstrapper
+from directory_bootstrap.distros.base import BOOTSTRAPPER_CLASS_FIELD, \
+        add_general_directory_bootstrapping_options
+from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.messenger import Messenger, \
         VERBOSITY_QUIET, VERBOSITY_VERBOSE
+from directory_bootstrap.shared.metadata import VERSION_STR
 from directory_bootstrap.shared.output_control import \
         add_output_control_options, is_color_wanted, run_handle_errors
 
@@ -27,16 +30,9 @@ def _main__level_three(messenger, options):
     executor = Executor(messenger, stdout=child_process_stdout)
 
 
-    bootstrap = ArchBootstrapper(
-            messenger,
-            executor,
-            os.path.abspath(options.target_dir),
-            os.path.abspath(options.cache_dir),
-            options.architecture,
-            options.image_date,
-            options.mirror_url,
-            os.path.abspath(options.resolv_conf),
-            )
+    bootstrapper_class = getattr(options, BOOTSTRAPPER_CLASS_FIELD)
+    bootstrap = bootstrapper_class.create(messenger, executor, options)
+
     bootstrap.check_for_commands()
     bootstrap.unshare()
     bootstrap.run()
@@ -48,13 +44,14 @@ def _main__level_three(messenger, options):
 
 def _main__level_two():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--version', action='version', version=VERSION_STR)
 
     add_output_control_options(parser)
 
+    general = parser.add_argument_group('general configuration')
+    add_general_directory_bootstrapping_options(general)
+
     system = parser.add_argument_group('system configuration')
-    system.add_argument('--arch', dest='architecture', default='x86_64',
-            choices=SUPPORTED_ARCHITECTURES,
-            help='architecture (e.g. x86_64)')
     system.add_argument('--resolv-conf', metavar='FILE', default='/etc/resolv.conf',
         help='file to copy nameserver entries from (default: %(default)s)')
 
@@ -63,8 +60,13 @@ def _main__level_two():
                     'on options specific to that distribution.',
             metavar='DISTRIBUTION', help='choice of distribution, pick from:')
 
-    arch = distros.add_parser('arch')
-    ArchBootstrapper.add_arguments_to(arch)
+
+    for strategy_clazz in (
+            ArchBootstrapper,
+            GentooBootstrapper,
+            ):
+        strategy_clazz.add_parser_to(distros)
+
 
     parser.add_argument('target_dir', metavar='DIRECTORY')
 
