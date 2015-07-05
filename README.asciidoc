@@ -319,7 +319,7 @@ optional arguments:
   --release RELEASE     specify Debian release (default: jessie)
   --mirror URL          specify Debian mirror to use (e.g.
                         http://localhost:3142/debian for a local instance of
-                        apt-cacher-ng; default: http://http.debian.net/debian)
+                        apt-cacher-ng; default: http://httpredir.debian.org/debian)
   --debootstrap-opt OPTION
                         option to pass to debootstrap, in addition; can be
                         passed several times; use with --debootstrap-opt=...

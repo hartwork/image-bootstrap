@@ -44,7 +44,7 @@ class DebianStrategy(DistroStrategy):
     DISTRO_NAME_SHORT = 'Debian'
     DISTRO_NAME_LONG = 'Debian GNU/Linux'
     DEFAULT_RELEASE = 'jessie'
-    DEFAULT_MIRROR_URL = 'http://http.debian.net/debian'
+    DEFAULT_MIRROR_URL = 'http://httpredir.debian.org/debian'
     APT_CACHER_NG_URL = 'http://localhost:3142/debian'
 
     def __init__(self,
