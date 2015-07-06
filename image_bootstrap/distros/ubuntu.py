@@ -3,11 +3,11 @@
 
 import os
 
-from image_bootstrap.distros.debian import DebianStrategy
+from image_bootstrap.distros.debian_based import DebianBasedDistroStrategy
 from image_bootstrap.engine import BOOTLOADER__HOST_EXTLINUX
 
 
-class UbuntuStrategy(DebianStrategy):
+class UbuntuStrategy(DebianBasedDistroStrategy):
     DISTRO_KEY = 'ubuntu'
     DISTRO_NAME_SHORT = 'Ubuntu'
     DISTRO_NAME_LONG = 'Ubuntu'
@@ -17,6 +17,9 @@ class UbuntuStrategy(DebianStrategy):
 
     def select_bootloader(self):
         return BOOTLOADER__HOST_EXTLINUX
+
+    def check_release(self):
+        pass
 
     def get_kernel_package_name(self, architecture):
         return 'linux-image-generic'
