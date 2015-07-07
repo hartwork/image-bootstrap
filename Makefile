@@ -5,7 +5,12 @@
 PREFIX = /usr/local
 DESTDIR = /
 
+PYTHON = python
+
 all:
+
+compile:
+	$(PYTHON) -m compileall directory_bootstrap image_bootstrap
 
 deb:
 	debuild -uc -us --lintian-opts --display-info
@@ -21,4 +26,4 @@ install:
 mrproper:
 	git clean -d -f -x
 
-.PHONY: all deb dist install mrproper
+.PHONY: all compile deb dist install mrproper
