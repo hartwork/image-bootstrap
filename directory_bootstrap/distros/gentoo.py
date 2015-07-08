@@ -164,11 +164,12 @@ class GentooBootstrapper(DirectoryBootstrapper):
         self._messenger.info('Verifying MD5 checksum of file "%s"...' \
                 % snapshot_tarball)
 
-        needle = os.path.basename(snapshot_tarball) + '\n'
+        snapshot_tarball_basename = os.path.basename(snapshot_tarball)
+        needle = snapshot_tarball_basename + '\n'
         with open(snapshot_md5sum, 'r') as f:
             if f.read().count(needle) != 1:
                 raise ValueError('File "%s" does not mention "%s" exactly once' \
-                        % (snapshot_md5sum, snapshot_tarball))
+                        % (snapshot_md5sum, snapshot_tarball_basename))
 
         cwd = os.path.dirname(snapshot_md5sum)
         self._executor.check_call([
