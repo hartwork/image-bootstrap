@@ -30,7 +30,8 @@ def _main__level_three(messenger, options):
     bootstrap = bootstrapper_class.create(messenger, executor, options)
 
     bootstrap.check_for_commands()
-    bootstrap.unshare()
+    if bootstrap.wants_to_be_unshared():
+        bootstrap.unshare()
     bootstrap.run()
 
 

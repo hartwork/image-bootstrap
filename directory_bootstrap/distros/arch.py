@@ -56,6 +56,9 @@ class ArchBootstrapper(DirectoryBootstrapper):
         self._mirror_url = mirror_url
         self._abs_resolv_conf = abs_resolv_conf
 
+    def wants_to_be_unshared(self):
+        return True
+
     @staticmethod
     def get_commands_to_check_for():
         return DirectoryBootstrapper.get_commands_to_check_for() + [

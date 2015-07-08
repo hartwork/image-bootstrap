@@ -67,6 +67,9 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
         self._gpg_supports_no_autostart = None
 
+    def wants_to_be_unshared(self):
+        return False
+
     @staticmethod
     def get_commands_to_check_for():
         return DirectoryBootstrapper.get_commands_to_check_for() + [

@@ -50,6 +50,10 @@ class DirectoryBootstrapper(object):
         self._abs_target_dir = abs_target_dir
         self._abs_cache_dir = abs_cache_dir
 
+    @abstractmethod
+    def wants_to_be_unshared(self):
+        pass
+
     @classmethod
     def add_parser_to(clazz, distros):
         distro = distros.add_parser(clazz.DISTRO_KEY, help=clazz.DISTRO_NAME_LONG)
