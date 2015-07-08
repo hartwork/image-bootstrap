@@ -26,7 +26,8 @@ _year = '([2-9][0-9]{3})'
 _month = '(0[1-9]|1[12])'
 _day = '(0[1-9]|[12][0-9]|3[01])'
 
-_stage3_folder_date_matcher = re.compile('^%s%s%s' % (_year, _month, _day))
+_STAGE3_TARBALL_DATE_PATTERN = '^(?P<date>%s%s%s)/stage3-(?P<arch>[^ -]+)-[0-9]+\\.tar\\.[^ ]+ [1-9]+[0-9]*$' % (_year, _month, _day)
+_stage3_tarball_date_matcher = re.compile(_STAGE3_TARBALL_DATE_PATTERN)
 _snapshot_date_matcher = re.compile('%s%s%s' % (_year, _month, _day))
 
 
@@ -80,14 +81,40 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 COMMAND_UNXZ,
                 ]
 
-    def _get_stage3_listing_url(self):
-        return '%s/releases/%s/autobuilds/' % (self._mirror_base_url, self._architecture)
+    def _get_stage3_latest_file_url(self):
+        return '%s/releases/%s/autobuilds/latest-stage3.txt' % (
+                self._mirror_base_url,
+                self._architecture,
+                )
 
     def _get_portage_snapshot_listing_url(self):
         return '%s/releases/snapshots/current/' % self._mirror_base_url
 
-    def _find_latest_stage3_date(self, stage3_listing):
-        return self.extract_latest_date(stage3_listing, _stage3_folder_date_matcher)
+    def _find_latest_stage3_date(self, stage3_latest_file_content, stage3_latest_file_url):
+        matches = []
+        for line in stage3_latest_file_content.split('\n'):
+            m = _stage3_tarball_date_matcher.match(line)
+            if m is None:
+                continue
+            if m.group('arch') != self._architecture:
+                continue
+            matches.append(m)
+
+        message = ('Content from %s does not seem to contain '
+                'a single (or mutliple agreeing) well-formed default flavour '
+                'stage3 tarball entr(y|ies)'
+                % stage3_latest_file_url
+                )
+
+        if not matches:
+            raise ValueError(message)
+
+        date_strs = list(set([m.group(1) for m in matches]))
+        if len(date_strs) != 1:
+            raise ValueError(message)
+
+        m = matches[0]
+        return int(m.group(2)), int(m.group(3)), int(m.group(4))
 
     def _find_latest_snapshot_date(self, snapshot_listing):
         return self.extract_latest_date(snapshot_listing, _snapshot_date_matcher)
@@ -216,9 +243,8 @@ class GentooBootstrapper(DirectoryBootstrapper):
         if (today - date_to_check).days > self._max_age_days:
             raise _NotFreshEnoughException((year, month, day), self._max_age_days)
 
-    def _parse_stage3_listing_date(self, stage3_date_str):
-        m = _stage3_folder_date_matcher.match(stage3_date_str)
-        return (int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    def _format_date_stage3_tarball_filename(self, stage3_date_triple):
+        return '%04d%02d%02d' % stage3_date_triple
 
     def _parse_snapshot_listing_date(self, snapshot_date_str):
         m = _snapshot_date_matcher.match(snapshot_date_str)
@@ -311,12 +337,14 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
             if self._stage3_date_triple_or_none is None:
                 self._messenger.info('Searching for available stage3 tarballs...')
-                stage3_listing = self.get_url_content(self._get_stage3_listing_url())
-                stage3_date_str = self._find_latest_stage3_date(stage3_listing)
+                stage3_latest_file_url = self._get_stage3_latest_file_url()
+                stage3_latest_file_content = self.get_url_content(stage3_latest_file_url)
+                stage3_date_triple = self._find_latest_stage3_date(stage3_latest_file_content, stage3_latest_file_url)
+                stage3_date_str = self._format_date_stage3_tarball_filename(stage3_date_triple)
                 self._messenger.info('Found "%s" to be latest.' % stage3_date_str)
-                self._require_fresh_enough(self._parse_stage3_listing_date(stage3_date_str))
+                self._require_fresh_enough(stage3_date_triple)
             else:
-                stage3_date_str = '%04d%02d%02d' % self._stage3_date_triple_or_none
+                stage3_date_str = self._format_date_stage3_tarball_filename(self._stage3_date_triple_or_none)
 
             if self._repository_date_triple_or_none is None:
                 self._messenger.info('Searching for available portage repository snapshots...')
