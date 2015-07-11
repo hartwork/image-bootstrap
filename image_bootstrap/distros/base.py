@@ -31,7 +31,7 @@ class DistroStrategy(object):
         pass
 
     def check_architecture(self, architecture):
-        pass
+        return architecture
 
     @abstractmethod
     def allow_autostart_of_services(self, abs_mountpoint, allow):
