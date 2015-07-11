@@ -563,9 +563,16 @@ class BootstrapEngine(object):
         use_chroot = self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2
         use_device_map = self._bootloader_approach in BOOTLOADER__ANY_GRUB2__DRIVE
 
+        chroot_boot_grub = os.path.join(self._abs_mountpoint, 'boot', 'grub')
+        try:
+            os.makedirs(chroot_boot_grub, 0755)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
         if use_device_map:
             # Write device map just for being able to call grub-install
-            abs_chroot_device_map = os.path.join(self._abs_mountpoint, 'boot', 'grub', 'device.map')
+            abs_chroot_device_map = os.path.join(chroot_boot_grub, 'device.map')
             grub_drive = '(hd9999)'
             self._messenger.info('Writing device map to "%s" (mapping "%s" to "%s")...' \
                     % (abs_chroot_device_map, grub_drive, real_abs_target))
