@@ -103,6 +103,9 @@ class DistroStrategy(object):
     def get_initramfs_path(self):
         pass
 
+    def prepare_installation_of_packages(self, abs_mountpoint, env):
+        pass
+
     @classmethod
     def add_parser_to(clazz, distros):
         raise NotImplementedError()

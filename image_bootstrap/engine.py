@@ -872,6 +872,10 @@ class BootstrapEngine(object):
         # that we would only need to kill one way or another
         self._distro.allow_autostart_of_services(self._abs_mountpoint, allow)
 
+    def _prepare_installation_of_packages(self):
+        env = self.make_environment(tell_mountpoint=False)
+        self._distro.prepare_installation_of_packages(self._abs_mountpoint, env)
+
     def run(self):
         self._unshare()
         self._partition_device()
@@ -911,6 +915,7 @@ class BootstrapEngine(object):
                     try:
                         self._allow_autostart_of_services(False)
                         self._set_root_password_inside_chroot()
+                        self._prepare_installation_of_packages()
 
                         if self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2:
                             self._ensure_chroot_has_grub2_installed()
