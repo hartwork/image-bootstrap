@@ -23,13 +23,15 @@ class ArchStrategy(DistroStrategy):
     def __init__(self, messenger, executor,
                 abs_cache_dir, image_date_triple_or_none, mirror_url,
                 abs_resolv_conf):
-        self._messenger = messenger
-        self._executor = executor
+        super(ArchStrategy, self).__init__(
+                messenger,
+                executor,
+                abs_cache_dir,
+                abs_resolv_conf,
+                )
 
-        self._abs_cache_dir = abs_cache_dir
         self._image_date_triple_or_none = image_date_triple_or_none
         self._mirror_url = mirror_url
-        self._abs_resolv_conf = abs_resolv_conf
 
     def get_commands_to_check_for(self):
         return ArchBootstrapper.get_commands_to_check_for() + [

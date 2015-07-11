@@ -13,6 +13,13 @@ DISTRO_CLASS_FIELD = 'distro_class'
 class DistroStrategy(object):
     __metaclass__ = ABCMeta
 
+    def __init__(self, messenger, executor, abs_cache_dir, abs_resolv_conf):
+        self._messenger = messenger
+        self._executor = executor
+
+        self._abs_cache_dir = abs_cache_dir
+        self._abs_resolv_conf = abs_resolv_conf
+
     def check_release(self):
         pass
 
