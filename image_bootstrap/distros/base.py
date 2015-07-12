@@ -106,6 +106,10 @@ class DistroStrategy(object):
     def prepare_installation_of_packages(self, abs_mountpoint, env):
         pass
 
+    @abstractmethod
+    def install_kernel(self, abs_mountpoint, env):
+        pass
+
     @classmethod
     def add_parser_to(clazz, distros):
         raise NotImplementedError()

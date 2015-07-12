@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import errno
 import os
+import shutil
 
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.shared.commands import COMMAND_CHROOT
@@ -188,6 +189,31 @@ class GentooStrategy(DistroStrategy):
                 COMMAND_CHROOT,
                 abs_mountpoint,
                 'eselect', 'news', 'read', '--quiet', 'all',
+                ], env=env)
+
+    def install_kernel(self, abs_mountpoint, env):
+        self._set_package_keywords(abs_mountpoint, 'sys-kernel/vanilla-sources', '**')  # TODO ~arch
+        self._set_package_use_flags(abs_mountpoint, 'sys-kernel/vanilla-sources', 'symlink')
+        self._install_package_atoms(abs_mountpoint, env, ['sys-kernel/vanilla-sources'])
+        self._executor.check_call([
+                COMMAND_CHROOT, abs_mountpoint,
+                'make', '-C', '/usr/src/linux', 'defconfig',
+                ], env=env)
+        shutil.copyfile(
+                os.path.join(abs_mountpoint, 'usr/src/linux/.config'),
+                os.path.join(abs_mountpoint, 'usr/src/linux/.config.defconfig'),
+                )
+        self._executor.check_call([
+                COMMAND_CHROOT, abs_mountpoint,
+                'make',
+                '-C', '/usr/src/linux',
+                '-j2',
+                ], env=env)
+        self._executor.check_call([
+                COMMAND_CHROOT, abs_mountpoint,
+                'make',
+                '-C', '/usr/src/linux',
+                'modules_install', 'install',
                 ], env=env)
 
     @classmethod

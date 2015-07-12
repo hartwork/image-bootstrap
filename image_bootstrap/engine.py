@@ -883,6 +883,10 @@ class BootstrapEngine(object):
         env = self.make_environment(tell_mountpoint=False)
         self._distro.prepare_installation_of_packages(self._abs_mountpoint, env)
 
+    def _install_kernel(self):
+        env = self.make_environment(tell_mountpoint=False)
+        self._distro.install_kernel(self._abs_mountpoint, env)
+
     def run(self):
         self._unshare()
         self._partition_device()
@@ -936,6 +940,8 @@ class BootstrapEngine(object):
                             self.generate_grub_cfg_from_inside_chroot()
 
                             self._fix_grub_cfg_root_device()
+
+                        self._install_kernel()
 
                         if self._with_openstack:
                             # Essentials

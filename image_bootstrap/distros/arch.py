@@ -267,6 +267,9 @@ class ArchStrategy(DistroStrategy):
     def get_initramfs_path(self):
         return '/boot/initramfs-linux.img'
 
+    def install_kernel(self, abs_mountpoint, env):
+        pass  # Kernel installed, already
+
     @classmethod
     def add_parser_to(clazz, distros):
         arch = distros.add_parser(clazz.DISTRO_KEY, help=clazz.DISTRO_NAME_LONG)
