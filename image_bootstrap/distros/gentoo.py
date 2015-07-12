@@ -11,8 +11,6 @@ from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.shared.commands import COMMAND_CHROOT
 
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
-from image_bootstrap.engine import \
-        BOOTLOADER__HOST_GRUB2__DRIVE
 
 
 _ABS_PACKAGE_USE = '/etc/portage/package.use'
@@ -39,9 +37,6 @@ class GentooStrategy(DistroStrategy):
         self._max_age_days = max_age_days
         self._stage3_date_triple_or_none = stage3_date_triple_or_none
         self._repository_date_triple_or_none = repository_date_triple_or_none
-
-    def select_bootloader(self):
-        return BOOTLOADER__HOST_GRUB2__DRIVE
 
     def allow_autostart_of_services(self, abs_mountpoint, allow):
         pass  # services are not auto-started on Gentoo
