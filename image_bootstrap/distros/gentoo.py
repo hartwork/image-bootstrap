@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import errno
+import glob
 import os
 import shutil
 
@@ -108,6 +109,19 @@ class GentooStrategy(DistroStrategy):
                 ]
         self._executor.check_call(cmd, env=env)
 
+    def _make_initramfs_symlink(self, abs_mountpoint):
+        # NOTE: dracut default is /boot/initramfs-<kernel version>.img
+        initramfs_images = [os.path.basename(e) for e
+                in sorted(glob.glob(os.path.join(abs_mountpoint, 'boot/initramfs-*.img')))]
+        if not initramfs_images:
+            raise ValueError('No initramfs image found')  # TODO proper exception
+
+        target_basename = initramfs_images[-1]
+        if len(initramfs_images) > 1:
+            self._messenger.warn('Multiple initramfs images found, picked "%s" for the symlink' % target_basename)
+
+        os.symlink(target_basename, os.path.join(abs_mountpoint, self.get_initramfs_path().lstrip('/')))
+
     def generate_initramfs_from_inside_chroot(self, abs_mountpoint, env):
         self._set_package_keywords(abs_mountpoint, 'sys-kernel/dracut', '**')  # TODO ~arch
         self._install_package_atoms(abs_mountpoint, env, ['sys-kernel/dracut'])
@@ -115,8 +129,9 @@ class GentooStrategy(DistroStrategy):
                 COMMAND_CHROOT,
                 abs_mountpoint,
                 'dracut',
-                self.get_initramfs_path(),
                 ], env=env)
+
+        self._make_initramfs_symlink(abs_mountpoint)
 
     def get_chroot_command_grub2_install(self):
         return 'grub2-install'
@@ -130,8 +145,7 @@ class GentooStrategy(DistroStrategy):
                 ]
 
     def get_initramfs_path(self):
-        # NOTE: dracut default is /boot/initramfs-<kernel version>.img
-        return '/boot/initramfs.img'
+        return '/boot/initramfs'
 
     def get_vmlinuz_path(self):
         return '/boot/vmlinuz'
