@@ -26,6 +26,7 @@ from image_bootstrap.engine import \
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD
 from image_bootstrap.distros.arch import ArchStrategy
 from image_bootstrap.distros.debian import DebianStrategy
+from image_bootstrap.distros.gentoo import GentooStrategy
 from image_bootstrap.distros.ubuntu import UbuntuStrategy
 from image_bootstrap.types.disk_id import disk_id_type
 from image_bootstrap.types.machine_id import machine_id_type
@@ -155,6 +156,7 @@ def _main__level_two():
     for strategy_clazz in (
             ArchStrategy,
             DebianStrategy,
+            GentooStrategy,
             UbuntuStrategy,
             ):
         strategy_clazz.add_parser_to(distros)
