@@ -935,13 +935,13 @@ class BootstrapEngine(object):
                         if self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2:
                             self._install_bootloader__grub2()
 
+                        self._install_kernel()
+
                         if self._bootloader_approach in BOOTLOADER__ANY_GRUB:
                             self._messenger.info('Generating GRUB configuration...')
                             self.generate_grub_cfg_from_inside_chroot()
 
                             self._fix_grub_cfg_root_device()
-
-                        self._install_kernel()
 
                         if self._with_openstack:
                             # Essentials
