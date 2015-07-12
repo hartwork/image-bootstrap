@@ -72,6 +72,7 @@ class GentooStrategy(DistroStrategy):
 
     def _install_package_atoms(self, abs_mountpoint, env, packages):
         env = env.copy().update({
+            'DONT_MOUNT_BOOT': '1',  # sys-boot/grub
             'MAKEOPTS': '-j2',
         })
         self._executor.check_call([
