@@ -90,7 +90,18 @@ class GentooStrategy(DistroStrategy):
                 'sys-boot/grub', 'grub_platforms_pc', 'sys-boot/grub:2')
         self._install_package_atoms(abs_mountpoint, env, ['sys-boot/grub:2'])
 
+    def _disable_grub2_gfxmode(self, abs_mountpoint, env):
+        self._executor.check_call([
+                COMMAND_CHROOT, abs_mountpoint,
+                'sed',
+                '/GRUB_TERMINAL=/ s,.*GRUB_TERMINAL=.*,GRUB_TERMINAL=console  # forced by image-bootstrap,',
+                '-i', '/etc/default/grub',
+                ], env=env)
+
     def generate_grub_cfg_from_inside_chroot(self, abs_mountpoint, env):
+        # TODO Limit to use with OpenStack
+        self._disable_grub2_gfxmode(abs_mountpoint, env)
+
         cmd = [
                 COMMAND_CHROOT,
                 abs_mountpoint,
