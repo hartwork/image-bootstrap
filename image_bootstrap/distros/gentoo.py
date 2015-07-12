@@ -88,7 +88,9 @@ class GentooStrategy(DistroStrategy):
 
     def ensure_chroot_has_grub2_installed(self, abs_mountpoint, env):
         self._set_package_use_flags(abs_mountpoint,
-                'sys-boot/grub', 'grub_platforms_pc', 'sys-boot/grub:2')
+                'sys-boot/grub', 'device-mapper grub_platforms_pc', 'sys-boot/grub:2')
+        self._set_package_use_flags(abs_mountpoint,
+                'sys-fs/lvm2', '-thin')
         self._install_package_atoms(abs_mountpoint, env, ['sys-boot/grub:2'])
 
     def _disable_grub2_gfxmode(self, abs_mountpoint, env):
