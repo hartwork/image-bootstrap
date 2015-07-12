@@ -937,12 +937,6 @@ class BootstrapEngine(object):
 
                         self._install_kernel()
 
-                        if self._bootloader_approach in BOOTLOADER__ANY_GRUB:
-                            self._messenger.info('Generating GRUB configuration...')
-                            self.generate_grub_cfg_from_inside_chroot()
-
-                            self._fix_grub_cfg_root_device()
-
                         if self._with_openstack:
                             # Essentials
                             self._install_sudo()
@@ -958,6 +952,11 @@ class BootstrapEngine(object):
 
                         self._adjust_initramfs_generator_config()
                         self.generate_initramfs_from_inside_chroot()
+
+                        if self._bootloader_approach in BOOTLOADER__ANY_GRUB:
+                            self._messenger.info('Generating GRUB configuration...')
+                            self.generate_grub_cfg_from_inside_chroot()
+                            self._fix_grub_cfg_root_device()
 
                         if self._abs_scripts_dir_chroot:
                             self._copy_chroot_scripts()
