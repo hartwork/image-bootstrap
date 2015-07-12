@@ -71,6 +71,9 @@ class GentooStrategy(DistroStrategy):
             print('%s %s' % (package_name, keywords_str), file=f)
 
     def _install_package_atoms(self, abs_mountpoint, env, packages):
+        env = env.copy().update({
+            'MAKEOPTS': '-j2',
+        })
         self._executor.check_call([
                 COMMAND_CHROOT,
                 abs_mountpoint,
