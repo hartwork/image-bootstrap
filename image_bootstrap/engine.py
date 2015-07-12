@@ -566,7 +566,7 @@ class BootstrapEngine(object):
         if use_device_map:
             # Write device map just for being able to call grub-install
             abs_chroot_device_map = os.path.join(self._abs_mountpoint, 'boot', 'grub', 'device.map')
-            grub_drive = '(hd0)'
+            grub_drive = '(hd9999)'
             self._messenger.info('Writing device map to "%s" (mapping "%s" to "%s")...' \
                     % (abs_chroot_device_map, grub_drive, real_abs_target))
             f = open(abs_chroot_device_map, 'w')
