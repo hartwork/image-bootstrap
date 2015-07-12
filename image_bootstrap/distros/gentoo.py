@@ -109,6 +109,19 @@ class GentooStrategy(DistroStrategy):
                 ]
         self._executor.check_call(cmd, env=env)
 
+    def _get_installed_kernel_version(self, abs_mountpoint):
+        prefix = 'vmlinuz-'
+        kernel_bins = [os.path.basename(e) for e
+                in sorted(glob.glob(os.path.join(abs_mountpoint, 'boot/%s*' % prefix)))]
+        if not kernel_bins:
+            raise ValueError('No kernel binary found')  # TODO proper exception
+
+        kernel_version = kernel_bins[-1][len(prefix):]
+        if len(kernel_bins) > 1:
+            self._messenger.warn('Multiple kernel binaries found, picked "%s-%s" for version extraction' % (prefix, kernel_version))
+
+        return kernel_version
+
     def _make_initramfs_symlink(self, abs_mountpoint):
         # NOTE: dracut default is /boot/initramfs-<kernel version>.img
         initramfs_images = [os.path.basename(e) for e
@@ -123,12 +136,17 @@ class GentooStrategy(DistroStrategy):
         os.symlink(target_basename, os.path.join(abs_mountpoint, self.get_initramfs_path().lstrip('/')))
 
     def generate_initramfs_from_inside_chroot(self, abs_mountpoint, env):
+        kernel_version_str = self._get_installed_kernel_version(abs_mountpoint)
+
         self._set_package_keywords(abs_mountpoint, 'sys-kernel/dracut', '**')  # TODO ~arch
         self._install_package_atoms(abs_mountpoint, env, ['sys-kernel/dracut'])
+        # NOTE: Pass kernel version to Dracut so it does not end up
+        #       picking that of the host (rather than the chroot) from uname
         self._executor.check_call([
                 COMMAND_CHROOT,
                 abs_mountpoint,
                 'dracut',
+                '--kver', kernel_version_str,
                 ], env=env)
 
         self._make_initramfs_symlink(abs_mountpoint)
