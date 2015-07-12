@@ -205,6 +205,23 @@ class GentooStrategy(DistroStrategy):
                 'eselect', 'news', 'read', '--quiet', 'all',
                 ], env=env)
 
+    def _enable_kernel_option(self, option_name, abs_mountpoint, env):
+        self._executor.check_call([
+                COMMAND_CHROOT, abs_mountpoint,
+                '/usr/src/linux/scripts/config',
+                '--file', '/usr/src/linux/.config',
+                '--enable', option_name,
+                ], env=env)
+
+    def _configure_kernel__enable_kvm_support(self, abs_mountpoint, env):
+        for option_name in (
+                    'VIRTIO_NET',
+                    'VIRTIO_BLK',
+                    'VIRTIO_BALLOON',
+                    'VIRTIO_CONSOLE',
+                    ):
+            self._enable_kernel_option(option_name, abs_mountpoint, env)
+
     def install_kernel(self, abs_mountpoint, env):
         self._set_package_keywords(abs_mountpoint, 'sys-kernel/vanilla-sources', '**')  # TODO ~arch
         self._set_package_use_flags(abs_mountpoint, 'sys-kernel/vanilla-sources', 'symlink')
@@ -217,6 +234,9 @@ class GentooStrategy(DistroStrategy):
                 os.path.join(abs_mountpoint, 'usr/src/linux/.config'),
                 os.path.join(abs_mountpoint, 'usr/src/linux/.config.defconfig'),
                 )
+
+        self._configure_kernel__enable_kvm_support(abs_mountpoint, env)
+
         self._executor.check_call([
                 COMMAND_CHROOT, abs_mountpoint,
                 'make',
