@@ -924,8 +924,11 @@ class BootstrapEngine(object):
                         self._set_root_password_inside_chroot()
                         self._prepare_installation_of_packages()
 
-                        if self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2:
+                        if self._bootloader_approach in BOOTLOADER__ANY_GRUB:
+                            # Need grub2-mkconfig in any case
                             self._ensure_chroot_has_grub2_installed()
+
+                        if self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2:
                             self._install_bootloader__grub2()
 
                         if self._bootloader_approach in BOOTLOADER__ANY_GRUB:
