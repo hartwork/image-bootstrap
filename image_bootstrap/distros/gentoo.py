@@ -240,9 +240,17 @@ class GentooStrategy(DistroStrategy):
     def install_sudo(self, abs_mountpoint, env):
         self._install_package_atoms(abs_mountpoint, env, ['app-admin/sudo'])
 
+    def _create_network_init_script_symlink(self, interface_name, abs_mountpoint):
+        net_service = 'net.%s' % interface_name
+        net_init_script = os.path.join(abs_mountpoint, 'etc/init.d', net_service)
+        os.symlink('net.lo', net_init_script)
+        return net_service
+
     def make_openstack_services_autostart(self, abs_mountpoint, env):
+        net_service = self._create_network_init_script_symlink('eth0', abs_mountpoint)
+
         for service in (
-                'net.eth0',
+                net_service,
                 'sshd',
                 'sshd-need-root',  # written by image-bootstrap above
                 'cloud-init-local',
