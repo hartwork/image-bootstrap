@@ -8,6 +8,8 @@ import glob
 import os
 import shutil
 
+from textwrap import dedent
+
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.shared.commands import COMMAND_CHROOT
 
@@ -174,6 +176,29 @@ class GentooStrategy(DistroStrategy):
     def install_sshd(self, abs_mountpoint, env):
         self._install_package_atoms(abs_mountpoint, env, ['net-misc/openssh'])
 
+        init_script_path = os.path.join(abs_mountpoint, 'etc/init.d/sshd-need-root')
+        with open(init_script_path, 'w') as f:
+            print(dedent("""\
+                    #!/sbin/runscript
+                    # Workaround to ensure that sshd has a writable root file system
+                    # during key generation
+                    # https://bugs.gentoo.org/show_bug.cgi?id=554804
+                    #
+                    # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
+                    # Licensed under AGPL v3 or later
+
+                    depend() {
+                        if ! ls /etc/ssh/ssh_host_*_key 1>/dev/null 2>/dev/null; then
+                            need root
+                        fi
+                        before sshd
+                    }
+
+                    start() { :; }
+                    stop() { :; }
+                    """), file=f)
+            os.fchmod(f.fileno(), 0755)
+
     def install_sudo(self, abs_mountpoint, env):
         self._install_package_atoms(abs_mountpoint, env, ['app-admin/sudo'])
 
@@ -181,6 +206,7 @@ class GentooStrategy(DistroStrategy):
         for service in (
                 # TODO network
                 'sshd',
+                'sshd-need-root',  # written by image-bootstrap above
                 'cloud-init-local',
                 'cloud-init',
                 'cloud-config',
