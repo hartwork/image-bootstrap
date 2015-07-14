@@ -920,7 +920,6 @@ class BootstrapEngine(object):
                     self._create_etc_resolv_conf()  # re-write
                     self._create_etc_fstab()
                     self._create_etc_machine_id()  # potentially re-write
-                    self.create_network_configuration()
                     self._run_pre_scripts()
                     if self._bootloader_approach in BOOTLOADER__HOST_GRUB2:
                         self._install_bootloader__grub2()
@@ -954,6 +953,8 @@ class BootstrapEngine(object):
                             # Goodies
                             self._disable_clearing_tty1()
                             self._disable_pcspkr_autoloading()
+
+                        self.create_network_configuration()  # after DHCP client install
 
                         self._adjust_initramfs_generator_config()
                         self.generate_initramfs_from_inside_chroot()
