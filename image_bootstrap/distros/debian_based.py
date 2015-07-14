@@ -207,6 +207,9 @@ class DebianBasedDistroStrategy(DistroStrategy):
                 ] + list(package_names)
         self._executor.check_call(cmd, env=env)
 
+    def install_dhcp_client(self, abs_mountpoint, env):
+        pass  # already installed
+
     def install_sudo(self, abs_mountpoint, env):
         self._install_packages(['sudo'], abs_mountpoint, env)
 

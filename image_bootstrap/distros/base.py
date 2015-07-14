@@ -76,6 +76,10 @@ class DistroStrategy(object):
         return self.DISTRO_KEY
 
     @abstractmethod
+    def install_dhcp_client(self, abs_mountpoint, env):
+        pass
+
+    @abstractmethod
     def install_sudo(self, abs_mountpoint, env):
         pass
 

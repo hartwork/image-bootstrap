@@ -234,6 +234,9 @@ class GentooStrategy(DistroStrategy):
                     """), file=f)
             os.fchmod(f.fileno(), 0755)
 
+    def install_dhcp_client(self, abs_mountpoint, env):
+        self._install_package_atoms(abs_mountpoint, env, ['net-misc/dhcpcd'])
+
     def install_sudo(self, abs_mountpoint, env):
         self._install_package_atoms(abs_mountpoint, env, ['app-admin/sudo'])
 

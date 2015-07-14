@@ -760,6 +760,10 @@ class BootstrapEngine(object):
             self._messenger.warn('Using --password PASSWORD is a security risk more often than not; '
                     'please consider using --password-file FILE, instead.')
 
+    def _install_dhcp_client(self):
+        env = self.make_environment(tell_mountpoint=False)
+        return self._distro.install_dhcp_client(self._abs_mountpoint, env)
+
     def _install_sudo(self):
         env = self.make_environment(tell_mountpoint=False)
         return self._distro.install_sudo(self._abs_mountpoint, env)
@@ -939,6 +943,7 @@ class BootstrapEngine(object):
 
                         if self._with_openstack:
                             # Essentials
+                            self._install_dhcp_client()
                             self._install_sudo()
                             self._create_sudo_nopasswd_user()
                             self._install_cloud_init_and_friends()

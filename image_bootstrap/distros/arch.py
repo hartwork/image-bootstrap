@@ -210,6 +210,9 @@ class ArchStrategy(DistroStrategy):
                 ]
         self._executor.check_call(cmd)
 
+    def install_dhcp_client(self, abs_mountpoint, env):
+        pass  # already installed (part of systemd)
+
     def install_sudo(self, abs_mountpoint, env):
         self._install_packages(['sudo'], abs_mountpoint, env)
 
