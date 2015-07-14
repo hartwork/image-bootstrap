@@ -190,8 +190,7 @@ class GentooStrategy(DistroStrategy):
                 COMMAND_CHROOT,
                 abs_mountpoint,
                 'rc-update',
-                'add',
-                service,
+                'add', service, 'default',
                 ], env=env)
 
     def perform_in_chroot_shipping_clean_up(self, abs_mountpoint, env):
