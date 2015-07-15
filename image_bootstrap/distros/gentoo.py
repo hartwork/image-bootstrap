@@ -41,8 +41,23 @@ class GentooStrategy(DistroStrategy):
         self._stage3_date_triple_or_none = stage3_date_triple_or_none
         self._repository_date_triple_or_none = repository_date_triple_or_none
 
+    def _write_etc_conf_d_hostname(self, abs_mountpoint, hostname):
+        etc_conf_d = os.path.join(abs_mountpoint, 'etc/conf.d')
+        try:
+            os.makedirs(etc_conf_d, 0755)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+        etc_conf_d_hostname = os.path.join(etc_conf_d, 'hostname')
+        with open(etc_conf_d_hostname, 'w') as f:
+            print(dedent("""\
+                    # Set to the hostname of this machine
+                    hostname="%s"
+                    """ % hostname), file=f)
+
     def configure_hostname(self, abs_mountpoint, hostname):
-        self.write_etc_hostname(abs_mountpoint, hostname)
+        self._write_etc_conf_d_hostname(abs_mountpoint, hostname)
 
     def allow_autostart_of_services(self, abs_mountpoint, allow):
         pass  # services are not auto-started on Gentoo
