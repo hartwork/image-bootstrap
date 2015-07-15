@@ -22,7 +22,7 @@ Welcome to the home of *image-bootstrap* (and its little brother *directory-boot
 *image-bootstrap* is a command line tool to generate bootable virtual machine images
 and write them to a given _block device_. +
 Linux distributions supported by *image-bootstrap* currently include:
-Arch, Debian, Ubuntu. +
+Arch, Debian, Gentoo, Ubuntu. +
 When passing the `--openstack` parameter, images are
 http://docs.openstack.org/image-guide/content/ch_openstack_images.html[prepared for use with OpenStack].
 
