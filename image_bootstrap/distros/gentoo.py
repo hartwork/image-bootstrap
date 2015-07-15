@@ -129,6 +129,8 @@ class GentooStrategy(DistroStrategy):
         self._executor.check_call([
                 COMMAND_CHROOT,
                 abs_mountpoint,
+                'env',
+                'FEATURES=-news',
                 'emerge',
                 '--ignore-default-opts',
                 '--tree',
@@ -329,12 +331,6 @@ class GentooStrategy(DistroStrategy):
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     raise
-
-        self._executor.check_call([
-                COMMAND_CHROOT,
-                abs_mountpoint,
-                'eselect', 'news', 'read', '--quiet', 'all',
-                ], env=env)
 
     def _enable_kernel_option(self, option_name, abs_mountpoint, env):
         self._executor.check_call([
