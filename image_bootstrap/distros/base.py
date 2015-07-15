@@ -3,6 +3,8 @@
 
 from __future__ import print_function
 
+import os
+
 from abc import ABCMeta, abstractmethod
 
 from image_bootstrap.engine import \
@@ -32,7 +34,7 @@ class DistroStrategy(object):
         filename = os.path.join(abs_mountpoint, 'etc', 'hostname')
         self._messenger.info('Writing file "%s"...' % filename)
         f = open(filename, 'w')
-        print(self._hostname, file=f)
+        print(hostname, file=f)
         f.close()
 
     @abstractmethod  # leave calling write_etc_hostname to derived classes
