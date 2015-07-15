@@ -323,6 +323,14 @@ class GentooStrategy(DistroStrategy):
                     ):
             self._enable_kernel_option(option_name, abs_mountpoint, env)
 
+    def _configure_kernel__finish(self, abs_mountpoint, env):
+        self._executor.check_call([
+                COMMAND_CHROOT, abs_mountpoint,
+                'make',
+                '-C', '/usr/src/linux',
+                'olddefconfig',
+                ], env=env)
+
     def install_kernel(self, abs_mountpoint, env):
         self._set_package_keywords(abs_mountpoint, 'sys-kernel/vanilla-sources', '**')  # TODO ~arch
         self._set_package_use_flags(abs_mountpoint, 'sys-kernel/vanilla-sources', 'symlink')
@@ -337,6 +345,7 @@ class GentooStrategy(DistroStrategy):
                 )
 
         self._configure_kernel__enable_kvm_support(abs_mountpoint, env)
+        self._configure_kernel__finish(abs_mountpoint, env)
 
         self._executor.check_call([
                 COMMAND_CHROOT, abs_mountpoint,
