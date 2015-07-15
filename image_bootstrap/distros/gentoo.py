@@ -134,9 +134,18 @@ class GentooStrategy(DistroStrategy):
                 '-i', '/etc/default/grub',
                 ], env=env)
 
+    def _ensure_eth0_naming(self, abs_mountpoint, env):
+        self._executor.check_call([
+                COMMAND_CHROOT, abs_mountpoint,
+                'sed',
+                's,#GRUB_CMDLINE_LINUX=.*",GRUB_CMDLINE_LINUX="net.ifnames=0"  # set by image-bootstrap,',
+                '-i', '/etc/default/grub',
+                ], env=env)
+
     def generate_grub_cfg_from_inside_chroot(self, abs_mountpoint, env):
         # TODO Limit to use with OpenStack
         self._disable_grub2_gfxmode(abs_mountpoint, env)
+        self._ensure_eth0_naming(abs_mountpoint, env)
 
         cmd = [
                 COMMAND_CHROOT,
