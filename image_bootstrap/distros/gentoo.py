@@ -315,12 +315,44 @@ class GentooStrategy(DistroStrategy):
                 ], env=env)
 
     def _configure_kernel__enable_kvm_support(self, abs_mountpoint, env):
-        for option_name in (
-                    'VIRTIO_NET',
-                    'VIRTIO_BLK',
-                    'VIRTIO_BALLOON',
-                    'VIRTIO_CONSOLE',
-                    ):
+        tasks = dedent("""\
+                # Based on linux-4.0.1/arch/x86/configs/kvm_guest.config
+                CONFIG_NET=y
+                CONFIG_NET_CORE=y
+                CONFIG_NETDEVICES=y
+                CONFIG_BLOCK=y
+                CONFIG_BLK_DEV=y
+                CONFIG_NETWORK_FILESYSTEMS=y
+                CONFIG_INET=y
+                CONFIG_TTY=y
+                CONFIG_SERIAL_8250=y
+                CONFIG_SERIAL_8250_CONSOLE=y
+                CONFIG_IP_PNP=y
+                CONFIG_IP_PNP_DHCP=y
+                CONFIG_BINFMT_ELF=y
+                CONFIG_PCI=y
+                CONFIG_PCI_MSI=y
+                # CONFIG_DEBUG_KERNEL=y
+                CONFIG_VIRTUALIZATION=y
+                CONFIG_HYPERVISOR_GUEST=y
+                CONFIG_PARAVIRT=y
+                CONFIG_KVM_GUEST=y
+                CONFIG_VIRTIO=y
+                CONFIG_VIRTIO_PCI=y
+                CONFIG_VIRTIO_BLK=y
+                CONFIG_VIRTIO_CONSOLE=y
+                CONFIG_VIRTIO_NET=y
+                CONFIG_9P_FS=y
+                CONFIG_NET_9P=y
+                CONFIG_NET_9P_VIRTIO=y
+                """)
+        for line in tasks.split('\n'):
+            if not line or line.startswith('#'):
+                continue
+            assert line.startswith('CONFIG_')
+            assert line.endswith('=y')
+            option_name = line[len('CONFIG_'):-len('=y')]
+
             self._enable_kernel_option(option_name, abs_mountpoint, env)
 
     def _configure_kernel__finish(self, abs_mountpoint, env):
