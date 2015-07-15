@@ -270,6 +270,8 @@ machine configuration:
   --first-partition-uuid UUID
                         specific UUID to apply to first partition, e.g.
                         c1b9d5a2-f162-11cf-9ece-0020afc76f16
+  --machine-id ID       specific machine identifier to apply, e.g.
+                        c1b9d5a2f16211cf9ece0020afc76f16
 
 script integration:
   --scripts-pre DIRECTORY
@@ -297,6 +299,7 @@ subcommands (choice of distribution):
   DISTRIBUTION          choice of distribution, pick from:
     arch                Arch Linux
     debian              Debian GNU/Linux
+    gentoo              Gentoo
     ubuntu              Ubuntu
 
      _                          __             __      __               
