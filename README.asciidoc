@@ -40,11 +40,11 @@ History
 https://github.com/grml/grml-debootstrap[grml-debootstrap].
 Primarily, it can be used to create Debian/Ubuntu or Arch images ready to be launched as a virtual machine.
 
-In comparision to grml-debootstrap, *image-bootstrap*
+In comparision to grml-debootstrap, by now *image-bootstrap*
 
  * installs to block devices only,
 
- * supports several approaches to installing GRUB (including _not_ to install GRUB at all),
+ * supports several approaches to installing GRUB 2.x, or extlinux, or no bootloader at all,
 
  * does not leak the host's hostname into the resulting image,
 
@@ -54,7 +54,10 @@ In comparision to grml-debootstrap, *image-bootstrap*
  * supports using a custom `/ect/resolv.conf` file
    (e.g. to not leak your home router model name from `/ect/resolv.conf` into the image),
 
- * supports Arch Linux,
+ * has support for installing Arch Linux, Gentoo and Ubuntu (besides Debian),
+
+ * is able to create
+   http://docs.openstack.org/image-guide/content/ch_openstack_images.html[OpenStack images],
 
  * is written in Python rather than Bash/mksh, and
 
