@@ -7,6 +7,7 @@ import os
 
 from abc import ABCMeta, abstractmethod
 
+from directory_bootstrap.shared.commands import COMMAND_WGET
 from image_bootstrap.engine import \
         BOOTLOADER__CHROOT_GRUB2__DRIVE
 
@@ -128,6 +129,22 @@ class DistroStrategy(object):
     @abstractmethod
     def install_kernel(self, abs_mountpoint, env):
         pass
+
+    def _fetch_install_chmod(self, url, abs_mountpoint, local_path, permissions):
+        full_local_path = os.path.join(abs_mountpoint, local_path.lstrip('/'))
+        cmd = [
+                COMMAND_WGET,
+                '-O%s' % full_local_path,
+                url,
+                ]
+        self._executor.check_call(cmd)
+        os.chmod(full_local_path, permissions)
+
+    def install_growpart(self, abs_mountpoint):
+        self._messenger.info('Fetching growpart of cloud-utils...')
+        self._fetch_install_chmod(
+                'https://bazaar.launchpad.net/~cloud-utils-dev/cloud-utils/trunk/download/head:/growpart-20110225134600-d84xgz6209r194ob-1/growpart',
+                abs_mountpoint, '/usr/bin/growpart', 0755)
 
     @classmethod
     def add_parser_to(clazz, distros):
