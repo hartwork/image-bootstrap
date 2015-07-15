@@ -11,7 +11,7 @@ import shutil
 from textwrap import dedent
 
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
-from directory_bootstrap.shared.commands import COMMAND_CHROOT
+from directory_bootstrap.shared.commands import COMMAND_CHROOT, COMMAND_WGET
 
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 
@@ -224,6 +224,7 @@ class GentooStrategy(DistroStrategy):
     def get_commands_to_check_for(self):
         return [
                 COMMAND_CHROOT,
+                COMMAND_WGET,
                 ]
 
     def get_initramfs_path(self):
@@ -234,6 +235,7 @@ class GentooStrategy(DistroStrategy):
 
     def install_cloud_init_and_friends(self, abs_mountpoint, env):
         self._install_package_atoms(abs_mountpoint, env, ['app-emulation/cloud-init'])
+        self.install_growpart(abs_mountpoint)
 
     def install_sshd(self, abs_mountpoint, env):
         self._install_package_atoms(abs_mountpoint, env, ['net-misc/openssh'])
