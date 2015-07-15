@@ -238,6 +238,7 @@ class GentooStrategy(DistroStrategy):
         self._install_package_atoms(abs_mountpoint, env, ['net-misc/dhcpcd'])
 
     def install_sudo(self, abs_mountpoint, env):
+        self._set_package_use_flags(abs_mountpoint, 'app-admin/sudo', '-sendmail')
         self._install_package_atoms(abs_mountpoint, env, ['app-admin/sudo'])
 
     def _create_network_init_script_symlink(self, interface_name, abs_mountpoint):
