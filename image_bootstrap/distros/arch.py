@@ -23,13 +23,15 @@ class ArchStrategy(DistroStrategy):
     def __init__(self, messenger, executor,
                 abs_cache_dir, image_date_triple_or_none, mirror_url,
                 abs_resolv_conf):
-        self._messenger = messenger
-        self._executor = executor
+        super(ArchStrategy, self).__init__(
+                messenger,
+                executor,
+                abs_cache_dir,
+                abs_resolv_conf,
+                )
 
-        self._abs_cache_dir = abs_cache_dir
         self._image_date_triple_or_none = image_date_triple_or_none
         self._mirror_url = mirror_url
-        self._abs_resolv_conf = abs_resolv_conf
 
     def get_commands_to_check_for(self):
         return ArchBootstrapper.get_commands_to_check_for() + [
@@ -48,6 +50,9 @@ class ArchStrategy(DistroStrategy):
             raise ValueError('Architecture "%s" not supported' % architecture)
 
         return architecture
+
+    def configure_hostname(self, abs_mountpoint, hostname):
+        self.write_etc_hostname(abs_mountpoint, hostname)
 
     def allow_autostart_of_services(self, abs_mountpoint, allow):
         pass  # services are not auto-started on Arch
@@ -208,28 +213,15 @@ class ArchStrategy(DistroStrategy):
                 ]
         self._executor.check_call(cmd)
 
+    def install_dhcp_client(self, abs_mountpoint, env):
+        pass  # already installed (part of systemd)
+
     def install_sudo(self, abs_mountpoint, env):
         self._install_packages(['sudo'], abs_mountpoint, env)
 
-    def _fetch_install_chmod(self, url, abs_mountpoint, local_path, permissions):
-        full_local_path = os.path.join(abs_mountpoint, local_path.lstrip('/'))
-        cmd = [
-                COMMAND_WGET,
-                '-O%s' % full_local_path,
-                url,
-                ]
-        self._executor.check_call(cmd)
-        os.chmod(full_local_path, permissions)
-
-    def _install_growpart(self, abs_mountpoint):
-        self._messenger.info('Fetching growpart of cloud-utils...')
-        self._fetch_install_chmod(
-                'https://bazaar.launchpad.net/~cloud-utils-dev/cloud-utils/trunk/download/head:/growpart-20110225134600-d84xgz6209r194ob-1/growpart',
-                abs_mountpoint, '/usr/bin/growpart', 0755)
-
     def install_cloud_init_and_friends(self, abs_mountpoint, env):
         self._install_packages(['cloud-init'], abs_mountpoint, env)
-        self._install_growpart(abs_mountpoint)
+        self.install_growpart(abs_mountpoint)
 
     def get_cloud_init_datasource_cfg_path(self):
         return '/etc/cloud/cloud.cfg.d/90_datasource.cfg'
@@ -264,6 +256,9 @@ class ArchStrategy(DistroStrategy):
 
     def get_initramfs_path(self):
         return '/boot/initramfs-linux.img'
+
+    def install_kernel(self, abs_mountpoint, env):
+        pass  # Kernel installed, already
 
     @classmethod
     def add_parser_to(clazz, distros):

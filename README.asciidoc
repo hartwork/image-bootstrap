@@ -22,7 +22,7 @@ Welcome to the home of *image-bootstrap* (and its little brother *directory-boot
 *image-bootstrap* is a command line tool to generate bootable virtual machine images
 and write them to a given _block device_. +
 Linux distributions supported by *image-bootstrap* currently include:
-Arch, Debian, Ubuntu. +
+Arch, Debian, Gentoo, Ubuntu. +
 When passing the `--openstack` parameter, images are
 http://docs.openstack.org/image-guide/content/ch_openstack_images.html[prepared for use with OpenStack].
 
@@ -40,11 +40,11 @@ History
 https://github.com/grml/grml-debootstrap[grml-debootstrap].
 Primarily, it can be used to create Debian/Ubuntu or Arch images ready to be launched as a virtual machine.
 
-In comparision to grml-debootstrap, *image-bootstrap*
+In comparision to grml-debootstrap, by now *image-bootstrap*
 
  * installs to block devices only,
 
- * supports several approaches to installing GRUB (including _not_ to install GRUB at all),
+ * supports several approaches to installing GRUB 2.x, or extlinux, or no bootloader at all,
 
  * does not leak the host's hostname into the resulting image,
 
@@ -54,7 +54,10 @@ In comparision to grml-debootstrap, *image-bootstrap*
  * supports using a custom `/ect/resolv.conf` file
    (e.g. to not leak your home router model name from `/ect/resolv.conf` into the image),
 
- * supports Arch Linux,
+ * has support for installing Arch Linux, Gentoo and Ubuntu (besides Debian),
+
+ * is able to create
+   http://docs.openstack.org/image-guide/content/ch_openstack_images.html[OpenStack images],
 
  * is written in Python rather than Bash/mksh, and
 
@@ -267,6 +270,8 @@ machine configuration:
   --first-partition-uuid UUID
                         specific UUID to apply to first partition, e.g.
                         c1b9d5a2-f162-11cf-9ece-0020afc76f16
+  --machine-id ID       specific machine identifier to apply, e.g.
+                        c1b9d5a2f16211cf9ece0020afc76f16
 
 script integration:
   --scripts-pre DIRECTORY
@@ -294,6 +299,7 @@ subcommands (choice of distribution):
   DISTRIBUTION          choice of distribution, pick from:
     arch                Arch Linux
     debian              Debian GNU/Linux
+    gentoo              Gentoo
     ubuntu              Ubuntu
 
      _                          __             __      __               

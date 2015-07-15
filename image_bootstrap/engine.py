@@ -434,12 +434,9 @@ class BootstrapEngine(object):
             with open(etc_machine_id, 'w') as f:
                 print(self._machine_id, file=f)
 
-    def _create_etc_hostname(self):
-        filename = os.path.join(self._abs_mountpoint, 'etc', 'hostname')
-        self._messenger.info('Writing file "%s"...' % filename)
-        f = open(filename, 'w')
-        print(self._hostname, file=f)
-        f.close()
+    def _configure_hostname(self):
+        env = self.make_environment(tell_mountpoint=False)
+        self._distro.configure_hostname(self._abs_mountpoint, self._hostname)
 
     def create_network_configuration(self):
         use_mtu_tristate = True if self._with_openstack else None
@@ -563,9 +560,16 @@ class BootstrapEngine(object):
         use_chroot = self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2
         use_device_map = self._bootloader_approach in BOOTLOADER__ANY_GRUB2__DRIVE
 
+        chroot_boot_grub = os.path.join(self._abs_mountpoint, 'boot', 'grub')
+        try:
+            os.makedirs(chroot_boot_grub, 0755)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
         if use_device_map:
             # Write device map just for being able to call grub-install
-            abs_chroot_device_map = os.path.join(self._abs_mountpoint, 'boot', 'grub', 'device.map')
+            abs_chroot_device_map = os.path.join(chroot_boot_grub, 'device.map')
             grub_drive = '(hd9999)'
             self._messenger.info('Writing device map to "%s" (mapping "%s" to "%s")...' \
                     % (abs_chroot_device_map, grub_drive, real_abs_target))
@@ -753,6 +757,10 @@ class BootstrapEngine(object):
             self._messenger.warn('Using --password PASSWORD is a security risk more often than not; '
                     'please consider using --password-file FILE, instead.')
 
+    def _install_dhcp_client(self):
+        env = self.make_environment(tell_mountpoint=False)
+        return self._distro.install_dhcp_client(self._abs_mountpoint, env)
+
     def _install_sudo(self):
         env = self.make_environment(tell_mountpoint=False)
         return self._distro.install_sudo(self._abs_mountpoint, env)
@@ -872,6 +880,14 @@ class BootstrapEngine(object):
         # that we would only need to kill one way or another
         self._distro.allow_autostart_of_services(self._abs_mountpoint, allow)
 
+    def _prepare_installation_of_packages(self):
+        env = self.make_environment(tell_mountpoint=False)
+        self._distro.prepare_installation_of_packages(self._abs_mountpoint, env)
+
+    def _install_kernel(self):
+        env = self.make_environment(tell_mountpoint=False)
+        self._distro.install_kernel(self._abs_mountpoint, env)
+
     def run(self):
         self._unshare()
         self._partition_device()
@@ -891,17 +907,16 @@ class BootstrapEngine(object):
                 self._mount_disk_chroot_mounts()
                 try:
                     self._mkdir_mountpount_etc()
-                    self._create_etc_hostname()  # first time
+                    self._configure_hostname()  # first time
                     self._create_etc_resolv_conf()  # first time
                     try:
                         self.run_directory_bootstrap()
                     finally:
                         self._unmount_directory_bootstrap_leftovers()
-                    self._create_etc_hostname()  # re-write
+                    self._configure_hostname()  # re-write
                     self._create_etc_resolv_conf()  # re-write
                     self._create_etc_fstab()
                     self._create_etc_machine_id()  # potentially re-write
-                    self.create_network_configuration()
                     self._run_pre_scripts()
                     if self._bootloader_approach in BOOTLOADER__HOST_GRUB2:
                         self._install_bootloader__grub2()
@@ -911,19 +926,23 @@ class BootstrapEngine(object):
                     try:
                         self._allow_autostart_of_services(False)
                         self._set_root_password_inside_chroot()
+                        self._prepare_installation_of_packages()
 
-                        if self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2:
-                            self._ensure_chroot_has_grub2_installed()
-                            self._install_bootloader__grub2()
+                        # NOTE: Kernel is configured/installed early to allow other
+                        #       packages to run their checks on the kernel configuration
+                        #       with the actual kernel configuration
+                        self._install_kernel()
 
                         if self._bootloader_approach in BOOTLOADER__ANY_GRUB:
-                            self._messenger.info('Generating GRUB configuration...')
-                            self.generate_grub_cfg_from_inside_chroot()
+                            # Need grub2-mkconfig in any case
+                            self._ensure_chroot_has_grub2_installed()
 
-                            self._fix_grub_cfg_root_device()
+                        if self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2:
+                            self._install_bootloader__grub2()
 
                         if self._with_openstack:
                             # Essentials
+                            self._install_dhcp_client()
                             self._install_sudo()
                             self._create_sudo_nopasswd_user()
                             self._install_cloud_init_and_friends()
@@ -935,8 +954,15 @@ class BootstrapEngine(object):
                             self._disable_clearing_tty1()
                             self._disable_pcspkr_autoloading()
 
+                        self.create_network_configuration()  # after DHCP client install
+
                         self._adjust_initramfs_generator_config()
                         self.generate_initramfs_from_inside_chroot()
+
+                        if self._bootloader_approach in BOOTLOADER__ANY_GRUB:
+                            self._messenger.info('Generating GRUB configuration...')
+                            self.generate_grub_cfg_from_inside_chroot()
+                            self._fix_grub_cfg_root_device()
 
                         if self._abs_scripts_dir_chroot:
                             self._copy_chroot_scripts()

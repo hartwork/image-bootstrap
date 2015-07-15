@@ -93,6 +93,9 @@ class DebianBasedDistroStrategy(DistroStrategy):
 
         return architecture
 
+    def configure_hostname(self, abs_mountpoint, hostname):
+        self.write_etc_hostname(abs_mountpoint, hostname)
+
     def allow_autostart_of_services(self, abs_mountpoint, allow):
         policy_rc_d_path = os.path.join(abs_mountpoint, 'usr/sbin/policy-rc.d')
 
@@ -207,6 +210,9 @@ class DebianBasedDistroStrategy(DistroStrategy):
                 ] + list(package_names)
         self._executor.check_call(cmd, env=env)
 
+    def install_dhcp_client(self, abs_mountpoint, env):
+        pass  # already installed
+
     def install_sudo(self, abs_mountpoint, env):
         self._install_packages(['sudo'], abs_mountpoint, env)
 
@@ -228,6 +234,9 @@ class DebianBasedDistroStrategy(DistroStrategy):
 
     def get_initramfs_path(self):
         return '/initrd.img'
+
+    def install_kernel(self, abs_mountpoint, env):
+        pass  # Kernel installed, already
 
     @classmethod
     def add_parser_to(clazz, distros):
