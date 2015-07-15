@@ -93,6 +93,9 @@ class DebianBasedDistroStrategy(DistroStrategy):
 
         return architecture
 
+    def configure_hostname(self, abs_mountpoint, hostname):
+        self.write_etc_hostname(abs_mountpoint, hostname)
+
     def allow_autostart_of_services(self, abs_mountpoint, allow):
         policy_rc_d_path = os.path.join(abs_mountpoint, 'usr/sbin/policy-rc.d')
 

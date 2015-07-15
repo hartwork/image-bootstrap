@@ -1,6 +1,8 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
+from __future__ import print_function
+
 from abc import ABCMeta, abstractmethod
 
 from image_bootstrap.engine import \
@@ -25,6 +27,17 @@ class DistroStrategy(object):
 
     def select_bootloader(self):
         return BOOTLOADER__CHROOT_GRUB2__DRIVE
+
+    def write_etc_hostname(self, abs_mountpoint, hostname):
+        filename = os.path.join(abs_mountpoint, 'etc', 'hostname')
+        self._messenger.info('Writing file "%s"...' % filename)
+        f = open(filename, 'w')
+        print(self._hostname, file=f)
+        f.close()
+
+    @abstractmethod  # leave calling write_etc_hostname to derived classes
+    def configure_hostname(self, abs_mountpoint, hostname):
+        pass
 
     @abstractmethod
     def get_commands_to_check_for(self):

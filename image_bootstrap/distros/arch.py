@@ -51,6 +51,9 @@ class ArchStrategy(DistroStrategy):
 
         return architecture
 
+    def configure_hostname(self, abs_mountpoint, hostname):
+        self.write_etc_hostname(abs_mountpoint, hostname)
+
     def allow_autostart_of_services(self, abs_mountpoint, allow):
         pass  # services are not auto-started on Arch
 

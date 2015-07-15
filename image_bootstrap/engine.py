@@ -434,12 +434,9 @@ class BootstrapEngine(object):
             with open(etc_machine_id, 'w') as f:
                 print(self._machine_id, file=f)
 
-    def _create_etc_hostname(self):
-        filename = os.path.join(self._abs_mountpoint, 'etc', 'hostname')
-        self._messenger.info('Writing file "%s"...' % filename)
-        f = open(filename, 'w')
-        print(self._hostname, file=f)
-        f.close()
+    def _configure_hostname(self):
+        env = self.make_environment(tell_mountpoint=False)
+        self._distro.configure_hostname(self._abs_mountpoint, self._hostname)
 
     def create_network_configuration(self):
         use_mtu_tristate = True if self._with_openstack else None
@@ -910,13 +907,13 @@ class BootstrapEngine(object):
                 self._mount_disk_chroot_mounts()
                 try:
                     self._mkdir_mountpount_etc()
-                    self._create_etc_hostname()  # first time
+                    self._configure_hostname()  # first time
                     self._create_etc_resolv_conf()  # first time
                     try:
                         self.run_directory_bootstrap()
                     finally:
                         self._unmount_directory_bootstrap_leftovers()
-                    self._create_etc_hostname()  # re-write
+                    self._configure_hostname()  # re-write
                     self._create_etc_resolv_conf()  # re-write
                     self._create_etc_fstab()
                     self._create_etc_machine_id()  # potentially re-write

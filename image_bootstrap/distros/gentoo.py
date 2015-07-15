@@ -41,6 +41,9 @@ class GentooStrategy(DistroStrategy):
         self._stage3_date_triple_or_none = stage3_date_triple_or_none
         self._repository_date_triple_or_none = repository_date_triple_or_none
 
+    def configure_hostname(self, abs_mountpoint, hostname):
+        self.write_etc_hostname(abs_mountpoint, hostname)
+
     def allow_autostart_of_services(self, abs_mountpoint, allow):
         pass  # services are not auto-started on Gentoo
 
