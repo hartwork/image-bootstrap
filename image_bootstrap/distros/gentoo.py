@@ -362,6 +362,13 @@ class GentooStrategy(DistroStrategy):
                 '-C', '/usr/src/linux',
                 'olddefconfig',
                 ], env=env)
+        self._executor.check_call([
+                COMMAND_CHROOT, abs_mountpoint,
+                '/usr/src/linux/scripts/diffconfig',
+                '-m',
+                '/usr/src/linux/.config.initial',
+                '/usr/src/linux/.config',
+                ], env=env)
 
     def install_kernel(self, abs_mountpoint, env):
         self._set_package_keywords(abs_mountpoint, 'sys-kernel/vanilla-sources', '**')  # TODO ~arch
@@ -373,7 +380,7 @@ class GentooStrategy(DistroStrategy):
                 ], env=env)
         shutil.copyfile(
                 os.path.join(abs_mountpoint, 'usr/src/linux/.config'),
-                os.path.join(abs_mountpoint, 'usr/src/linux/.config.defconfig'),
+                os.path.join(abs_mountpoint, 'usr/src/linux/.config.initial'),
                 )
 
         self._configure_kernel__enable_kvm_support(abs_mountpoint, env)
