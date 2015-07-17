@@ -428,6 +428,13 @@ class GentooStrategy(DistroStrategy):
                 'modules_install', 'install',
                 ], env=env)
 
+    def uses_systemd(self):
+        return False
+
+    def install_acpid(self, abs_mountpoint, env):
+        self._install_package_atoms(abs_mountpoint, env, ['sys-power/acpid'])
+        self._make_service_autostart('acpid', abs_mountpoint, env)
+
     @classmethod
     def add_parser_to(clazz, distros):
         gentoo = distros.add_parser(clazz.DISTRO_KEY, help=clazz.DISTRO_NAME_LONG)

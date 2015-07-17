@@ -238,6 +238,9 @@ class DebianBasedDistroStrategy(DistroStrategy):
     def install_kernel(self, abs_mountpoint, env):
         pass  # Kernel installed, already
 
+    def install_acpid(self, abs_mountpoint, env):
+        self._install_packages(['acpid'], abs_mountpoint, env)
+
     @classmethod
     def add_parser_to(clazz, distros):
         debian = distros.add_parser(clazz.DISTRO_KEY, help=clazz.DISTRO_NAME_LONG)

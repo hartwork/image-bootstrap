@@ -146,6 +146,14 @@ class DistroStrategy(object):
                 'https://bazaar.launchpad.net/~cloud-utils-dev/cloud-utils/trunk/download/head:/growpart-20110225134600-d84xgz6209r194ob-1/growpart',
                 abs_mountpoint, '/usr/bin/growpart', 0755)
 
+    @abstractmethod
+    def uses_systemd(self):
+        pass
+
+    def install_acpid(self, abs_mountpoint, env):
+        # NOTE: Only called for distros NOT using systemd
+        raise NotImplementedError()
+
     @classmethod
     def add_parser_to(clazz, distros):
         raise NotImplementedError()

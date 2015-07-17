@@ -875,6 +875,11 @@ class BootstrapEngine(object):
                 blacklist pcspkr
                 """), file=f)
 
+    def _intall_acpid_unless_using_systemd(self):
+        if not self._distro.uses_systemd():
+            env = self.make_environment(tell_mountpoint=False)
+            return self._distro.install_acpid(self._abs_mountpoint, env)
+
     def _allow_autostart_of_services(self, allow):
         # The idea is to avoid starting services in the chroot
         # that we would only need to kill one way or another
@@ -953,6 +958,7 @@ class BootstrapEngine(object):
                             # Goodies
                             self._disable_clearing_tty1()
                             self._disable_pcspkr_autoloading()
+                            self._intall_acpid_unless_using_systemd()
 
                         self.create_network_configuration()  # after DHCP client install
 

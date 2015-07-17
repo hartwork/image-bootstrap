@@ -56,3 +56,7 @@ class UbuntuStrategy(DebianBasedDistroStrategy):
         # if cloud-init and growpart alone work just fine
         self._install_packages(['cloud-init', 'cloud-utils'],
                 abs_mountpoint, env)
+
+    def uses_systemd(self):
+        # NOTE: assumes not supporting anything older than trusty
+        return self._release != 'trusty'

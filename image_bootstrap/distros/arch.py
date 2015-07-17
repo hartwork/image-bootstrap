@@ -260,6 +260,9 @@ class ArchStrategy(DistroStrategy):
     def install_kernel(self, abs_mountpoint, env):
         pass  # Kernel installed, already
 
+    def uses_systemd(self):
+        return True
+
     @classmethod
     def add_parser_to(clazz, distros):
         arch = distros.add_parser(clazz.DISTRO_KEY, help=clazz.DISTRO_NAME_LONG)
