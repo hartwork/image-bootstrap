@@ -278,6 +278,14 @@ class GentooStrategy(DistroStrategy):
         os.symlink('net.lo', net_init_script)
         return net_service
 
+    def _make_service_autostart(self, service_name, abs_mountpoint, env):
+        self._executor.check_call([
+            COMMAND_CHROOT,
+            abs_mountpoint,
+            'rc-update',
+            'add', service_name, 'default',
+            ], env=env)
+
     def make_openstack_services_autostart(self, abs_mountpoint, env):
         net_service = self._create_network_init_script_symlink('eth0', abs_mountpoint)
 
@@ -290,12 +298,7 @@ class GentooStrategy(DistroStrategy):
                 'cloud-config',
                 'cloud-final',
                 ):
-            self._executor.check_call([
-                COMMAND_CHROOT,
-                abs_mountpoint,
-                'rc-update',
-                'add', service, 'default',
-                ], env=env)
+            self._make_service_autostart(service, abs_mountpoint, env)
 
     def perform_in_chroot_shipping_clean_up(self, abs_mountpoint, env):
         pass  # TODO
