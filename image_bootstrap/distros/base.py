@@ -146,6 +146,13 @@ class DistroStrategy(object):
                 'https://bazaar.launchpad.net/~cloud-utils-dev/cloud-utils/trunk/download/head:/growpart-20110225134600-d84xgz6209r194ob-1/growpart',
                 abs_mountpoint, '/usr/bin/growpart', 0755)
 
+    def disable_cloud_init_syslog_fix_perms(self, abs_mountpoint):
+        # https://github.com/hartwork/image-bootstrap/issues/17
+        filename = os.path.join(abs_mountpoint, 'etc/cloud/cloud.cfg.d/00_syslog_fix_perms.cfg')
+        self._messenger.info('Writing file "%s"...' % filename)
+        with open(filename, 'w') as f:
+            print('syslog_fix_perms: null', file=f)
+
     @abstractmethod
     def uses_systemd(self):
         pass

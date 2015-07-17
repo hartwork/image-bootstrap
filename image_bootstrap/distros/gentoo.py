@@ -237,6 +237,7 @@ class GentooStrategy(DistroStrategy):
 
     def install_cloud_init_and_friends(self, abs_mountpoint, env):
         self._install_package_atoms(abs_mountpoint, env, ['app-emulation/cloud-init'])
+        self.disable_cloud_init_syslog_fix_perms(abs_mountpoint)
         self.install_growpart(abs_mountpoint)
 
     def install_sshd(self, abs_mountpoint, env):

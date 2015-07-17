@@ -221,6 +221,7 @@ class ArchStrategy(DistroStrategy):
 
     def install_cloud_init_and_friends(self, abs_mountpoint, env):
         self._install_packages(['cloud-init'], abs_mountpoint, env)
+        self.disable_cloud_init_syslog_fix_perms(abs_mountpoint)
         self.install_growpart(abs_mountpoint)
 
     def get_cloud_init_datasource_cfg_path(self):
