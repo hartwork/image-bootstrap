@@ -463,16 +463,21 @@ class BootstrapEngine(object):
         env = os.environ.copy()
         for key in ('LANG', 'LANGUAGE'):
             env.pop(key, None)
+
+        assert self._hostname is not None
         env.update({
                 'HOSTNAME': self._hostname,  # for compatibility to grml-debootstrap
                 'IB_HOSTNAME': self._hostname,
                 'LC_ALL': 'C',
                 })
+
         if tell_mountpoint:
+            assert self._abs_mountpoint is not None
             env.update({
                     'IB_ROOT': self._abs_mountpoint,
                     'MNTPOINT': self._abs_mountpoint,  # for compatibility to grml-debootstrap
                     })
+
         return env
 
     def _run_pre_scripts(self):
