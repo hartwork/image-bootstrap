@@ -25,6 +25,15 @@ class DistroStrategy(object):
         self._abs_cache_dir = abs_cache_dir
         self._abs_resolv_conf = abs_resolv_conf
 
+    def set_mountpoint(self, abs_mountpoint):
+        self._abs_mountpoint = abs_mountpoint
+
+    def set_chroot_env_prototype(self, chroot_env_prototype):
+        self._chroot_env_prototype = chroot_env_prototype
+
+    def create_chroot_env(self):
+        return self._chroot_env_prototype.copy()
+
     def check_release(self):
         pass
 

@@ -121,6 +121,7 @@ class BootstrapEngine(object):
         self._distro = None
 
     def set_distro(self, distro):
+        distro.set_chroot_env_prototype(self.make_environment(tell_mountpoint=False))
         self._distro = distro
 
     def check_release(self):
@@ -350,6 +351,7 @@ class BootstrapEngine(object):
     def _mkdir_mountpount(self):
         self._abs_mountpoint = tempfile.mkdtemp(dir=_MOUNTPOINT_PARENT_DIR)
         self._messenger.info('Creating directory "%s"...' % self._abs_mountpoint)
+        self._distro.set_mountpoint(self._abs_mountpoint)
 
     def _mkdir_mountpount_etc(self):
         abs_dir = os.path.join(self._abs_mountpoint, 'etc')
