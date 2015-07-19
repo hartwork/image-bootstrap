@@ -93,11 +93,11 @@ class DebianBasedDistroStrategy(DistroStrategy):
 
         return architecture
 
-    def configure_hostname(self, abs_mountpoint, hostname):
-        self.write_etc_hostname(abs_mountpoint, hostname)
+    def configure_hostname(self, hostname):
+        self.write_etc_hostname(hostname)
 
-    def allow_autostart_of_services(self, abs_mountpoint, allow):
-        policy_rc_d_path = os.path.join(abs_mountpoint, 'usr/sbin/policy-rc.d')
+    def allow_autostart_of_services(self, allow):
+        policy_rc_d_path = os.path.join(self._abs_mountpoint, 'usr/sbin/policy-rc.d')
 
         verb_activate = 'Re-activating' if allow else 'Deactivating'
         verb_create = 'removing' if allow else 'writing'
@@ -119,9 +119,9 @@ class DebianBasedDistroStrategy(DistroStrategy):
                         """), file=f)
                 os.fchmod(f.fileno(), 0755)
 
-    def run_directory_bootstrap(self, abs_mountpoint, architecture, bootloader_approach):
+    def run_directory_bootstrap(self, architecture, bootloader_approach):
         self._messenger.info('Bootstrapping %s "%s" into "%s"...'
-                % (self.DISTRO_NAME_SHORT, self._release, abs_mountpoint))
+                % (self.DISTRO_NAME_SHORT, self._release, self._abs_mountpoint))
 
         _extra_packages = [
                 'initramfs-tools',  # for update-initramfs
@@ -145,13 +145,13 @@ class DebianBasedDistroStrategy(DistroStrategy):
                 + self._debootstrap_opt \
                 + [
                 self._release,
-                abs_mountpoint,
+                self._abs_mountpoint,
                 self._mirror_url,
                 ]
         self._executor.check_call(cmd)
 
-    def create_network_configuration(self, abs_mountpoint, use_mtu_tristate):
-        filename = os.path.join(abs_mountpoint, 'etc', 'network', 'interfaces')
+    def create_network_configuration(self, use_mtu_tristate):
+        filename = os.path.join(self._abs_mountpoint, 'etc', 'network', 'interfaces')
         self._messenger.info('Writing file "%s"...' % filename)
         f = open(filename, 'w')
         print(_ETC_NETWORK_INTERFACES_CONTENT, file=f)
@@ -160,73 +160,74 @@ class DebianBasedDistroStrategy(DistroStrategy):
         # TODO For non-None use_mtu_tristate, force DHCP client option 26/interface-mtu
         use_mtu_tristate
 
-    def ensure_chroot_has_grub2_installed(self, abs_mountpoint, env):
+    def ensure_chroot_has_grub2_installed(self):
         pass  # debootstrap has already pulled GRUB 2.x in
 
     def get_chroot_command_grub2_install(self):
         return 'grub-install'
 
-    def generate_grub_cfg_from_inside_chroot(self, abs_mountpoint, env):
+    def generate_grub_cfg_from_inside_chroot(self):
         cmd = [
                 COMMAND_CHROOT,
-                abs_mountpoint,
+                self._abs_mountpoint,
                 'update-grub',
                 ]
-        self._executor.check_call(cmd, env=env)
+        self._executor.check_call(cmd, env=self.create_chroot_env())
 
-    def generate_initramfs_from_inside_chroot(self, abs_mountpoint, env):
+    def generate_initramfs_from_inside_chroot(self):
         cmd = [
                 COMMAND_CHROOT,
-                abs_mountpoint,
+                self._abs_mountpoint,
                 'update-initramfs',
                 '-u',
                 '-k', 'all',
                 ]
-        self._executor.check_call(cmd, env=env)
+        self._executor.check_call(cmd, env=self.create_chroot_env())
 
-    def perform_in_chroot_shipping_clean_up(self, abs_mountpoint, env):
+    def perform_in_chroot_shipping_clean_up(self):
         pass  # nothing, yet
 
-    def perform_post_chroot_clean_up(self, abs_mountpoint):
+    def perform_post_chroot_clean_up(self):
         self._messenger.info('Cleaning chroot apt cache...')
         cmd = [
                 COMMAND_FIND,
-                os.path.join(abs_mountpoint, 'var', 'cache', 'apt', 'archives'),
+                os.path.join(self._abs_mountpoint, 'var', 'cache', 'apt', 'archives'),
                 '-type', 'f',
                 '-name', '*.deb',
                 '-delete',
                 ]
         self._executor.check_call(cmd)
 
-    def _install_packages(self, package_names, abs_mountpoint, env):
+    def _install_packages(self, package_names):
         self._messenger.info('Installing %s...' % ', '.join(package_names))
+        env = self.create_chroot_env()
         env.setdefault('DEBIAN_FRONTEND', 'noninteractive')
         cmd = [
                 COMMAND_CHROOT,
-                abs_mountpoint,
+                self._abs_mountpoint,
                 'apt-get',
                 'install',
                 '-y', '--no-install-recommends', '-V',
                 ] + list(package_names)
         self._executor.check_call(cmd, env=env)
 
-    def install_dhcp_client(self, abs_mountpoint, env):
+    def install_dhcp_client(self):
         pass  # already installed
 
-    def install_sudo(self, abs_mountpoint, env):
-        self._install_packages(['sudo'], abs_mountpoint, env)
+    def install_sudo(self):
+        self._install_packages(['sudo'])
 
     @abstractmethod
-    def install_cloud_init_and_friends(self, abs_mountpoint, env):
+    def install_cloud_init_and_friends(self):
         pass
 
     def get_cloud_init_datasource_cfg_path(self):
         return '/etc/cloud/cloud.cfg.d/90_dpkg.cfg'  # existing file
 
-    def install_sshd(self, abs_mountpoint, env):
-        self._install_packages(['openssh-server'], abs_mountpoint, env)
+    def install_sshd(self):
+        self._install_packages(['openssh-server'])
 
-    def make_openstack_services_autostart(self, abs_mountpoint, env):
+    def make_openstack_services_autostart(self):
         pass  # autostarted in Debian, already
 
     def get_vmlinuz_path(self):
@@ -235,11 +236,11 @@ class DebianBasedDistroStrategy(DistroStrategy):
     def get_initramfs_path(self):
         return '/initrd.img'
 
-    def install_kernel(self, abs_mountpoint, env):
+    def install_kernel(self):
         pass  # Kernel installed, already
 
-    def install_acpid(self, abs_mountpoint, env):
-        self._install_packages(['acpid'], abs_mountpoint, env)
+    def install_acpid(self):
+        self._install_packages(['acpid'])
 
     @classmethod
     def add_parser_to(clazz, distros):

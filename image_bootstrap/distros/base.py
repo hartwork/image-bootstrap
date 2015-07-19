@@ -40,15 +40,15 @@ class DistroStrategy(object):
     def select_bootloader(self):
         return BOOTLOADER__CHROOT_GRUB2__DRIVE
 
-    def write_etc_hostname(self, abs_mountpoint, hostname):
-        filename = os.path.join(abs_mountpoint, 'etc', 'hostname')
+    def write_etc_hostname(self, hostname):
+        filename = os.path.join(self._abs_mountpoint, 'etc', 'hostname')
         self._messenger.info('Writing file "%s"...' % filename)
         f = open(filename, 'w')
         print(hostname, file=f)
         f.close()
 
     @abstractmethod  # leave calling write_etc_hostname to derived classes
-    def configure_hostname(self, abs_mountpoint, hostname):
+    def configure_hostname(self, hostname):
         pass
 
     @abstractmethod
@@ -59,19 +59,19 @@ class DistroStrategy(object):
         return architecture
 
     @abstractmethod
-    def allow_autostart_of_services(self, abs_mountpoint, allow):
+    def allow_autostart_of_services(self, allow):
         pass
 
     @abstractmethod
-    def run_directory_bootstrap(self, abs_mountpoint, architecture, bootloader_approach):
+    def run_directory_bootstrap(self, architecture, bootloader_approach):
         pass
 
     @abstractmethod
-    def create_network_configuration(self, abs_mountpoint, use_mtu_tristate):
+    def create_network_configuration(self, use_mtu_tristate):
         pass
 
     @abstractmethod
-    def ensure_chroot_has_grub2_installed(self, abs_mountpoint, env):
+    def ensure_chroot_has_grub2_installed(self):
         pass
 
     @abstractmethod
@@ -79,37 +79,37 @@ class DistroStrategy(object):
         pass
 
     @abstractmethod
-    def generate_grub_cfg_from_inside_chroot(self, abs_mountpoint, env):
+    def generate_grub_cfg_from_inside_chroot(self):
         pass
 
-    def adjust_initramfs_generator_config(self, abs_mountpoint):
-        pass
-
-    @abstractmethod
-    def generate_initramfs_from_inside_chroot(self, abs_mountpoint, env):
+    def adjust_initramfs_generator_config(self):
         pass
 
     @abstractmethod
-    def perform_in_chroot_shipping_clean_up(self, abs_mountpoint, env):
+    def generate_initramfs_from_inside_chroot(self):
         pass
 
     @abstractmethod
-    def perform_post_chroot_clean_up(self, abs_mountpoint):
+    def perform_in_chroot_shipping_clean_up(self):
+        pass
+
+    @abstractmethod
+    def perform_post_chroot_clean_up(self):
         pass
 
     def get_cloud_username(self):
         return self.DISTRO_KEY
 
     @abstractmethod
-    def install_dhcp_client(self, abs_mountpoint, env):
+    def install_dhcp_client(self):
         pass
 
     @abstractmethod
-    def install_sudo(self, abs_mountpoint, env):
+    def install_sudo(self):
         pass
 
     @abstractmethod
-    def install_cloud_init_and_friends(self, abs_mountpoint, env):
+    def install_cloud_init_and_friends(self):
         pass
 
     @abstractmethod
@@ -117,11 +117,11 @@ class DistroStrategy(object):
         pass
 
     @abstractmethod
-    def install_sshd(self, abs_mountpoint, env):
+    def install_sshd(self):
         pass
 
     @abstractmethod
-    def make_openstack_services_autostart(self, abs_mountpoint, env):
+    def make_openstack_services_autostart(self):
         pass
 
     @abstractmethod
@@ -132,15 +132,15 @@ class DistroStrategy(object):
     def get_initramfs_path(self):
         pass
 
-    def prepare_installation_of_packages(self, abs_mountpoint, env):
+    def prepare_installation_of_packages(self):
         pass
 
     @abstractmethod
-    def install_kernel(self, abs_mountpoint, env):
+    def install_kernel(self):
         pass
 
-    def _fetch_install_chmod(self, url, abs_mountpoint, local_path, permissions):
-        full_local_path = os.path.join(abs_mountpoint, local_path.lstrip('/'))
+    def _fetch_install_chmod(self, url, local_path, permissions):
+        full_local_path = os.path.join(self._abs_mountpoint, local_path.lstrip('/'))
         cmd = [
                 COMMAND_WGET,
                 '-O%s' % full_local_path,
@@ -149,15 +149,15 @@ class DistroStrategy(object):
         self._executor.check_call(cmd)
         os.chmod(full_local_path, permissions)
 
-    def install_growpart(self, abs_mountpoint):
+    def install_growpart(self):
         self._messenger.info('Fetching growpart of cloud-utils...')
         self._fetch_install_chmod(
                 'https://bazaar.launchpad.net/~cloud-utils-dev/cloud-utils/trunk/download/head:/growpart-20110225134600-d84xgz6209r194ob-1/growpart',
-                abs_mountpoint, '/usr/bin/growpart', 0755)
+                '/usr/bin/growpart', 0755)
 
-    def disable_cloud_init_syslog_fix_perms(self, abs_mountpoint):
+    def disable_cloud_init_syslog_fix_perms(self):
         # https://github.com/hartwork/image-bootstrap/issues/17
-        filename = os.path.join(abs_mountpoint, 'etc/cloud/cloud.cfg.d/00_syslog_fix_perms.cfg')
+        filename = os.path.join(self._abs_mountpoint, 'etc/cloud/cloud.cfg.d/00_syslog_fix_perms.cfg')
         self._messenger.info('Writing file "%s"...' % filename)
         with open(filename, 'w') as f:
             print('syslog_fix_perms: null', file=f)
@@ -166,7 +166,7 @@ class DistroStrategy(object):
     def uses_systemd(self):
         pass
 
-    def install_acpid(self, abs_mountpoint, env):
+    def install_acpid(self):
         # NOTE: Only called for distros NOT using systemd
         raise NotImplementedError()
 

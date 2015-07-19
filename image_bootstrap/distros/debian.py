@@ -25,9 +25,8 @@ class DebianStrategy(DebianBasedDistroStrategy):
 
         return 'linux-image-%s' % architecture
 
-    def install_cloud_init_and_friends(self, abs_mountpoint, env):
-        self._install_packages(['cloud-init', 'cloud-utils', 'cloud-initramfs-growroot'],
-                abs_mountpoint, env)
+    def install_cloud_init_and_friends(self):
+        self._install_packages(['cloud-init', 'cloud-utils', 'cloud-initramfs-growroot'])
 
     def uses_systemd(self):
         # NOTE: assumes not supporting anything older than wheezy

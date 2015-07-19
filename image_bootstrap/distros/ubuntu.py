@@ -24,12 +24,12 @@ class UbuntuStrategy(DebianBasedDistroStrategy):
     def get_kernel_package_name(self, architecture):
         return 'linux-image-generic'
 
-    def _adjust_grub_defaults(self, abs_mountpoint):
+    def _adjust_grub_defaults(self):
         subst = (
             ('GRUB_TIMEOUT=', 'GRUB_TIMEOUT=1'),
             ('GRUB_HIDDEN_TIMEOUT', None),
         )
-        etc_default_grub = os.path.join(abs_mountpoint, 'etc/default/grub')
+        etc_default_grub = os.path.join(self._abs_mountpoint, 'etc/default/grub')
         with open(etc_default_grub, 'r') as f:
             content = f.read()
 
@@ -47,15 +47,14 @@ class UbuntuStrategy(DebianBasedDistroStrategy):
         with open(etc_default_grub, 'w') as f:
             f.write('\n'.join(lines_to_write))
 
-    def generate_grub_cfg_from_inside_chroot(self, abs_mountpoint, env):
-        self._adjust_grub_defaults(abs_mountpoint)
-        super(UbuntuStrategy, self).generate_grub_cfg_from_inside_chroot(abs_mountpoint, env)
+    def generate_grub_cfg_from_inside_chroot(self):
+        self._adjust_grub_defaults()
+        super(UbuntuStrategy, self).generate_grub_cfg_from_inside_chroot()
 
-    def install_cloud_init_and_friends(self, abs_mountpoint, env):
+    def install_cloud_init_and_friends(self):
         # Do not install cloud-initramfs-growroot (from universe)
         # if cloud-init and growpart alone work just fine
-        self._install_packages(['cloud-init', 'cloud-utils'],
-                abs_mountpoint, env)
+        self._install_packages(['cloud-init', 'cloud-utils'])
 
     def uses_systemd(self):
         # NOTE: assumes not supporting anything older than trusty

@@ -51,20 +51,20 @@ class ArchStrategy(DistroStrategy):
 
         return architecture
 
-    def configure_hostname(self, abs_mountpoint, hostname):
-        self.write_etc_hostname(abs_mountpoint, hostname)
+    def configure_hostname(self, hostname):
+        self.write_etc_hostname(hostname)
 
-    def allow_autostart_of_services(self, abs_mountpoint, allow):
+    def allow_autostart_of_services(self, allow):
         pass  # services are not auto-started on Arch
 
-    def run_directory_bootstrap(self, abs_mountpoint, architecture, bootloader_approach):
+    def run_directory_bootstrap(self, architecture, bootloader_approach):
         self._messenger.info('Bootstrapping %s into "%s"...'
-                % (self.DISTRO_NAME_SHORT, abs_mountpoint))
+                % (self.DISTRO_NAME_SHORT, self._abs_mountpoint))
 
         bootstrap = ArchBootstrapper(
                 self._messenger,
                 self._executor,
-                abs_mountpoint,
+                self._abs_mountpoint,
                 self._abs_cache_dir,
                 architecture,
                 self._image_date_triple_or_none,
@@ -73,11 +73,11 @@ class ArchStrategy(DistroStrategy):
                 )
         bootstrap.run()
 
-    def create_network_configuration(self, abs_mountpoint, use_mtu_tristate):
+    def create_network_configuration(self, use_mtu_tristate):
         self._messenger.info('Making sure that network interfaces get named eth*...')
-        os.symlink('/dev/null', os.path.join(abs_mountpoint, 'etc/udev/rules.d/80-net-setup-link.rules'))
+        os.symlink('/dev/null', os.path.join(self._abs_mountpoint, 'etc/udev/rules.d/80-net-setup-link.rules'))
 
-        network_filename = os.path.join(abs_mountpoint, 'etc/systemd/network/eth0-dhcp.network')
+        network_filename = os.path.join(self._abs_mountpoint, 'etc/systemd/network/eth0-dhcp.network')
         self._messenger.info('Writing file "%s"...' % network_filename)
         with open(network_filename, 'w') as f:
             if use_mtu_tristate is None:
@@ -103,33 +103,33 @@ class ArchStrategy(DistroStrategy):
                         UseMTU=%(use_mtu)s
                         """ % d), file=f)
 
-    def _install_packages(self, package_names, abs_mountpoint, env):
+    def _install_packages(self, package_names):
         cmd = [
                 COMMAND_CHROOT,
-                abs_mountpoint,
+                self._abs_mountpoint,
                 'pacman',
                 '--noconfirm',
                 '--sync',
                 ] + list(package_names)
-        self._executor.check_call(cmd, env=env)
+        self._executor.check_call(cmd, env=self.create_chroot_env())
 
-    def ensure_chroot_has_grub2_installed(self, abs_mountpoint, env):
-        self._install_packages(['grub'], abs_mountpoint, env)
+    def ensure_chroot_has_grub2_installed(self):
+        self._install_packages(['grub'])
 
     def get_chroot_command_grub2_install(self):
         return 'grub-install'
 
-    def generate_grub_cfg_from_inside_chroot(self, abs_mountpoint, env):
+    def generate_grub_cfg_from_inside_chroot(self):
         cmd = [
                 COMMAND_CHROOT,
-                abs_mountpoint,
+                self._abs_mountpoint,
                 'grub-mkconfig',
                 '-o', '/boot/grub/grub.cfg',
                 ]
-        self._executor.check_call(cmd, env=env)
+        self._executor.check_call(cmd, env=self.create_chroot_env())
 
-    def adjust_initramfs_generator_config(self, abs_mountpoint):
-        abs_linux_preset = os.path.join(abs_mountpoint, 'etc', 'mkinitcpio.d', 'linux.preset')
+    def adjust_initramfs_generator_config(self):
+        abs_linux_preset = os.path.join(self._abs_mountpoint, 'etc', 'mkinitcpio.d', 'linux.preset')
         self._messenger.info('Adjusting "%s"...' % abs_linux_preset)
         cmd_sed = [
                 COMMAND_SED,
@@ -138,22 +138,22 @@ class ArchStrategy(DistroStrategy):
                 ]
         self._executor.check_call(cmd_sed)
 
-    def generate_initramfs_from_inside_chroot(self, abs_mountpoint, env):
+    def generate_initramfs_from_inside_chroot(self):
         cmd_mkinitcpio = [
                 COMMAND_CHROOT,
-                abs_mountpoint,
+                self._abs_mountpoint,
                 'mkinitcpio',
                 '-p', 'linux',
                 ]
-        self._executor.check_call(cmd_mkinitcpio, env=env)
+        self._executor.check_call(cmd_mkinitcpio, env=self.create_chroot_env())
 
-    def _setup_pacman_reanimation(self, abs_mountpoint, env):
+    def _setup_pacman_reanimation(self):
         self._messenger.info('Installing haveged (for reanimate-pacman, only)...')
-        self._install_packages(['haveged'], abs_mountpoint, env)
+        self._install_packages(['haveged'])
 
         local_reanimate_path = '/usr/sbin/reanimate-pacman'
 
-        full_reanimate_path = os.path.join(abs_mountpoint, local_reanimate_path.lstrip('/'))
+        full_reanimate_path = os.path.join(self._abs_mountpoint, local_reanimate_path.lstrip('/'))
         self._messenger.info('Writing file "%s"...' % full_reanimate_path)
         with open(full_reanimate_path, 'w') as f:
             print(dedent("""\
@@ -172,7 +172,7 @@ class ArchStrategy(DistroStrategy):
                     """), file=f)
             os.fchmod(f.fileno(), 0755)
 
-        pacman_reanimation_service = os.path.join(abs_mountpoint,
+        pacman_reanimation_service = os.path.join(self._abs_mountpoint,
                 'etc/systemd/system/pacman-reanimation.service')
         self._messenger.info('Writing file "%s"...' % pacman_reanimation_service)
         with open(pacman_reanimation_service, 'w') as f:
@@ -188,13 +188,13 @@ class ArchStrategy(DistroStrategy):
                     WantedBy=multi-user.target
                     """ % local_reanimate_path), file=f)
 
-        self._make_services_autostart(['pacman-reanimation'], abs_mountpoint, env)
+        self._make_services_autostart(['pacman-reanimation'])
 
-    def perform_in_chroot_shipping_clean_up(self, abs_mountpoint, env):
-        self._setup_pacman_reanimation(abs_mountpoint, env)
+    def perform_in_chroot_shipping_clean_up(self):
+        self._setup_pacman_reanimation()
 
         # NOTE: After this, calling pacman needs reanimation, first
-        pacman_gpg_path = os.path.join(abs_mountpoint, 'etc/pacman.d/gnupg')
+        pacman_gpg_path = os.path.join(self._abs_mountpoint, 'etc/pacman.d/gnupg')
         self._messenger.info('Deleting pacman keys at "%s"...' % pacman_gpg_path)
         cmd = [
                 COMMAND_RM,
@@ -203,46 +203,46 @@ class ArchStrategy(DistroStrategy):
         self._executor.check_call(cmd)
 
 
-    def perform_post_chroot_clean_up(self, abs_mountpoint):
+    def perform_post_chroot_clean_up(self):
         self._messenger.info('Cleaning chroot pacman cache...')
         cmd = [
                 COMMAND_FIND,
-                os.path.join(abs_mountpoint, 'var/cache/pacman/pkg/'),
+                os.path.join(self._abs_mountpoint, 'var/cache/pacman/pkg/'),
                 '-type', 'f',
                 '-delete',
                 ]
         self._executor.check_call(cmd)
 
-    def install_dhcp_client(self, abs_mountpoint, env):
+    def install_dhcp_client(self):
         pass  # already installed (part of systemd)
 
-    def install_sudo(self, abs_mountpoint, env):
-        self._install_packages(['sudo'], abs_mountpoint, env)
+    def install_sudo(self):
+        self._install_packages(['sudo'])
 
-    def install_cloud_init_and_friends(self, abs_mountpoint, env):
-        self._install_packages(['cloud-init'], abs_mountpoint, env)
-        self.disable_cloud_init_syslog_fix_perms(abs_mountpoint)
-        self.install_growpart(abs_mountpoint)
+    def install_cloud_init_and_friends(self):
+        self._install_packages(['cloud-init'])
+        self.disable_cloud_init_syslog_fix_perms()
+        self.install_growpart()
 
     def get_cloud_init_datasource_cfg_path(self):
         return '/etc/cloud/cloud.cfg.d/90_datasource.cfg'
 
-    def install_sshd(self, abs_mountpoint, env):
-        self._install_packages(['openssh'], abs_mountpoint, env)
+    def install_sshd(self):
+        self._install_packages(['openssh'])
 
-    def _make_services_autostart(self, service_names, abs_mountpoint, env):
+    def _make_services_autostart(self, service_names):
         for service_name in service_names:
             self._messenger.info('Making service "%s" start automatically...' % service_name)
             cmd = [
                 COMMAND_CHROOT,
-                abs_mountpoint,
+                self._abs_mountpoint,
                 'systemctl',
                 'enable',
                 service_name,
                 ]
-            self._executor.check_call(cmd, env=env)
+            self._executor.check_call(cmd, env=self.create_chroot_env())
 
-    def make_openstack_services_autostart(self, abs_mountpoint, env):
+    def make_openstack_services_autostart(self):
         self._make_services_autostart([
                 'systemd-networkd',
                 'sshd',
@@ -250,7 +250,7 @@ class ArchStrategy(DistroStrategy):
                 'cloud-init',
                 'cloud-config',
                 'cloud-final',
-                ], abs_mountpoint, env)
+                ])
 
     def get_vmlinuz_path(self):
         return '/boot/vmlinuz-linux'
@@ -258,7 +258,7 @@ class ArchStrategy(DistroStrategy):
     def get_initramfs_path(self):
         return '/boot/initramfs-linux.img'
 
-    def install_kernel(self, abs_mountpoint, env):
+    def install_kernel(self):
         pass  # Kernel installed, already
 
     def uses_systemd(self):
