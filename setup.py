@@ -26,6 +26,8 @@ if __name__ == '__main__':
                 '%s.types' % _PYTHON_PACKAGE_NAME,
                 'directory_bootstrap',
                 'directory_bootstrap.distros',
+                'directory_bootstrap.resources',
+                'directory_bootstrap.resources.gentoo',
                 'directory_bootstrap.shared',
                 'directory_bootstrap.shared.loaders',
             ],
