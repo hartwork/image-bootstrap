@@ -11,7 +11,7 @@ Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
  python-colorama, python-bs4, python-requests, python-pkg-resources,
  debootstrap | cdebootstrap | cdebootstrap-static,
- debian-archive-keyring, ubuntu-keyring, gnupg,
+ debian-archive-keyring, ubuntu-keyring | ubuntu-archive-keyring, gnupg,
  extlinux, mbr,
  grub-pc | grub-coreboot | grub-efi-amd64 | grub-efi-ia32 | grub-ieee1275 | grub-yeeloong,
  kpartx,
