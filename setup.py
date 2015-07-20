@@ -20,6 +20,12 @@ if __name__ == '__main__':
             author_email='sebastian@pipping.org',
             url=GITHUB_HOME_URL,
             download_url='%s/archive/%s.tar.gz' % (GITHUB_HOME_URL, VERSION_STR),
+            install_requires=[
+                'beautifulsoup4',
+                'colorama',
+                'requests',
+                'setuptools',
+            ],
             packages=[
                 _PYTHON_PACKAGE_NAME,
                 '%s.distros' % _PYTHON_PACKAGE_NAME,
