@@ -11,7 +11,7 @@ import shutil
 from textwrap import dedent
 
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
-from directory_bootstrap.shared.commands import COMMAND_CHROOT, COMMAND_WGET
+from directory_bootstrap.shared.commands import COMMAND_CHROOT, COMMAND_FIND, COMMAND_WGET
 
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 
@@ -233,6 +233,7 @@ class GentooStrategy(DistroStrategy):
     def get_commands_to_check_for(self):
         return [
                 COMMAND_CHROOT,
+                COMMAND_FIND,
                 COMMAND_WGET,
                 ]
 
@@ -311,8 +312,19 @@ class GentooStrategy(DistroStrategy):
     def perform_in_chroot_shipping_clean_up(self):
         pass  # TODO
 
+    def _clean_distfiles(self):
+        distfiles_abs_path = os.path.join(self._abs_mountpoint, 'usr/portage/distfiles/')
+        self._messenger.info('Cleaning distfiles at "%s"...' % distfiles_abs_path)
+        cmd = [
+                COMMAND_FIND,
+                distfiles_abs_path,
+                '-type', 'f',
+                '-delete',
+                ]
+        self._executor.check_call(cmd)
+
     def perform_post_chroot_clean_up(self):
-        pass  # TODO
+        self._clean_distfiles()
 
     def run_directory_bootstrap(self, architecture, bootloader_approach):
         self._messenger.info('Bootstrapping %s into "%s"...'
