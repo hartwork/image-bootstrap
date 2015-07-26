@@ -41,7 +41,7 @@ class GentooStrategy(DistroStrategy):
         self._stage3_date_triple_or_none = stage3_date_triple_or_none
         self._repository_date_triple_or_none = repository_date_triple_or_none
 
-    def _write_etc_conf_d_hostname(self, hostname):
+    def _write_etc_conf_d_hostname(self):
         etc_conf_d = os.path.join(self._abs_mountpoint, 'etc/conf.d')
         try:
             os.makedirs(etc_conf_d, 0755)
@@ -52,12 +52,19 @@ class GentooStrategy(DistroStrategy):
         etc_conf_d_hostname = os.path.join(etc_conf_d, 'hostname')
         with open(etc_conf_d_hostname, 'w') as f:
             print(dedent("""\
-                    # Set to the hostname of this machine
-                    hostname="%s"
-                    """ % hostname), file=f)
+                    # Written by image-bootstrap
+                    if [ -f /etc/hostname ]; then
+                        hostname="`cat /etc/hostname`"
+                    fi
+
+                    if [ -z "${hostname}" ]; then
+                        hostname=localhost
+                    fi
+                    """), file=f)
 
     def configure_hostname(self, hostname):
-        self._write_etc_conf_d_hostname(hostname)
+        self.write_etc_hostname(hostname)
+        self._write_etc_conf_d_hostname()
 
     def allow_autostart_of_services(self, allow):
         pass  # services are not auto-started on Gentoo
