@@ -309,8 +309,15 @@ class GentooStrategy(DistroStrategy):
                 ):
             self._make_service_autostart(service)
 
+    def _mark_all_news_as_read(self):
+        self._executor.check_call([
+            COMMAND_CHROOT, self._abs_mountpoint,
+            'eselect', 'news',
+            'read', '--quiet', 'all',
+            ], env=self.create_chroot_env())
+
     def perform_in_chroot_shipping_clean_up(self):
-        pass  # TODO
+        self._mark_all_news_as_read()
 
     def _clean_distfiles(self):
         distfiles_abs_path = os.path.join(self._abs_mountpoint, 'usr/portage/distfiles/')
