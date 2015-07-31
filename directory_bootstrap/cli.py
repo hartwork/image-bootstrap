@@ -2,17 +2,15 @@
 # Licensed under AGPL v3 or later
 
 import directory_bootstrap.shared.loaders._argparse as argparse
-
 from directory_bootstrap.distros.arch import ArchBootstrapper
-from directory_bootstrap.distros.base import BOOTSTRAPPER_CLASS_FIELD, \
-        add_general_directory_bootstrapping_options
+from directory_bootstrap.distros.base import (
+        BOOTSTRAPPER_CLASS_FIELD, add_general_directory_bootstrapping_options)
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.shared.executor import Executor
-from directory_bootstrap.shared.messenger import Messenger, \
-        VERBOSITY_VERBOSE
+from directory_bootstrap.shared.messenger import VERBOSITY_VERBOSE, Messenger
 from directory_bootstrap.shared.metadata import VERSION_STR
-from directory_bootstrap.shared.output_control import \
-        add_output_control_options, is_color_wanted, run_handle_errors
+from directory_bootstrap.shared.output_control import (
+        add_output_control_options, is_color_wanted, run_handle_errors)
 
 
 def _main__level_three(messenger, options):

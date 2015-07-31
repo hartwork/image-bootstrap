@@ -7,8 +7,8 @@ import re
 import sys
 
 from directory_bootstrap.shared.loaders._colorama import Fore, Style
-from directory_bootstrap.shared.metadata import GITHUB_HOME_URL, VERSION_STR, RELEASE_DATE_STR
-
+from directory_bootstrap.shared.metadata import (
+        GITHUB_HOME_URL, RELEASE_DATE_STR, VERSION_STR)
 
 _NEEDS_ESCAPING = re.compile('([!`"\'$ \\\\{}()?*&<>;])')
 

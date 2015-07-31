@@ -1,11 +1,9 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from ctypes import CDLL, c_int, get_errno, cast, c_char_p
-
 import errno
 import os
-
+from ctypes import CDLL, c_char_p, c_int, cast, get_errno
 
 _CLONE_NEWNS = 0x00020000
 _CLONE_NEWUTS = 0x04000000

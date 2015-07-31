@@ -4,14 +4,12 @@
 from __future__ import print_function
 
 import os
-
 from textwrap import dedent
 
-from directory_bootstrap.distros.arch import ArchBootstrapper, \
-        SUPPORTED_ARCHITECTURES
-from directory_bootstrap.shared.commands import \
-        COMMAND_CHROOT, COMMAND_SED, COMMAND_FIND, COMMAND_RM, COMMAND_WGET
-
+from directory_bootstrap.distros.arch import (
+        SUPPORTED_ARCHITECTURES, ArchBootstrapper)
+from directory_bootstrap.shared.commands import (
+        COMMAND_CHROOT, COMMAND_FIND, COMMAND_RM, COMMAND_SED, COMMAND_WGET)
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 
 

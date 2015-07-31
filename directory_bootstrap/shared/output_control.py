@@ -6,8 +6,8 @@ import subprocess
 import sys
 import traceback
 
-from directory_bootstrap.shared.messenger import VERBOSITY_QUIET, VERBOSITY_VERBOSE
-
+from directory_bootstrap.shared.messenger import (
+        VERBOSITY_QUIET, VERBOSITY_VERBOSE)
 
 _COLORIZE_NEVER = 'never'
 _COLORIZE_ALWAYS = 'always'

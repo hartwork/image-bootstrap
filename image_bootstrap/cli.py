@@ -6,32 +6,26 @@ import os
 from directory_bootstrap.distros.base import \
         add_general_directory_bootstrapping_options
 from directory_bootstrap.shared.executor import Executor
-from directory_bootstrap.shared.loaders._argparse import \
-        ArgumentParser, RawDescriptionHelpFormatter
-from directory_bootstrap.shared.messenger import Messenger, BANNER, \
-        VERBOSITY_VERBOSE
+from directory_bootstrap.shared.loaders._argparse import (
+        ArgumentParser, RawDescriptionHelpFormatter)
+from directory_bootstrap.shared.messenger import (
+        BANNER, VERBOSITY_VERBOSE, Messenger)
 from directory_bootstrap.shared.metadata import DESCRIPTION, VERSION_STR
-from directory_bootstrap.shared.output_control import \
-        add_output_control_options, is_color_wanted, run_handle_errors
-
-from image_bootstrap.engine import \
-        BootstrapEngine, \
-        BOOTLOADER__AUTO, \
-        BOOTLOADER__CHROOT_GRUB2__DEVICE, \
-        BOOTLOADER__CHROOT_GRUB2__DRIVE, \
-        BOOTLOADER__HOST_EXTLINUX, \
-        BOOTLOADER__HOST_GRUB2__DEVICE, \
-        BOOTLOADER__HOST_GRUB2__DRIVE, \
-        BOOTLOADER__NONE
-from image_bootstrap.distros.base import DISTRO_CLASS_FIELD
+from directory_bootstrap.shared.output_control import (
+        add_output_control_options, is_color_wanted, run_handle_errors)
 from image_bootstrap.distros.arch import ArchStrategy
+from image_bootstrap.distros.base import DISTRO_CLASS_FIELD
 from image_bootstrap.distros.debian import DebianStrategy
 from image_bootstrap.distros.gentoo import GentooStrategy
 from image_bootstrap.distros.ubuntu import UbuntuStrategy
+from image_bootstrap.engine import (
+        BOOTLOADER__AUTO, BOOTLOADER__CHROOT_GRUB2__DEVICE,
+        BOOTLOADER__CHROOT_GRUB2__DRIVE, BOOTLOADER__HOST_EXTLINUX,
+        BOOTLOADER__HOST_GRUB2__DEVICE, BOOTLOADER__HOST_GRUB2__DRIVE,
+        BOOTLOADER__NONE, BootstrapEngine)
 from image_bootstrap.types.disk_id import disk_id_type
 from image_bootstrap.types.machine_id import machine_id_type
 from image_bootstrap.types.uuid import uuid_type
-
 
 _BOOTLOADER_APPROACHES = (
         BOOTLOADER__AUTO,

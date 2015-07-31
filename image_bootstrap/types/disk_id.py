@@ -3,7 +3,6 @@
 
 import re
 
-
 _DISK_ID_PATTERN = '^0x[0-9a-fA-F]{1,8}$'
 _DISK_ID_MATCHER = re.compile(_DISK_ID_PATTERN)
 

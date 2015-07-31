@@ -6,18 +6,14 @@ from __future__ import print_function
 import errno
 import os
 import subprocess
-
 from abc import ABCMeta, abstractmethod
 from textwrap import dedent
 
-from directory_bootstrap.shared.commands import \
-        COMMAND_FIND, COMMAND_UNAME, COMMAND_UNSHARE
-
+from directory_bootstrap.shared.commands import (
+        COMMAND_FIND, COMMAND_UNAME, COMMAND_UNSHARE)
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
-from image_bootstrap.engine import \
-        COMMAND_CHROOT, \
-        BOOTLOADER__ANY_GRUB, \
-        BOOTLOADER__HOST_EXTLINUX
+from image_bootstrap.engine import (
+        BOOTLOADER__ANY_GRUB, BOOTLOADER__HOST_EXTLINUX, COMMAND_CHROOT)
 
 
 _ETC_NETWORK_INTERFACES_CONTENT = """\

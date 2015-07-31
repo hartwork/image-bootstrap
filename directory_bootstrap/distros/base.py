@@ -6,16 +6,13 @@ from __future__ import print_function
 import errno
 import os
 import re
-
 from abc import ABCMeta, abstractmethod
 
 import directory_bootstrap.shared.loaders._requests as requests
-
+from directory_bootstrap.shared.commands import (
+        COMMAND_WGET, check_for_commands)
 from directory_bootstrap.shared.loaders._bs4 import BeautifulSoup
-
-from directory_bootstrap.shared.commands import check_for_commands, COMMAND_WGET
 from directory_bootstrap.shared.namespace import unshare_current_process
-
 
 BOOTSTRAPPER_CLASS_FIELD = 'bootstrapper_class'
 

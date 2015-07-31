@@ -10,26 +10,21 @@ import stat
 import subprocess
 import tempfile
 import time
-
 from textwrap import dedent
 
-from directory_bootstrap.shared.commands import \
-        check_for_commands, find_command, check_call__keep_trying, \
-        EXIT_COMMAND_NOT_FOUND, \
-        COMMAND_BLKID, COMMAND_CHMOD, COMMAND_CHROOT, \
-        COMMAND_CP, COMMAND_EXTLINUX, COMMAND_FIND, \
-        COMMAND_INSTALL_MBR, COMMAND_KPARTX, COMMAND_MKDIR, \
-        COMMAND_MKFS_EXT4, COMMAND_MOUNT, COMMAND_PARTED, \
-        COMMAND_PARTPROBE, COMMAND_RM, COMMAND_RMDIR, \
-        COMMAND_SED, COMMAND_TUNE2FS
-from directory_bootstrap.shared.mount import try_unmounting, COMMAND_UMOUNT
-from directory_bootstrap.shared.namespace import \
-        unshare_current_process, set_hostname
+from directory_bootstrap.shared.commands import (
+        COMMAND_BLKID, COMMAND_CHMOD, COMMAND_CHROOT, COMMAND_CP,
+        COMMAND_EXTLINUX, COMMAND_FIND, COMMAND_INSTALL_MBR, COMMAND_KPARTX,
+        COMMAND_MKDIR, COMMAND_MKFS_EXT4, COMMAND_MOUNT, COMMAND_PARTED,
+        COMMAND_PARTPROBE, COMMAND_RM, COMMAND_RMDIR, COMMAND_SED,
+        COMMAND_TUNE2FS, EXIT_COMMAND_NOT_FOUND, check_call__keep_trying,
+        check_for_commands, find_command)
+from directory_bootstrap.shared.mount import COMMAND_UMOUNT, try_unmounting
+from directory_bootstrap.shared.namespace import (
+        set_hostname, unshare_current_process)
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
-
 from image_bootstrap.mount import MountFinder
 from image_bootstrap.types.uuid import require_valid_uuid
-
 
 BOOTLOADER__AUTO = 'auto'
 BOOTLOADER__CHROOT_GRUB2__DEVICE = 'chroot-grub2-device'

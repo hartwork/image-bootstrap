@@ -6,7 +6,6 @@ from __future__ import print_function
 import os
 import re
 
-
 # See https://www.kernel.org/doc/Documentation/filesystems/proc.txt
 _PROC_PID_MOUNTINFO_LINE = re.compile(
         '^(?P<mount_id>[0-9]+) '

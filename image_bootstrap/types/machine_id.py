@@ -3,7 +3,6 @@
 
 import re
 
-
 _MACHINE_ID_PATTERN = '^[0-9a-f]{32}$'
 _MACHINE_ID_MATCHER = re.compile(_MACHINE_ID_PATTERN)
 

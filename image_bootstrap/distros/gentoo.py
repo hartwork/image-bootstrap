@@ -7,14 +7,12 @@ import errno
 import glob
 import os
 import shutil
-
 from textwrap import dedent
 
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
-from directory_bootstrap.shared.commands import COMMAND_CHROOT, COMMAND_FIND, COMMAND_WGET
-
+from directory_bootstrap.shared.commands import (
+        COMMAND_CHROOT, COMMAND_FIND, COMMAND_WGET)
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
-
 
 _ABS_PACKAGE_USE = '/etc/portage/package.use'
 _ABS_PACKAGE_KEYWORDS = '/etc/portage/package.keywords'

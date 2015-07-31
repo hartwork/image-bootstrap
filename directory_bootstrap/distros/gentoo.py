@@ -11,13 +11,13 @@ import shutil
 import subprocess
 import tempfile
 
-from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
-
 import directory_bootstrap.resources.gentoo as resources
-from directory_bootstrap.distros.base import DirectoryBootstrapper, date_argparse_type
-from directory_bootstrap.shared.commands import COMMAND_GPG, COMMAND_MD5SUM, \
-        COMMAND_SHA512SUM, COMMAND_TAR, COMMAND_UNXZ
-
+from directory_bootstrap.distros.base import (
+        DirectoryBootstrapper, date_argparse_type)
+from directory_bootstrap.shared.commands import (
+        COMMAND_GPG, COMMAND_MD5SUM, COMMAND_SHA512SUM, COMMAND_TAR,
+        COMMAND_UNXZ)
+from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
 
 _DEFAULT_MIRROR = 'http://distfiles.gentoo.org/'
 _GPG_DISPLAY_KEY_FORMAT = '0xlong'

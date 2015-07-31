@@ -8,16 +8,15 @@ import os
 import re
 import shutil
 import tempfile
-
 from tarfile import TarFile
 
-from directory_bootstrap.distros.base import DirectoryBootstrapper, date_argparse_type
-from directory_bootstrap.shared.commands import \
-        COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, \
-        COMMAND_UMOUNT, COMMAND_UNSHARE
+from directory_bootstrap.distros.base import (
+        DirectoryBootstrapper, date_argparse_type)
+from directory_bootstrap.shared.commands import (
+        COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, COMMAND_UMOUNT,
+        COMMAND_UNSHARE)
 from directory_bootstrap.shared.mount import try_unmounting
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
-
 
 SUPPORTED_ARCHITECTURES = ('i686', 'x86_64')
 

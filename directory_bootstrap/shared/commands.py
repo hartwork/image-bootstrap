@@ -3,9 +3,8 @@
 
 import errno
 import os
-import time
 import subprocess
-
+import time
 
 COMMAND_BLKID = 'blkid'
 COMMAND_CHMOD = 'chmod'

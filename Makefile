@@ -23,7 +23,16 @@ dist:
 install:
 	./setup.py install --prefix "$(PREFIX)" --root "$(DESTDIR)"
 
+isort:
+	find -type f -name  '*.py' -print0 \
+			| xargs --null isort \
+				--project directory_bootstrap \
+				--project image_bootstrap \
+				--section-default THIRDPARTY \
+				-m 4 --indent '        ' \
+				--atomic
+
 mrproper:
 	git clean -d -f -x
 
-.PHONY: all compile deb dist install mrproper
+.PHONY: all compile deb dist install isort mrproper

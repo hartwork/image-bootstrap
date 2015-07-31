@@ -4,15 +4,11 @@
 from __future__ import print_function
 
 import os
-
 from abc import ABCMeta, abstractmethod
 
 import image_bootstrap.loaders._yaml as yaml
-
 from directory_bootstrap.shared.commands import COMMAND_WGET
-from image_bootstrap.engine import \
-        BOOTLOADER__CHROOT_GRUB2__DRIVE
-
+from image_bootstrap.engine import BOOTLOADER__CHROOT_GRUB2__DRIVE
 
 DISTRO_CLASS_FIELD = 'distro_class'
 
