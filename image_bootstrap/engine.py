@@ -789,23 +789,10 @@ class BootstrapEngine(object):
             os.fchmod(f.fileno(), 0440)
 
     def _install_cloud_init_and_friends(self):
-        return self._distro.install_cloud_init_and_friends()
+        self._distro.install_cloud_init_and_friends()
 
     def _configure_cloud_init_and_friends(self):
-        cloud_cfg_path = os.path.join(self._abs_mountpoint, 'etc/cloud/cloud.cfg')
-        self._messenger.info('Adjusting file "%s"...' % cloud_cfg_path)
-        with open(cloud_cfg_path) as f:
-            content = f.read()
-
-        lines_to_write = []
-        for line in content.split('\n'):
-            if line.startswith('     name:'):
-                line = '     name: %s' % self._distro.get_cloud_username()
-
-            lines_to_write.append(line)
-
-        with open(cloud_cfg_path, 'w') as f:
-            print('\n'.join(lines_to_write), file=f)
+        self._distro.adjust_etc_cloud_cfg()
 
         cloud_cfg_d_file_path = os.path.join(self._abs_mountpoint,
                 self._distro.get_cloud_init_datasource_cfg_path().lstrip('/'))

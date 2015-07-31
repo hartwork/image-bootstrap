@@ -7,6 +7,8 @@ import os
 
 from abc import ABCMeta, abstractmethod
 
+import image_bootstrap.loaders._yaml as yaml
+
 from directory_bootstrap.shared.commands import COMMAND_WGET
 from image_bootstrap.engine import \
         BOOTLOADER__CHROOT_GRUB2__DRIVE
@@ -100,6 +102,9 @@ class DistroStrategy(object):
     def get_cloud_username(self):
         return self.DISTRO_KEY
 
+    def get_cloud_init_distro(self):
+        return self.DISTRO_KEY
+
     @abstractmethod
     def install_dhcp_client(self):
         pass
@@ -161,6 +166,25 @@ class DistroStrategy(object):
         self._messenger.info('Writing file "%s"...' % filename)
         with open(filename, 'w') as f:
             print('syslog_fix_perms: null', file=f)
+
+    def adjust_cloud_cfg_dict(self, cloud_cfg_dict):
+        system_info = cloud_cfg_dict.setdefault('system_info', {})
+
+        system_info__default_user = system_info.setdefault('default_user', {})
+        system_info__default_user['name'] = self.get_cloud_username()
+        system_info__default_user['gecos'] = 'Cloud-init-user'
+
+        system_info['distro'] = self.get_cloud_init_distro()
+
+    def adjust_etc_cloud_cfg(self):
+        filename = os.path.join(self._abs_mountpoint, 'etc/cloud/cloud.cfg')
+        self._messenger.info('Adjusting file "%s"...' % filename)
+        with open(filename, 'r') as f:
+            d = yaml.load(f.read())
+        self.adjust_cloud_cfg_dict(d)
+        with open(filename, 'w') as f:
+            print('# Re-written by image-bootstrap', file=f)
+            print(yaml.dump(d, default_flow_style=False), file=f)
 
     @abstractmethod
     def uses_systemd(self):
