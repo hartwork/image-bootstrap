@@ -38,6 +38,10 @@ _BOOTLOADER_APPROACHES = (
         )
 
 
+def _abspath_or_none(path_or_none):
+    return path_or_none and os.path.abspath(path_or_none)
+
+
 def _main__level_three(messenger, options):
     messenger.banner()
 
@@ -54,7 +58,7 @@ def _main__level_three(messenger, options):
             options.hostname,
             options.architecture,
             options.root_password,
-            options.root_password_file and os.path.abspath(options.root_password_file),
+            _abspath_or_none(options.root_password_file),
             os.path.abspath(options.resolv_conf),
             options.disk_id,
             options.first_partition_uuid,
@@ -68,9 +72,9 @@ def _main__level_three(messenger, options):
             messenger,
             executor,
             machine_config,
-            options.scripts_dir_pre and os.path.abspath(options.scripts_dir_pre),
-            options.scripts_dir_chroot and os.path.abspath(options.scripts_dir_chroot),
-            options.scripts_dir_post and os.path.abspath(options.scripts_dir_post),
+            _abspath_or_none(options.scripts_dir_pre),
+            _abspath_or_none(options.scripts_dir_chroot),
+            _abspath_or_none(options.scripts_dir_post),
             os.path.abspath(options.target_path),
             options.command_grub2_install,
             )
