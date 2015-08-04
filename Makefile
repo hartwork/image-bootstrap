@@ -9,6 +9,9 @@ PYTHON = python
 
 all:
 
+check:
+	py.test --doctest-modules
+
 compile:
 	$(PYTHON) -m compileall directory_bootstrap image_bootstrap
 
@@ -35,4 +38,4 @@ isort:
 mrproper:
 	git clean -d -f -x
 
-.PHONY: all compile deb dist install isort mrproper
+.PHONY: all check compile deb dist install isort mrproper
