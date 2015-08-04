@@ -22,7 +22,7 @@ from image_bootstrap.engine import (
         BOOTLOADER__AUTO, BOOTLOADER__CHROOT_GRUB2__DEVICE,
         BOOTLOADER__CHROOT_GRUB2__DRIVE, BOOTLOADER__HOST_EXTLINUX,
         BOOTLOADER__HOST_GRUB2__DEVICE, BOOTLOADER__HOST_GRUB2__DRIVE,
-        BOOTLOADER__NONE, BootstrapEngine)
+        BOOTLOADER__NONE, BootstrapEngine, MachineConfig)
 from image_bootstrap.types.disk_id import disk_id_type
 from image_bootstrap.types.machine_id import machine_id_type
 from image_bootstrap.types.uuid import uuid_type
@@ -50,9 +50,7 @@ def _main__level_three(messenger, options):
 
     executor = Executor(messenger, stdout=child_process_stdout)
 
-    bootstrap = BootstrapEngine(
-            messenger,
-            executor,
+    machine_config = MachineConfig(
             options.hostname,
             options.architecture,
             options.root_password,
@@ -61,14 +59,20 @@ def _main__level_three(messenger, options):
             options.disk_id,
             options.first_partition_uuid,
             options.machine_id,
+            options.bootloader_approach,
+            options.bootloader_force,
+            options.with_openstack,
+            )
+
+    bootstrap = BootstrapEngine(
+            messenger,
+            executor,
+            machine_config,
             options.scripts_dir_pre and os.path.abspath(options.scripts_dir_pre),
             options.scripts_dir_chroot and os.path.abspath(options.scripts_dir_chroot),
             options.scripts_dir_post and os.path.abspath(options.scripts_dir_post),
             os.path.abspath(options.target_path),
             options.command_grub2_install,
-            options.bootloader_approach,
-            options.bootloader_force,
-            options.with_openstack,
             )
 
     distro_class = getattr(options, DISTRO_CLASS_FIELD)

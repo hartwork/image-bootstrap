@@ -70,10 +70,8 @@ _DISK_ID_OFFSET = 440
 _DISK_ID_COUNT_BYTES = 4
 
 
-class BootstrapEngine(object):
+class MachineConfig(object):
     def __init__(self,
-            messenger,
-            executor,
             hostname,
             architecture,
             root_password,
@@ -82,37 +80,49 @@ class BootstrapEngine(object):
             disk_id,
             first_partition_uuid,
             machine_id,
+            bootloader_approach,
+            bootloader_force,
+            with_openstack,
+            ):
+        self.hostname = hostname
+        self.architecture = architecture
+        self.root_password = root_password
+        self.abs_root_password_file = abs_root_password_file
+        self.abs_etc_resolv_conf = abs_etc_resolv_conf
+        self.disk_id = disk_id
+        self.first_partition_uuid = first_partition_uuid
+        self.machine_id = machine_id
+        self.bootloader_approach = bootloader_approach
+        self.bootloader_force = bootloader_force
+        self.with_openstack = with_openstack
+
+
+class BootstrapEngine(object):
+    def __init__(self,
+            messenger,
+            executor,
+            machine_config,
             abs_scripts_dir_pre,
             abs_scripts_dir_chroot,
             abs_scripts_dir_post,
             abs_target_path,
             command_grub2_install,
-            bootloader_approach,
-            bootloader_force,
-            with_openstack,
             ):
         self._messenger = messenger
         self._executor = executor
-        self._hostname = hostname
-        self._architecture = architecture
-        self._root_password = root_password
-        self._abs_root_password_file = abs_root_password_file
-        self._abs_etc_resolv_conf = abs_etc_resolv_conf
-        self._disk_id = disk_id
-        self._machine_id = machine_id
+
+        assert isinstance(machine_config, MachineConfig)
+        self._config = machine_config
+
         self._abs_scripts_dir_pre = abs_scripts_dir_pre
         self._abs_scripts_dir_chroot = abs_scripts_dir_chroot
         self._abs_scripts_dir_post = abs_scripts_dir_post
         self._abs_target_path = abs_target_path
 
         self._command_grub2_install = command_grub2_install
-        self._bootloader_approach = bootloader_approach
-        self._bootloader_force = bootloader_force
-        self._with_openstack = with_openstack
 
         self._abs_mountpoint = None
         self._abs_first_partition_device = None
-        self._first_partition_uuid = first_partition_uuid
 
         self._distro = None
 
@@ -124,10 +134,10 @@ class BootstrapEngine(object):
         return self._distro.check_release()
 
     def select_bootloader(self):
-        if self._bootloader_approach == BOOTLOADER__AUTO:
-            self._bootloader_approach = self._distro.select_bootloader()
+        if self._config.bootloader_approach == BOOTLOADER__AUTO:
+            self._config.bootloader_approach = self._distro.select_bootloader()
             self._messenger.info('Selected approach "%s" for bootloader installation.'
-                    % self._bootloader_approach)
+                    % self._config.bootloader_approach)
 
     def get_commands_to_check_for(self):
         res = list(self._distro.get_commands_to_check_for())
@@ -151,7 +161,7 @@ class BootstrapEngine(object):
                 self._command_grub2_install,
                 ]
 
-        if self._bootloader_approach == BOOTLOADER__HOST_EXTLINUX:
+        if self._config.bootloader_approach == BOOTLOADER__HOST_EXTLINUX:
             res += [
                     COMMAND_EXTLINUX,
                     COMMAND_INSTALL_MBR,
@@ -170,7 +180,7 @@ class BootstrapEngine(object):
         if self._command_grub2_install:
             return  # Explicit command given, no detection needed
 
-        if self._bootloader_approach not in BOOTLOADER__HOST_GRUB2:
+        if self._config.bootloader_approach not in BOOTLOADER__HOST_GRUB2:
             return  # Host grub2-install not used, no detection needed
 
         COMMAND_GRUB_INSTALL = 'grub-install'
@@ -207,8 +217,8 @@ class BootstrapEngine(object):
 
     def check_architecture(self):
         self._messenger.info('Checking for known unsupported architecture/machine combination...')
-        self._architecture = self._distro.check_architecture(self._architecture)
-        assert self._architecture is not None
+        self._config.architecture = self._distro.check_architecture(self._config.architecture)
+        assert self._config.architecture is not None
 
     def _script_should_be_run(self, basename):
         if basename.startswith('.'):
@@ -270,7 +280,7 @@ class BootstrapEngine(object):
 
     def _unshare(self):
         unshare_current_process(self._messenger)
-        set_hostname(self._hostname)
+        set_hostname(self._config.hostname)
 
     def _partition_device(self):
         self._messenger.info('Partitioning "%s"...' % self._abs_target_path)
@@ -365,8 +375,8 @@ class BootstrapEngine(object):
 
     def run_directory_bootstrap(self):
         return self._distro.run_directory_bootstrap(
-                self._architecture,
-                self._bootloader_approach,
+                self._config.architecture,
+                self._config.bootloader_approach,
                 )
 
     def _unmount_directory_bootstrap_leftovers(self):
@@ -377,7 +387,7 @@ class BootstrapEngine(object):
 
     def _set_root_password_inside_chroot(self):
         self._messenger.info('Setting root password...')
-        if self._root_password is None:
+        if self._config.root_password is None:
             return
 
         cmd = [
@@ -388,19 +398,19 @@ class BootstrapEngine(object):
         env = self.make_environment(tell_mountpoint=False)
         self._messenger.announce_command(cmd)
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, env=env)
-        p.stdin.write('root:%s' % self._root_password)
+        p.stdin.write('root:%s' % self._config.root_password)
         p.stdin.close()
         p.wait()
         if p.returncode:
             raise subprocess.CalledProcessError(p.returncode, cmd)
 
     def _set_first_partition_uuid(self):
-        if not self._first_partition_uuid:
+        if not self._config.first_partition_uuid:
             return
 
-        self._messenger.info('Setting first partition UUID to %s...' % self._first_partition_uuid)
+        self._messenger.info('Setting first partition UUID to %s...' % self._config.first_partition_uuid)
         cmd = [COMMAND_TUNE2FS,
-                '-U', self._first_partition_uuid,
+                '-U', self._config.first_partition_uuid,
                 self._abs_first_partition_device,
                 ]
         self._executor.check_call(cmd)
@@ -415,35 +425,35 @@ class BootstrapEngine(object):
         output = self._executor.check_output(cmd_blkid)
         first_partition_uuid = output.rstrip()
         require_valid_uuid(first_partition_uuid)
-        self._first_partition_uuid = first_partition_uuid
+        self._config.first_partition_uuid = first_partition_uuid
 
     def _create_etc_fstab(self):
         filename = os.path.join(self._abs_mountpoint, 'etc', 'fstab')
         self._messenger.info('Writing file "%s"...' % filename)
         f = open(filename, 'w')
-        print('/dev/disk/by-uuid/%s / auto defaults 0 1' % self._first_partition_uuid, file=f)
+        print('/dev/disk/by-uuid/%s / auto defaults 0 1' % self._config.first_partition_uuid, file=f)
         f.close()
 
     def _create_etc_machine_id(self):
-        if self._machine_id:
+        if self._config.machine_id:
             etc_machine_id = os.path.join(self._abs_mountpoint, 'etc/machine-id')
             self._messenger.info('Writing file "%s"...' % etc_machine_id)
             with open(etc_machine_id, 'w') as f:
-                print(self._machine_id, file=f)
+                print(self._config.machine_id, file=f)
 
     def _configure_hostname(self):
         env = self.make_environment(tell_mountpoint=False)
-        self._distro.configure_hostname(self._hostname)
+        self._distro.configure_hostname(self._config.hostname)
 
     def create_network_configuration(self):
-        use_mtu_tristate = True if self._with_openstack else None
+        use_mtu_tristate = True if self._config.with_openstack else None
         return self._distro.create_network_configuration(use_mtu_tristate)
 
     def _fix_grub_cfg_root_device(self):
         self._messenger.info('Post-processing GRUB config...')
         cmd_sed = [
                 COMMAND_SED,
-                's,root=[^ ]\+,root=UUID=%s,g' % self._first_partition_uuid,
+                's,root=[^ ]\+,root=UUID=%s,g' % self._config.first_partition_uuid,
                 '-i', os.path.join(self._abs_mountpoint, 'boot', 'grub', 'grub.cfg'),
                 ]
         self._executor.check_call(cmd_sed)
@@ -461,10 +471,10 @@ class BootstrapEngine(object):
         for key in ('LANG', 'LANGUAGE'):
             env.pop(key, None)
 
-        assert self._hostname is not None
+        assert self._config.hostname is not None
         env.update({
-                'HOSTNAME': self._hostname,  # for compatibility to grml-debootstrap
-                'IB_HOSTNAME': self._hostname,
+                'HOSTNAME': self._config.hostname,  # for compatibility to grml-debootstrap
+                'IB_HOSTNAME': self._config.hostname,
                 'LC_ALL': 'C',
                 })
 
@@ -500,7 +510,7 @@ class BootstrapEngine(object):
         hints = []
         if real_abs_target != os.path.normpath(self._abs_target_path):
             hints.append('actually "%s"' % real_abs_target)
-        hints.append('approach "%s"' % self._bootloader_approach)
+        hints.append('approach "%s"' % self._config.bootloader_approach)
 
         return 'Installing bootloader to device "%s" (%s)...' % (
                 self._abs_target_path, ', '.join(hints))
@@ -512,11 +522,11 @@ class BootstrapEngine(object):
         self._distro.ensure_chroot_has_grub2_installed()
 
     def _install_bootloader__extlinux(self):
-        assert self._first_partition_uuid
+        assert self._config.first_partition_uuid
         d = {
             'distro_key': self._distro.DISTRO_KEY,
             'distro_name_long': self._distro.DISTRO_NAME_LONG,
-            'uuid': self._first_partition_uuid,
+            'uuid': self._config.first_partition_uuid,
             'vmlinuz': self._distro.get_vmlinuz_path(),
             'initramfs': self._distro.get_initramfs_path(),
         }
@@ -558,8 +568,8 @@ class BootstrapEngine(object):
         real_abs_target = os.path.realpath(self._abs_target_path)
         message = self._create_bootloader_install_message(real_abs_target)
 
-        use_chroot = self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2
-        use_device_map = self._bootloader_approach in BOOTLOADER__ANY_GRUB2__DRIVE
+        use_chroot = self._config.bootloader_approach in BOOTLOADER__CHROOT_GRUB2
+        use_device_map = self._config.bootloader_approach in BOOTLOADER__ANY_GRUB2__DRIVE
 
         chroot_boot_grub = os.path.join(self._abs_mountpoint, 'boot', 'grub')
         try:
@@ -597,7 +607,7 @@ class BootstrapEngine(object):
                 ]
             env = None
 
-        if self._bootloader_force:
+        if self._config.bootloader_force:
             cmd.append('--force')
 
         if use_device_map:
@@ -623,7 +633,7 @@ class BootstrapEngine(object):
     def _create_etc_resolv_conf(self):
         output_filename = os.path.join(self._abs_mountpoint, 'etc', 'resolv.conf')
 
-        filter_copy_resolv_conf(self._messenger, self._abs_etc_resolv_conf, output_filename)
+        filter_copy_resolv_conf(self._messenger, self._config.abs_etc_resolv_conf, output_filename)
 
     def _copy_chroot_scripts(self):
         self._messenger.info('Copying chroot scripts into chroot...')
@@ -733,25 +743,25 @@ class BootstrapEngine(object):
                 break
 
     def _set_disk_id_in_mbr(self):
-        if not self._disk_id:
+        if not self._config.disk_id:
             return
 
-        content = self._disk_id.byte_sequence()
+        content = self._config.disk_id.byte_sequence()
         assert len(content) == _DISK_ID_COUNT_BYTES
 
-        self._messenger.info('Setting MBR disk identifier to %s (4 bytes)...' % str(self._disk_id))
+        self._messenger.info('Setting MBR disk identifier to %s (4 bytes)...' % str(self._config.disk_id))
         f = open(self._abs_target_path, 'w')
         f.seek(_DISK_ID_OFFSET)
         f.write(content)
         f.close()
 
     def process_root_password(self):
-        if self._abs_root_password_file:
-            self._messenger.info('Reading root password from file "%s"...' % self._abs_root_password_file)
-            f = open(self._abs_root_password_file)
-            self._root_password = f.read().split('\n')[0]
+        if self._config.abs_root_password_file:
+            self._messenger.info('Reading root password from file "%s"...' % self._config.abs_root_password_file)
+            f = open(self._config.abs_root_password_file)
+            self._config.root_password = f.read().split('\n')[0]
             f.close()
-        elif self._root_password is not None:
+        elif self._config.root_password is not None:
             self._messenger.warn('Using --password PASSWORD is a security risk more often than not; '
                     'please consider using --password-file FILE, instead.')
 
@@ -827,7 +837,7 @@ class BootstrapEngine(object):
         else:
             self._messenger.info('Removing file "%s"...' % dbus_machine_id)
 
-        if not self._machine_id:  # i.e. keep if explicit ID requested
+        if not self._config.machine_id:  # i.e. keep if explicit ID requested
             etc_machine_id = os.path.join(self._abs_mountpoint, 'etc/machine-id')
             self._messenger.info('Truncating file "%s"...' % etc_machine_id)
             with open(etc_machine_id, 'w') as f:
@@ -878,11 +888,11 @@ class BootstrapEngine(object):
         try:
             self._format_partitions()
 
-            if self._first_partition_uuid:
+            if self._config.first_partition_uuid:
                 self._set_first_partition_uuid()
             else:
                 self._gather_first_partition_uuid()
-            assert self._first_partition_uuid
+            assert self._config.first_partition_uuid
 
             self._mkdir_mountpount()
             try:
@@ -900,9 +910,9 @@ class BootstrapEngine(object):
                     self._create_etc_fstab()
                     self._create_etc_machine_id()  # potentially re-write
                     self._run_pre_scripts()
-                    if self._bootloader_approach in BOOTLOADER__HOST_GRUB2:
+                    if self._config.bootloader_approach in BOOTLOADER__HOST_GRUB2:
                         self._install_bootloader__grub2()
-                    elif self._bootloader_approach == BOOTLOADER__HOST_EXTLINUX:
+                    elif self._config.bootloader_approach == BOOTLOADER__HOST_EXTLINUX:
                         self._install_bootloader__extlinux()
                     self._mount_nondisk_chroot_mounts()
                     try:
@@ -915,14 +925,14 @@ class BootstrapEngine(object):
                         #       with the actual kernel configuration
                         self._install_kernel()
 
-                        if self._bootloader_approach in BOOTLOADER__ANY_GRUB:
+                        if self._config.bootloader_approach in BOOTLOADER__ANY_GRUB:
                             # Need grub2-mkconfig in any case
                             self._ensure_chroot_has_grub2_installed()
 
-                        if self._bootloader_approach in BOOTLOADER__CHROOT_GRUB2:
+                        if self._config.bootloader_approach in BOOTLOADER__CHROOT_GRUB2:
                             self._install_bootloader__grub2()
 
-                        if self._with_openstack:
+                        if self._config.with_openstack:
                             # Essentials
                             self._install_dhcp_client()
                             self._install_sudo()
@@ -942,7 +952,7 @@ class BootstrapEngine(object):
                         self._adjust_initramfs_generator_config()
                         self.generate_initramfs_from_inside_chroot()
 
-                        if self._bootloader_approach in BOOTLOADER__ANY_GRUB:
+                        if self._config.bootloader_approach in BOOTLOADER__ANY_GRUB:
                             self._messenger.info('Generating GRUB configuration...')
                             self.generate_grub_cfg_from_inside_chroot()
                             self._fix_grub_cfg_root_device()
@@ -954,7 +964,7 @@ class BootstrapEngine(object):
                             finally:
                                 self._remove_chroot_scripts()
 
-                        if self._with_openstack:
+                        if self._config.with_openstack:
                             # Essentials (that better go last)
                             self._delete_sshd_keys()
                             self._clean_machine_id()
