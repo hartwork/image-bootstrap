@@ -59,3 +59,6 @@ class UbuntuStrategy(DebianBasedDistroStrategy):
     def uses_systemd(self):
         # NOTE: assumes not supporting anything older than trusty
         return self._release != 'trusty'
+
+    def get_minimum_size_bytes(self):
+        return 2 * 1024**3

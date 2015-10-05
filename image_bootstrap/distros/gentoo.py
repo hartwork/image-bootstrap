@@ -456,6 +456,9 @@ class GentooStrategy(DistroStrategy):
     def uses_systemd(self):
         return False
 
+    def get_minimum_size_bytes(self):
+        return 5 * 1024**3
+
     def install_acpid(self):
         self._install_package_atoms(['sys-power/acpid'])
         self._make_service_autostart('acpid')

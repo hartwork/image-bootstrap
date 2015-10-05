@@ -12,13 +12,14 @@ import tempfile
 import time
 from textwrap import dedent
 
+from directory_bootstrap.shared.byte_size import format_byte_size
 from directory_bootstrap.shared.commands import (
-        COMMAND_BLKID, COMMAND_CHMOD, COMMAND_CHROOT, COMMAND_CP,
-        COMMAND_EXTLINUX, COMMAND_FIND, COMMAND_INSTALL_MBR, COMMAND_KPARTX,
-        COMMAND_MKDIR, COMMAND_MKFS_EXT4, COMMAND_MOUNT, COMMAND_PARTED,
-        COMMAND_PARTPROBE, COMMAND_RM, COMMAND_RMDIR, COMMAND_SED,
-        COMMAND_TUNE2FS, EXIT_COMMAND_NOT_FOUND, check_call__keep_trying,
-        check_for_commands, find_command)
+        COMMAND_BLKID, COMMAND_BLOCKDEV, COMMAND_CHMOD, COMMAND_CHROOT,
+        COMMAND_CP, COMMAND_EXTLINUX, COMMAND_FIND, COMMAND_INSTALL_MBR,
+        COMMAND_KPARTX, COMMAND_MKDIR, COMMAND_MKFS_EXT4, COMMAND_MOUNT,
+        COMMAND_PARTED, COMMAND_PARTPROBE, COMMAND_RM, COMMAND_RMDIR,
+        COMMAND_SED, COMMAND_TUNE2FS, EXIT_COMMAND_NOT_FOUND,
+        check_call__keep_trying, check_for_commands, find_command)
 from directory_bootstrap.shared.mount import COMMAND_UMOUNT, try_unmounting
 from directory_bootstrap.shared.namespace import (
         set_hostname, unshare_current_process)
@@ -135,6 +136,7 @@ class BootstrapEngine(object):
         res = list(self._distro.get_commands_to_check_for())
         res += [
                 COMMAND_BLKID,
+                COMMAND_BLOCKDEV,
                 COMMAND_CHMOD,
                 COMMAND_CHROOT,
                 COMMAND_CP,
@@ -273,6 +275,22 @@ class BootstrapEngine(object):
     def _unshare(self):
         unshare_current_process(self._messenger)
         set_hostname(self._config.hostname)
+
+    def _check_device_size(self):
+        self._messenger.info('Checking size of "%s"...' % self._abs_target_path)
+        blockdev_output = self._executor.check_output([
+                COMMAND_BLOCKDEV,
+                '--getsize64',
+                self._abs_target_path,
+                ])
+        size_bytes_found = int(blockdev_output)
+        size_bytes_needed = self._distro.get_minimum_size_bytes()
+        if size_bytes_found < size_bytes_needed:
+            raise OSError(errno.ENOSPC, 'Device "%s" is %s in size, %s or more needed.' % (
+                    self._abs_target_path,
+                    format_byte_size(size_bytes_found),
+                    format_byte_size(size_bytes_needed),
+                    ))
 
     def _partition_device(self):
         self._messenger.info('Partitioning "%s"...' % self._abs_target_path)
@@ -823,6 +841,7 @@ class BootstrapEngine(object):
 
     def run(self):
         self._unshare()
+        self._check_device_size()
         self._partition_device()
         self._set_disk_id_in_mbr()
         self._create_partition_devices()

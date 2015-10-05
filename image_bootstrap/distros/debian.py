@@ -31,3 +31,9 @@ class DebianStrategy(DebianBasedDistroStrategy):
     def uses_systemd(self):
         # NOTE: assumes not supporting anything older than wheezy
         return self._release != 'wheezy'
+
+    def get_minimum_size_bytes(self):
+        if self._release == 'wheezy':
+            return 1 * 1024**3
+        else:
+            return 2 * 1024**3

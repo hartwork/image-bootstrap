@@ -7,6 +7,7 @@ import subprocess
 import time
 
 COMMAND_BLKID = 'blkid'
+COMMAND_BLOCKDEV = 'blockdev'
 COMMAND_CHMOD = 'chmod'
 COMMAND_CHROOT = 'chroot'
 COMMAND_CP = 'cp'

@@ -186,6 +186,10 @@ class DistroStrategy(object):
     def uses_systemd(self):
         pass
 
+    @abstractmethod
+    def get_minimum_size_bytes(self):
+        pass
+
     def install_acpid(self):
         # NOTE: Only called for distros NOT using systemd
         raise NotImplementedError()
