@@ -6,7 +6,8 @@ from __future__ import print_function
 from textwrap import dedent
 from unittest import TestCase
 
-from directory_bootstrap.tools.stage3_latest_parser import find_latest_stage3_date
+from directory_bootstrap.tools.stage3_latest_parser import \
+        find_latest_stage3_date
 
 
 class TestStag3LatestParser(TestCase):
