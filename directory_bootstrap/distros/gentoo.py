@@ -18,6 +18,8 @@ from directory_bootstrap.shared.commands import (
         COMMAND_GPG, COMMAND_MD5SUM, COMMAND_SHA512SUM, COMMAND_TAR,
         COMMAND_UNXZ)
 from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
+from directory_bootstrap.tools.stage3_latest_parser import \
+        find_latest_stage3_date
 
 _DEFAULT_MIRROR = 'http://distfiles.gentoo.org/'
 _GPG_DISPLAY_KEY_FORMAT = '0xlong'
@@ -26,8 +28,6 @@ _year = '([2-9][0-9]{3})'
 _month = '(0[1-9]|1[12])'
 _day = '(0[1-9]|[12][0-9]|3[01])'
 
-_STAGE3_TARBALL_DATE_PATTERN = '^(?P<date>%s%s%s)/stage3-(?P<arch>[^ -]+)-[0-9]+\\.tar\\.[^ ]+ [1-9]+[0-9]*$' % (_year, _month, _day)
-_stage3_tarball_date_matcher = re.compile(_STAGE3_TARBALL_DATE_PATTERN)
 _snapshot_date_matcher = re.compile('%s%s%s' % (_year, _month, _day))
 
 
@@ -89,32 +89,6 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
     def _get_portage_snapshot_listing_url(self):
         return '%s/releases/snapshots/current/' % self._mirror_base_url
-
-    def _find_latest_stage3_date(self, stage3_latest_file_content, stage3_latest_file_url):
-        matches = []
-        for line in stage3_latest_file_content.split('\n'):
-            m = _stage3_tarball_date_matcher.match(line)
-            if m is None:
-                continue
-            if m.group('arch') != self._architecture:
-                continue
-            matches.append(m)
-
-        message = ('Content from %s does not seem to contain '
-                'a single (or mutliple agreeing) well-formed default flavour '
-                'stage3 tarball entr(y|ies)'
-                % stage3_latest_file_url
-                )
-
-        if not matches:
-            raise ValueError(message)
-
-        date_strs = list(set([m.group(1) for m in matches]))
-        if len(date_strs) != 1:
-            raise ValueError(message)
-
-        m = matches[0]
-        return int(m.group(2)), int(m.group(3)), int(m.group(4))
 
     def _find_latest_snapshot_date(self, snapshot_listing):
         return self.extract_latest_date(snapshot_listing, _snapshot_date_matcher)
@@ -339,7 +313,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 self._messenger.info('Searching for available stage3 tarballs...')
                 stage3_latest_file_url = self._get_stage3_latest_file_url()
                 stage3_latest_file_content = self.get_url_content(stage3_latest_file_url)
-                stage3_date_triple = self._find_latest_stage3_date(stage3_latest_file_content, stage3_latest_file_url)
+                stage3_date_triple = find_latest_stage3_date(stage3_latest_file_content, stage3_latest_file_url, self._architecture)
                 stage3_date_str = self._format_date_stage3_tarball_filename(stage3_date_triple)
                 self._messenger.info('Found "%s" to be latest.' % stage3_date_str)
                 self._require_fresh_enough(stage3_date_triple)
