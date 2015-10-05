@@ -6,7 +6,7 @@ from __future__ import print_function
 import re
 
 _year = '([2-9][0-9]{3})'
-_month = '(0[1-9]|1[12])'
+_month = '(0[1-9]|1[0-2])'
 _day = '(0[1-9]|[12][0-9]|3[01])'
 
 _STAGE3_TARBALL_DATE_PATTERN = '^(?P<date>%s%s%s)/stage3-(?P<arch>[^ -]+)-[0-9]+\\.tar\\.[^ ]+ [1-9]+[0-9]*$' % (_year, _month, _day)

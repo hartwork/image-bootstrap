@@ -17,7 +17,7 @@ from directory_bootstrap.shared.namespace import unshare_current_process
 BOOTSTRAPPER_CLASS_FIELD = 'bootstrapper_class'
 
 _year = '([2-9][0-9]{3})'
-_month = '(0[1-9]|1[12])'
+_month = '(0[1-9]|1[0-2])'
 _day = '(0[1-9]|[12][0-9]|3[01])'
 
 _argparse_date_matcher = re.compile('^%s-%s-%s$' % (_year, _month, _day))

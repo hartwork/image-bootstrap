@@ -25,7 +25,7 @@ _DEFAULT_MIRROR = 'http://distfiles.gentoo.org/'
 _GPG_DISPLAY_KEY_FORMAT = '0xlong'
 
 _year = '([2-9][0-9]{3})'
-_month = '(0[1-9]|1[12])'
+_month = '(0[1-9]|1[0-2])'
 _day = '(0[1-9]|[12][0-9]|3[01])'
 
 _snapshot_date_matcher = re.compile('%s%s%s' % (_year, _month, _day))
