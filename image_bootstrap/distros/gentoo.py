@@ -229,7 +229,7 @@ class GentooStrategy(DistroStrategy):
         return '/etc/cloud/cloud.cfg.d/90_datasource.cfg'
 
     def get_commands_to_check_for(self):
-        return [
+        return GentooBootstrapper.get_commands_to_check_for() + [
                 COMMAND_CHROOT,
                 COMMAND_FIND,
                 COMMAND_WGET,
