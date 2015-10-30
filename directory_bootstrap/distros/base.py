@@ -70,7 +70,7 @@ class DirectoryBootstrapper(object):
         unshare_current_process(self._messenger)
 
     def extract_latest_date(self, listing_html, date_matcher):
-        soup = BeautifulSoup(listing_html)
+        soup = BeautifulSoup(listing_html, 'lxml')
         dates = []
         for link in soup.find_all('a'):
             m = date_matcher.search(link.get('href'))

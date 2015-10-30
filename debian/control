@@ -10,7 +10,7 @@ Package: image-bootstrap
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
  python-colorama, python-bs4, python-requests, python-pkg-resources,
- python-yaml,
+ python-lxml, python-yaml,
  debootstrap | cdebootstrap | cdebootstrap-static,
  debian-archive-keyring, ubuntu-keyring | ubuntu-archive-keyring, gnupg,
  extlinux, mbr,
