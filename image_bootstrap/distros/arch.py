@@ -218,7 +218,9 @@ class ArchStrategy(DistroStrategy):
         self._install_packages(['sudo'])
 
     def install_cloud_init_and_friends(self):
-        self._install_packages(['cloud-init'])
+        # NOTE: python2-requests is installed to workaround issue #27
+        # https://github.com/hartwork/image-bootstrap/issues/27
+        self._install_packages(['python2-requests', 'cloud-init'])
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
 
