@@ -51,8 +51,8 @@ In comparision to grml-debootstrap, by now *image-bootstrap*
  * supports passing the root password off the command-line
    (and the eyes of other users and shell history),
 
- * supports using a custom `/ect/resolv.conf` file
-   (e.g. to not leak your home router model name from `/ect/resolv.conf` into the image),
+ * supports using a custom `/etc/resolv.conf` file
+   (e.g. to not leak your home router model name from `/etc/resolv.conf` into the image),
 
  * has support for installing Arch Linux, Gentoo and Ubuntu (besides Debian),
 
