@@ -338,14 +338,16 @@ class BootstrapEngine(object):
         device_name = output.split('\n')[0].split(' : ')[0]
         self._abs_first_partition_device = '/dev/mapper/%s' % device_name
 
-        if True:
-            cmd_add = [
-                    COMMAND_KPARTX,
-                    '-u',
-                    '-s',
-                    self._abs_target_path,
-                    ]
-            self._executor.check_call(cmd_add)
+        # NOTE: Ubuntu 15.04 does not have "-u" (issue #30)
+        #       So we try -u first, then -a if -u failed
+        try:
+            self._executor.check_call([COMMAND_KPARTX,
+                    '-u', self._abs_target_path,
+                    ])
+        except subprocess.CalledProcessError:
+            self._executor.check_call([COMMAND_KPARTX,
+                    '-a', self._abs_target_path,
+                    ])
 
         for i in range(3):
             if os.path.exists(self._abs_first_partition_device):
