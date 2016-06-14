@@ -84,7 +84,7 @@ class ArchStrategy(DistroStrategy):
                         Name=eth0
 
                         [Network]
-                        DHCP=both
+                        DHCP=yes
                         """), file=f)
             else:
                 d = {
@@ -95,7 +95,7 @@ class ArchStrategy(DistroStrategy):
                         Name=eth0
 
                         [Network]
-                        DHCP=both
+                        DHCP=yes
 
                         [DHCP]
                         UseMTU=%(use_mtu)s
