@@ -584,6 +584,9 @@ class BootstrapEngine(object):
                 )
         installer.run()
 
+    def adjust_grub_defaults(self):
+        return self._distro.adjust_grub_defaults(self._config.with_openstack)
+
     def generate_grub_cfg_from_inside_chroot(self):
         return self._distro.generate_grub_cfg_from_inside_chroot()
 
@@ -918,6 +921,7 @@ class BootstrapEngine(object):
                         self.generate_initramfs_from_inside_chroot()
 
                         if self._config.bootloader_approach in BOOTLOADER__ANY_GRUB:
+                            self.adjust_grub_defaults()
                             self._messenger.info('Generating GRUB configuration...')
                             self.generate_grub_cfg_from_inside_chroot()
                             self._fix_grub_cfg_root_device()

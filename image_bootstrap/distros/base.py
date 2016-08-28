@@ -190,6 +190,9 @@ class DistroStrategy(object):
     def get_minimum_size_bytes(self):
         pass
 
+    def adjust_grub_defaults(self, with_openstack):
+        pass
+
     def install_acpid(self):
         # NOTE: Only called for distros NOT using systemd
         raise NotImplementedError()

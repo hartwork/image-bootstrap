@@ -167,11 +167,12 @@ class GentooStrategy(DistroStrategy):
                 '-i', '/etc/default/grub',
                 ], env=self.create_chroot_env())
 
-    def generate_grub_cfg_from_inside_chroot(self):
+    def adjust_grub_defaults(self, with_openstack):
         # TODO Limit to use with OpenStack
         self._disable_grub2_gfxmode()
         self._ensure_eth0_naming()
 
+    def generate_grub_cfg_from_inside_chroot(self):
         cmd = [
                 COMMAND_CHROOT,
                 self._abs_mountpoint,

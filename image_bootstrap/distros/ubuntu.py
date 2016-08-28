@@ -24,7 +24,9 @@ class UbuntuStrategy(DebianBasedDistroStrategy):
     def get_kernel_package_name(self, architecture):
         return 'linux-image-generic'
 
-    def _adjust_grub_defaults(self):
+    def adjust_grub_defaults(self, with_openstack):
+        super(UbuntuStrategy, self).adjust_grub_defaults(with_openstack)
+
         subst = (
             ('GRUB_TIMEOUT=', 'GRUB_TIMEOUT=1'),
             ('GRUB_HIDDEN_TIMEOUT', None),
@@ -46,10 +48,6 @@ class UbuntuStrategy(DebianBasedDistroStrategy):
         self._messenger.info('Adjusting file "%s"...' % etc_default_grub)
         with open(etc_default_grub, 'w') as f:
             f.write('\n'.join(lines_to_write))
-
-    def generate_grub_cfg_from_inside_chroot(self):
-        self._adjust_grub_defaults()
-        super(UbuntuStrategy, self).generate_grub_cfg_from_inside_chroot()
 
     def install_cloud_init_and_friends(self):
         # Do not install cloud-initramfs-growroot (from universe)
