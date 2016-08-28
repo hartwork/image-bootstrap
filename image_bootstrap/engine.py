@@ -585,7 +585,20 @@ class BootstrapEngine(object):
         installer.run()
 
     def adjust_grub_defaults(self):
-        return self._distro.adjust_grub_defaults(self._config.with_openstack)
+        res = self._distro.adjust_grub_defaults(self._config.with_openstack)
+
+        if self._config.with_openstack:
+            self._messenger.info('Enabling serial console...')
+            env = self.make_environment(tell_mountpoint=False)
+            self._executor.check_call([
+                    COMMAND_CHROOT, self._abs_mountpoint,
+                    'sed',
+                    's:^\\(GRUB_CMDLINE_LINUX="[^"]*\\)":\\1 %s":'
+                            % _CONSOLE_CONFIG,
+                    '-i', '/etc/default/grub',
+                    ], env=env)
+
+        return res
 
     def generate_grub_cfg_from_inside_chroot(self):
         return self._distro.generate_grub_cfg_from_inside_chroot()
