@@ -224,7 +224,7 @@ class GentooStrategy(DistroStrategy):
         self._make_initramfs_symlink()
 
     def get_chroot_command_grub2_install(self):
-        return 'grub2-install'
+        return 'grub-install'
 
     def get_cloud_init_datasource_cfg_path(self):
         return '/etc/cloud/cloud.cfg.d/90_datasource.cfg'
