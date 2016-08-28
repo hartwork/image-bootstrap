@@ -176,7 +176,7 @@ class GentooStrategy(DistroStrategy):
         cmd = [
                 COMMAND_CHROOT,
                 self._abs_mountpoint,
-                'grub2-mkconfig',
+                'grub-mkconfig',
                 '-o', '/boot/grub/grub.cfg',
                 ]
         self._executor.check_call(cmd, env=self.create_chroot_env())
