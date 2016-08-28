@@ -62,6 +62,8 @@ _NON_DISK_MOUNT_TASKS = (
 _DISK_ID_OFFSET = 440
 _DISK_ID_COUNT_BYTES = 4
 
+_CONSOLE_CONFIG = 'console=tty0 console=ttyS0,115200'
+
 
 class MachineConfig(object):
     def __init__(self,
@@ -529,6 +531,7 @@ class BootstrapEngine(object):
         d = {
             'distro_key': self._distro.DISTRO_KEY,
             'distro_name_long': self._distro.DISTRO_NAME_LONG,
+            'kernel_extra': (' %s' % _CONSOLE_CONFIG) if self._config.with_openstack else '',
             'uuid': self._config.first_partition_uuid,
             'vmlinuz': self._distro.get_vmlinuz_path(),
             'initramfs': self._distro.get_initramfs_path(),
@@ -548,7 +551,7 @@ class BootstrapEngine(object):
                     LABEL    %(distro_key)s
                     SAY      Booting %(distro_name_long)s...
                     KERNEL   %(vmlinuz)s
-                    APPEND   initrd=%(initramfs)s root=/dev/disk/by-uuid/%(uuid)s
+                    APPEND   initrd=%(initramfs)s root=/dev/disk/by-uuid/%(uuid)s%(kernel_extra)s
                     INITRD   %(initramfs)s
                     """ % d), file=f)
 
