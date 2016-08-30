@@ -457,6 +457,9 @@ class GentooStrategy(DistroStrategy):
     def uses_systemd(self):
         return False
 
+    def uses_systemd_resolved(self, with_openstack):
+        return False
+
     def get_minimum_size_bytes(self):
         return 6 * 1024**3
 

@@ -187,6 +187,10 @@ class DistroStrategy(object):
         pass
 
     @abstractmethod
+    def uses_systemd_resolved(self, with_openstack):
+        pass
+
+    @abstractmethod
     def get_minimum_size_bytes(self):
         pass
 

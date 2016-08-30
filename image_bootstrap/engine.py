@@ -860,6 +860,15 @@ class BootstrapEngine(object):
     def _install_kernel(self):
         self._distro.install_kernel()
 
+    def _turn_etc_resolv_conf_to_systemd_resolved(self):
+        self._messenger.info('Handing /etc/resolv.conf over to systemd-resolved...')
+        os.remove(os.path.join(self._abs_mountpoint, 'etc', 'resolv.conf'))
+        env = self.make_environment(tell_mountpoint=False)
+        self._executor.check_call([
+                COMMAND_CHROOT, self._abs_mountpoint,
+                'ln', '-s', '/run/systemd/resolve/resolv.conf', '/etc/resolv.conf',
+                ], env=env)
+
     def run(self):
         self._unshare()
         self._check_device_size()
@@ -951,6 +960,10 @@ class BootstrapEngine(object):
                             self._delete_sshd_keys()
                             self._clean_machine_id()
                             self._perform_in_chroot_shipping_clean_up()
+
+                            if self._distro.uses_systemd_resolved(self._config.with_openstack):
+                                # Cannot go early, breaks chroot connectivity
+                                self._turn_etc_resolv_conf_to_systemd_resolved()
 
                         self._allow_autostart_of_services(True)
                     finally:

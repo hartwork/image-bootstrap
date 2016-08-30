@@ -32,6 +32,9 @@ class DebianStrategy(DebianBasedDistroStrategy):
         # NOTE: assumes not supporting anything older than wheezy
         return self._release != 'wheezy'
 
+    def uses_systemd_resolved(self, with_openstack):
+        return False
+
     def get_minimum_size_bytes(self):
         if self._release == 'wheezy':
             return 1 * 1024**3

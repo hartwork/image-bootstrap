@@ -58,5 +58,8 @@ class UbuntuStrategy(DebianBasedDistroStrategy):
         # NOTE: assumes not supporting anything older than trusty
         return self._release != 'trusty'
 
+    def uses_systemd_resolved(self, with_openstack):
+        return False
+
     def get_minimum_size_bytes(self):
         return 2 * 1024**3

@@ -245,6 +245,7 @@ class ArchStrategy(DistroStrategy):
     def make_openstack_services_autostart(self):
         self._make_services_autostart([
                 'systemd-networkd',
+                'systemd-resolved',  # for nameserver IPs from DHCP
                 'sshd',
                 'cloud-init-local',
                 'cloud-init',
@@ -263,6 +264,9 @@ class ArchStrategy(DistroStrategy):
 
     def uses_systemd(self):
         return True
+
+    def uses_systemd_resolved(self, with_openstack):
+        return with_openstack
 
     def get_minimum_size_bytes(self):
         return 2 * 1024**3
