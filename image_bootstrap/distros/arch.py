@@ -217,10 +217,24 @@ class ArchStrategy(DistroStrategy):
     def install_sudo(self):
         self._install_packages(['sudo'])
 
+    def _resolve_cloud_init_dependency_argparse(self):
+        cmd = [
+            COMMAND_CHROOT, self._abs_mountpoint,
+            'sed', '/^argparse$/d', '-i',
+                '/usr/lib/python2.7/site-packages/cloud_init-0.7.7-py2.7.egg-info/requires.txt',
+        ]
+        self._executor.check_call(cmd, env=self.create_chroot_env())
+
     def install_cloud_init_and_friends(self):
         # NOTE: python2-requests is installed to workaround issue #27
         # https://github.com/hartwork/image-bootstrap/issues/27
-        self._install_packages(['python2-requests', 'cloud-init'])
+        # The other deps turned out missing later
+        self._install_packages([
+                'cloud-init',
+                'python2-jinja', 'python2-oauthlib',
+                'python2-requests', 'python2-setuptools',
+                ])
+        self._resolve_cloud_init_dependency_argparse()
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
 
