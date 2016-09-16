@@ -225,6 +225,17 @@ class ArchStrategy(DistroStrategy):
         ]
         self._executor.check_call(cmd, env=self.create_chroot_env())
 
+    def _fix_cloud_init_code(self):
+        """
+        Workaround for TypeError: 'NoneType' object is not iterable
+        """
+        cmd = [
+            COMMAND_CHROOT, self._abs_mountpoint,
+            'sed', "s:\\.get('dns-nameservers'):\\.get('dns-nameservers', ()):", '-i',
+                '/usr/lib/python2.7/site-packages/cloudinit/distros/arch.py',
+        ]
+        self._executor.check_call(cmd, env=self.create_chroot_env())
+
     def install_cloud_init_and_friends(self):
         # NOTE: python2-requests is installed to workaround issue #27
         # https://github.com/hartwork/image-bootstrap/issues/27
@@ -235,6 +246,7 @@ class ArchStrategy(DistroStrategy):
                 'python2-requests', 'python2-setuptools',
                 ])
         self._resolve_cloud_init_dependency_argparse()
+        self._fix_cloud_init_code()
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
 
