@@ -6,10 +6,13 @@ from __future__ import print_function
 import os
 from textwrap import dedent
 
+from pkg_resources import resource_filename
+
 from directory_bootstrap.distros.arch import (
         SUPPORTED_ARCHITECTURES, ArchBootstrapper)
 from directory_bootstrap.shared.commands import (
-        COMMAND_CHROOT, COMMAND_FIND, COMMAND_RM, COMMAND_SED, COMMAND_WGET)
+        COMMAND_CHROOT, COMMAND_CP, COMMAND_FIND, COMMAND_RM, COMMAND_SED,
+        COMMAND_WGET)
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 
 
@@ -34,6 +37,7 @@ class ArchStrategy(DistroStrategy):
     def get_commands_to_check_for(self):
         return ArchBootstrapper.get_commands_to_check_for() + [
                 COMMAND_CHROOT,
+                COMMAND_CP,
                 COMMAND_FIND,
                 COMMAND_RM,
                 COMMAND_SED,
@@ -217,10 +221,51 @@ class ArchStrategy(DistroStrategy):
     def install_sudo(self):
         self._install_packages(['sudo'])
 
+    def _install_cloud_init_0_7_6(self):
+        pkgbuild_patch_filename = resource_filename('image_bootstrap',
+                'patches/cloud-init-0-7-6-pkgbuild.patch')
+        inner_script_filename = '/root/install-cloud-init-0-7-6.sh'
+        inner_patch_filename = '/root/cloud-init-pkgbuild.patch'
+
+        self._executor.check_call([
+                COMMAND_CP, pkgbuild_patch_filename,
+                os.path.join(self._abs_mountpoint, inner_patch_filename.lstrip('/')),
+                ])
+
+        with open(os.path.join(self._abs_mountpoint, inner_script_filename.lstrip('/')), 'w') as f:
+            f.write(dedent("""\
+                #! /bin/bash
+                set -e
+                PS4='# '
+                set -x
+
+                pacman --noconfirm --sync binutils fakeroot git patch sudo wget
+
+                COMMIT=adf3e2d5d311903e3a4429d50764b6add2c21e8b
+                wget https://git.archlinux.org/svntogit/community.git/snapshot/community-${COMMIT}.tar.xz
+                tar xf community-${COMMIT}.tar.xz
+                chmod a+rw community-${COMMIT}/trunk/
+                cd community-${COMMIT}/trunk/
+
+                patch PKGBUILD %s
+                pacman --noconfirm --sync \
+                        python2 python2-boto python2-cheetah \
+                        python2-configobj python2-jsonpatch \
+                        python2-jsonpointer python2-oauth \
+                        python2-prettytable python2-requests \
+                        python2-setuptools python2-yaml net-tools
+                sudo -u nobody makepkg
+                pacman --noconfirm --upgrade cloud-init-9999-1-any.pkg.tar.xz
+            """ % inner_patch_filename))
+            os.fchmod(f.fileno(), 0755)
+
+        self._executor.check_call([
+                COMMAND_CHROOT, self._abs_mountpoint,
+                inner_script_filename,
+                ], env=self.create_chroot_env())
+
     def install_cloud_init_and_friends(self):
-        # NOTE: python2-requests is installed to workaround issue #27
-        # https://github.com/hartwork/image-bootstrap/issues/27
-        self._install_packages(['python2-requests', 'cloud-init'])
+        self._install_cloud_init_0_7_6()
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
 
