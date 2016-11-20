@@ -4,6 +4,7 @@
 * <<History,History>>
 * <<ExampleRun,Example run>>
 * <<SpeedingThingsUp,Speeding things up>>
+** <<UsingRamInsteadOfDisk,Using RAM instead of HDD/SSD>>
 ** <<AptCacherNG,Apt-Cacher NG -- a cache specific to Debian/Ubuntu>>
 ** <<Polipo,Polipo -- a generic HTTP cache>>
 ** <<haveged,haveged -- an entropy generator>>
@@ -150,6 +151,32 @@ Without `--color never`, the output above is actually in color.
 [[SpeedingThingsUp]]
 Speeding things up
 ------------------
+
+[[UsingRamInsteadOfDisk]]
+Using RAM instead of HDD/SSD
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+If you run *image-bootstrap* repeatedly and have enough RAM, you may want to
+create images on RAM storage rather than on disk.  I use a setup with
+
+ * a loop device (to have a block device)
+
+ * over a sparse file (to save space)
+
+ * in a tmpfs mount (to use RAM).
+
+For example (assuming you have /tmp in RAM already):
+------------------------------------------------------------------------------------------
+# sudo mount -o remout,size=6g /tmp
+# truncate --size 3g /tmp/disk3g
+# LOOP_DEVICE="$(losetup --show -f /tmp/disk3g)"
+
+# image-bootstrap .... arch ... "${LOOP_DEVICE}"
+# qemu-img convert -p -f raw -O qcow2 "${LOOP_DEVICE}" /var/lib/arch-$(date -I).qcow2
+
+# losetup -d "${LOOP_DEVICE}"
+# rm /tmp/disk3g
+------------------------------------------------------------------------------------------
+
 
 [[AptCacherNG]]
 Apt-Cacher NG -- a cache specific to Debian/Ubuntu
