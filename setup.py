@@ -2,7 +2,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from distutils.core import setup
+from setuptools import setup
 
 from directory_bootstrap.shared.metadata import (
         GITHUB_HOME_URL, PACKAGE_NAME, VERSION_STR)
