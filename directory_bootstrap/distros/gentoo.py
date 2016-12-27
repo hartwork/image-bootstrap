@@ -60,6 +60,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 abs_cache_dir,
                 )
         self._architecture = architecture
+        self._architecture_family = self._extract_architecture_family(architecture)
         self._mirror_base_url = mirror_url.rstrip('/')
         self._max_age_days = max_age_days
         self._stage3_date_triple_or_none = stage3_date_triple_or_none
@@ -67,6 +68,15 @@ class GentooBootstrapper(DirectoryBootstrapper):
         self._abs_resolv_conf = abs_resolv_conf
 
         self._gpg_supports_no_autostart = None
+
+    @staticmethod
+    def _extract_architecture_family(architecture):
+        """
+        Map "arm64", "armv6j" etc to arm
+        """
+        if architecture.startswith('arm'):
+            return 'arm'
+        return architecture
 
     def wants_to_be_unshared(self):
         return False
@@ -84,7 +94,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
     def _get_stage3_latest_file_url(self):
         return '%s/releases/%s/autobuilds/latest-stage3.txt' % (
                 self._mirror_base_url,
-                self._architecture,
+                self._architecture_family,
                 )
 
     def _get_portage_snapshot_listing_url(self):
@@ -101,7 +111,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 ):
             filename = os.path.join(self._abs_cache_dir, basename)
             url = '%s/releases/%s/autobuilds/%s/%s' \
-                    % (self._mirror_base_url, self._architecture, stage3_date_str, basename)
+                    % (self._mirror_base_url, self._architecture_family, stage3_date_str, basename)
             self.download_url_to_file(url, filename)
 
             assert res[target_index] is None
