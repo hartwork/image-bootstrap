@@ -21,6 +21,7 @@ if __name__ == '__main__':
             install_requires=[
                 'beautifulsoup4',
                 'colorama',
+                'lxml',
                 'requests',
                 'setuptools',
                 'PyYAML',
