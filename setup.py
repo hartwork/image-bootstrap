@@ -25,6 +25,7 @@ if __name__ == '__main__':
                 'colorama',
                 'requests',
                 'setuptools',
+                'PyYAML',
             ],
             packages=[
                 _PYTHON_PACKAGE_NAME,
