@@ -2,12 +2,10 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 from directory_bootstrap.shared.metadata import (
         GITHUB_HOME_URL, PACKAGE_NAME, VERSION_STR)
-
-_PYTHON_PACKAGE_NAME = PACKAGE_NAME.replace('-','_')
 
 
 if __name__ == '__main__':
@@ -28,15 +26,7 @@ if __name__ == '__main__':
                 'PyYAML',
             ],
             packages=[
-                _PYTHON_PACKAGE_NAME,
-                '%s.distros' % _PYTHON_PACKAGE_NAME,
-                '%s.types' % _PYTHON_PACKAGE_NAME,
-                'directory_bootstrap',
-                'directory_bootstrap.distros',
-                'directory_bootstrap.resources',
-                'directory_bootstrap.resources.gentoo',
-                'directory_bootstrap.shared',
-                'directory_bootstrap.shared.loaders',
+                p for p in find_packages() if not p.endswith('.test')
             ],
             data_files=[
                 ('sbin/', [PACKAGE_NAME, 'directory-bootstrap']),
