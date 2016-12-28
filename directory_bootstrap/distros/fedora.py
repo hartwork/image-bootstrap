@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+import json
 import os
 import shutil
 import tempfile
@@ -11,6 +12,9 @@ from textwrap import dedent
 
 from directory_bootstrap.distros.base import DirectoryBootstrapper
 from directory_bootstrap.shared.commands import COMMAND_YUM
+
+
+_COLLECTIONS_URL = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
 
 
 class FedoraBootstrapper(DirectoryBootstrapper):
@@ -37,8 +41,8 @@ class FedoraBootstrapper(DirectoryBootstrapper):
 
     @classmethod
     def add_arguments_to(clazz, distro):
-        distro.add_argument('--release', metavar='VERSION', default=24,
-                help='release to bootstrap (default: %(default)s)')
+        distro.add_argument('--release', metavar='VERSION',
+                help='release to bootstrap (e.g. 24)')
 
     @classmethod
     def create(clazz, messenger, executor, options):
@@ -88,8 +92,26 @@ class FedoraBootstrapper(DirectoryBootstrapper):
                     skip_if_unavailable=False
                     """), file=f)
 
+    def _find_latest_release(self):
+        json_content = self.get_url_content(_COLLECTIONS_URL)
+        try:
+            content = json.loads(json_content)
+            return sorted([
+                    int(c['version']) for c in content['collections']
+                    if c['name'] == 'Fedora' and c['version'].isdigit()
+            ])[-1]
+        except:
+            raise ValueError(
+                    'Could not extract latest release from %s content' \
+                    % _COLLECTIONS_URL)
+
     def run(self):
         self.ensure_directories_writable()
+
+        if self._releasever is None:
+            self._messenger.info('Searching for latest release...')
+            self._releasever = self._find_latest_release()
+            self._messenger.info('Found %d to be latest.' % self._releasever)
 
         abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
         try:
