@@ -107,7 +107,17 @@ class FedoraBootstrapper(DirectoryBootstrapper):
                     gpgcheck=1
                     gpgkey=%s
                     skip_if_unavailable=False
-                    """ % (gpg_public_key_file_url, gpg_public_key_file_url)), file=f)
+
+                    [updates-testing]
+                    name=Fedora $releasever - $basearch - Test Updates
+                    failovermethod=priority
+                    metalink=https://mirrors.fedoraproject.org/metalink?repo=updates-testing-f$releasever&arch=$basearch
+                    enabled=1
+                    metadata_expire=6h
+                    gpgcheck=1
+                    gpgkey=%s
+                    skip_if_unavailable=False
+                    """ % (gpg_public_key_file_url, gpg_public_key_file_url, gpg_public_key_file_url)), file=f)
 
     def _find_latest_release(self):
         json_content = self.get_url_content(_COLLECTIONS_URL)
