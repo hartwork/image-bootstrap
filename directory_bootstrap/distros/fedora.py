@@ -3,11 +3,14 @@
 
 from __future__ import print_function
 
+import errno
 import json
 import os
 import shutil
 import tempfile
+import urllib
 
+from tarfile import TarFile
 from textwrap import dedent
 
 from directory_bootstrap.distros.base import DirectoryBootstrapper
@@ -15,6 +18,10 @@ from directory_bootstrap.shared.commands import COMMAND_YUM
 
 
 _COLLECTIONS_URL = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
+
+
+def _abs_filename_to_url(abs_filename):
+    return 'file://%s' % urllib.pathname2url(abs_filename)
 
 
 class FedoraBootstrapper(DirectoryBootstrapper):
@@ -77,9 +84,9 @@ class FedoraBootstrapper(DirectoryBootstrapper):
         with open(os.path.join(abs_yum_home_dir, '.rpmmacros'), 'w') as f:
             print('%_dbpath /var/lib/rpm', file=f)
 
-    def _write_yum_conf(self, abs_yum_conf_path):
+    def _write_yum_conf(self, abs_yum_conf_path, abs_gpg_public_key_filename):
+        gpg_public_key_file_url = _abs_filename_to_url(abs_gpg_public_key_filename)
         with open(abs_yum_conf_path, 'w') as f:
-            # TODO Use key of release X, current key is release 24
             print(dedent("""\
                     [fedora]
                     name=Fedora $releasever - $basearch
@@ -88,9 +95,9 @@ class FedoraBootstrapper(DirectoryBootstrapper):
                     enabled=1
                     metadata_expire=7d
                     gpgcheck=1
-                    gpgkey=https://getfedora.org/static/81B46521.txt
+                    gpgkey=%s
                     skip_if_unavailable=False
-                    """), file=f)
+                    """ % gpg_public_key_file_url), file=f)
 
     def _find_latest_release(self):
         json_content = self.get_url_content(_COLLECTIONS_URL)
@@ -105,23 +112,56 @@ class FedoraBootstrapper(DirectoryBootstrapper):
                     'Could not extract latest release from %s content' \
                     % _COLLECTIONS_URL)
 
+    def _download_fedora_repos_tarball(self):
+        # TODO find latest automatically
+        md5 = '2efbf860219bb9876eb185f84cbdbcdf'
+        releasever = '26'
+
+        url = 'https://src.fedoraproject.org/repo/pkgs/fedora-repos/fedora-repos-%s.tar.bz2/%s/fedora-repos-%s.tar.bz2' \
+                % (releasever, md5, releasever)
+        filename = os.path.join(self._abs_cache_dir, 'fedora-repos-%s-%s.tar.bz2' \
+                % (releasever, md5))
+        inner_folder = 'fedora-repos-%s' % releasever
+
+        self.download_url_to_file(url, filename)
+
+        return (filename, inner_folder)
+
+    def _extract_fedora_repos_tarball(self, tarball_filename, inner_folder, abs_temp_dir):
+        with TarFile.open(tarball_filename) as tf:
+            tf.extractall(path=abs_temp_dir)
+
+        abs_gpg_public_key_filename = os.path.join(abs_temp_dir,
+                inner_folder, 'RPM-GPG-KEY-fedora-%s-primary' \
+                % self._releasever)
+        if not os.path.exists(abs_gpg_public_key_filename):
+            raise OSError(errno.ENOENT, 'Public key %s not found' \
+                    % abs_gpg_public_key_filename)
+
+        return abs_gpg_public_key_filename
+
     def run(self):
         self.ensure_directories_writable()
 
         if self._releasever is None:
             self._messenger.info('Searching for latest release...')
-            self._releasever = self._find_latest_release()
-            self._messenger.info('Found %d to be latest.' % self._releasever)
+            self._releasever = str(self._find_latest_release())
+            self._messenger.info('Found %s to be latest.' % self._releasever)
+
+        tarball_filename, inner_folder = self._download_fedora_repos_tarball()
 
         abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
         try:
+            abs_gpg_public_key_filename = self._extract_fedora_repos_tarball(
+                    tarball_filename, inner_folder, abs_temp_dir)
+
             abs_yum_home_dir = os.path.join(abs_temp_dir, 'home')
             os.mkdir(abs_yum_home_dir)
 
             self._ensure_proper_dbpath(abs_yum_home_dir)
 
             abs_yum_conf_path = os.path.join(abs_temp_dir, 'yum.conf')
-            self._write_yum_conf(abs_yum_conf_path)
+            self._write_yum_conf(abs_yum_conf_path, abs_gpg_public_key_filename)
 
             self._bootstrap_using_yum(abs_yum_home_dir, abs_yum_conf_path)
         finally:
