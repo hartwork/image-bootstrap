@@ -10,7 +10,6 @@ import shutil
 import tempfile
 import urllib
 
-from tarfile import TarFile
 from textwrap import dedent
 
 from directory_bootstrap.distros.base import DirectoryBootstrapper
@@ -132,32 +131,13 @@ class FedoraBootstrapper(DirectoryBootstrapper):
                     'Could not extract latest release from %s content' \
                     % _COLLECTIONS_URL)
 
-    def _download_fedora_repos_tarball(self):
-        # TODO find latest automatically
-        md5 = '2efbf860219bb9876eb185f84cbdbcdf'
-        releasever = '26'
-
-        url = 'https://src.fedoraproject.org/repo/pkgs/fedora-repos/fedora-repos-%s.tar.bz2/%s/fedora-repos-%s.tar.bz2' \
-                % (releasever, md5, releasever)
-        filename = os.path.join(self._abs_cache_dir, 'fedora-repos-%s-%s.tar.bz2' \
-                % (releasever, md5))
-        inner_folder = 'fedora-repos-%s' % releasever
-
-        self.download_url_to_file(url, filename)
-
-        return (filename, inner_folder)
-
-    def _extract_fedora_repos_tarball(self, tarball_filename, inner_folder, abs_temp_dir):
-        with TarFile.open(tarball_filename) as tf:
-            tf.extractall(path=abs_temp_dir)
-
-        abs_gpg_public_key_filename = os.path.join(abs_temp_dir,
-                inner_folder, 'RPM-GPG-KEY-fedora-%s-primary' \
-                % self._releasever)
-        if not os.path.exists(abs_gpg_public_key_filename):
-            raise OSError(errno.ENOENT, 'Public key %s not found' \
-                    % abs_gpg_public_key_filename)
-
+    def _download_fedora_release_public_key(self):
+        rel_gpg_public_key_filename = 'RPM-GPG-KEY-fedora-%s-primary' \
+                % self._releasever
+        abs_gpg_public_key_filename = os.path.join(self._abs_cache_dir, rel_gpg_public_key_filename)
+        self.download_url_to_file(
+                'https://pagure.io/fedora-repos/raw/master/f/%s' % rel_gpg_public_key_filename,
+                abs_gpg_public_key_filename)
         return abs_gpg_public_key_filename
 
     def run(self):
@@ -168,13 +148,10 @@ class FedoraBootstrapper(DirectoryBootstrapper):
             self._releasever = str(self._find_latest_release())
             self._messenger.info('Found %s to be latest.' % self._releasever)
 
-        tarball_filename, inner_folder = self._download_fedora_repos_tarball()
+        abs_gpg_public_key_filename = self._download_fedora_release_public_key()
 
         abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
         try:
-            abs_gpg_public_key_filename = self._extract_fedora_repos_tarball(
-                    tarball_filename, inner_folder, abs_temp_dir)
-
             abs_yum_home_dir = os.path.join(abs_temp_dir, 'home')
             os.mkdir(abs_yum_home_dir)
 
