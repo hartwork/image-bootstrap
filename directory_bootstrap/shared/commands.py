@@ -33,6 +33,7 @@ COMMAND_UNAME = 'uname'
 COMMAND_UNSHARE = 'unshare'
 COMMAND_UNXZ = 'unxz'
 COMMAND_WGET = 'wget'
+COMMAND_YUM = 'yum'
 
 
 EXIT_COMMAND_NOT_FOUND = 127
