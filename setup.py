@@ -29,9 +29,12 @@ if __name__ == '__main__':
             packages=[
                 p for p in find_packages() if not p.endswith('.test')
             ],
-            data_files=[
-                ('sbin/', [PACKAGE_NAME, 'directory-bootstrap']),
-            ],
+            entry_points={
+                'console_scripts': [
+                    'directory-bootstrap = directory_bootstrap.cli:main',
+                    'image-bootstrap = image_bootstrap.cli:main'
+                ],
+            },
             classifiers=[
                 'Development Status :: 4 - Beta',
                 'Environment :: Console',
@@ -46,4 +49,4 @@ if __name__ == '__main__':
                 'Topic :: System :: Installation/Setup',
                 'Topic :: Utilities',
             ],
-            )
+    )
