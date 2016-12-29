@@ -83,7 +83,7 @@ class GentooStrategy(DistroStrategy):
                 if commented_out and use_mtu:
                     l = ENABLED
                 elif not commented_out and not use_mtu:
-                    l = DISABLE
+                    l = DISABLED
                 configured = True
             output_lines.append(l)
 

@@ -3,7 +3,6 @@
 
 from __future__ import print_function
 
-from textwrap import dedent
 from unittest import TestCase
 
 from directory_bootstrap.shared.byte_size import format_byte_size

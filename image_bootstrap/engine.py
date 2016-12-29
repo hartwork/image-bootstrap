@@ -456,7 +456,6 @@ class BootstrapEngine(object):
                 print(self._config.machine_id, file=f)
 
     def _configure_hostname(self):
-        env = self.make_environment(tell_mountpoint=False)
         self._distro.configure_hostname(self._config.hostname)
 
     def create_network_configuration(self):
