@@ -60,6 +60,9 @@ class FedoraBootstrapper(DirectoryBootstrapper):
                 )
 
     def _bootstrap_using_yum(self, abs_yum_home_dir, abs_yum_conf_path):
+        self._messenger.info('Bootstrapping %s into "%s" using yum...'
+                % (self.DISTRO_NAME_LONG, self._abs_target_dir))
+
         env = os.environ.copy()
         env['HOME'] = abs_yum_home_dir
 
@@ -79,10 +82,13 @@ class FedoraBootstrapper(DirectoryBootstrapper):
         /var/lib/rpm, so we bypass that change to have "rpm -qa" work
         as expected in the resulting chroot.
         """
-        with open(os.path.join(abs_yum_home_dir, '.rpmmacros'), 'w') as f:
+        abs_rpmmacros_path = os.path.join(abs_yum_home_dir, '.rpmmacros')
+        self._messenger.info('Writing file "%s"...' % abs_rpmmacros_path)
+        with open(abs_rpmmacros_path, 'w') as f:
             print('%_dbpath /var/lib/rpm', file=f)
 
     def _write_yum_conf(self, abs_yum_conf_path, abs_gpg_public_key_filename):
+        self._messenger.info('Writing file "%s"...' % abs_yum_conf_path)
         gpg_public_key_file_url = _abs_filename_to_url(abs_gpg_public_key_filename)
         with open(abs_yum_conf_path, 'w') as f:
             print(dedent("""\
@@ -131,6 +137,7 @@ class FedoraBootstrapper(DirectoryBootstrapper):
                     % _COLLECTIONS_URL)
 
     def _download_fedora_release_public_key(self):
+        self._messenger.info('Downloading related GnuPG public key...')
         rel_gpg_public_key_filename = 'RPM-GPG-KEY-fedora-%s-primary' \
                 % self._releasever
         abs_gpg_public_key_filename = os.path.join(self._abs_cache_dir, rel_gpg_public_key_filename)
