@@ -62,7 +62,10 @@ class Messenger(object):
         print()
 
     def escape_shell(self, text):
-        return _NEEDS_ESCAPING.sub('\\\\\\1', text)
+        escaped = _NEEDS_ESCAPING.sub('\\\\\\1', text)
+        if not escaped:
+            return "''"
+        return escaped
 
     def announce_command(self, argv):
         if not self._commands_wanted:
