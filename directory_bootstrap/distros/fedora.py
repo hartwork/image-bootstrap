@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import json
 import os
+import re
 import shutil
 import tempfile
 import urllib
@@ -12,10 +13,12 @@ import urllib
 from textwrap import dedent
 
 from directory_bootstrap.distros.base import DirectoryBootstrapper
-from directory_bootstrap.shared.commands import COMMAND_YUM
+from directory_bootstrap.shared.commands import COMMAND_FILE, COMMAND_RPM, COMMAND_YUM
 
 
 _COLLECTIONS_URL = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
+
+_BERKLEY_DB_FORMAT_VERSION_EXTRACTOR = re.compile('^Berkeley DB \\(.*, version (?P<version>[0-9]+),.*\\)$')
 
 
 def _abs_filename_to_url(abs_filename):
@@ -41,6 +44,8 @@ class FedoraBootstrapper(DirectoryBootstrapper):
     @staticmethod
     def get_commands_to_check_for():
         return DirectoryBootstrapper.get_commands_to_check_for() + [
+                COMMAND_FILE,
+                COMMAND_RPM,
                 COMMAND_YUM,
                 ]
 
@@ -146,6 +151,36 @@ class FedoraBootstrapper(DirectoryBootstrapper):
                 abs_gpg_public_key_filename)
         return abs_gpg_public_key_filename
 
+    def _determine_host_rpm_berkeley_db_version(self, abs_temp_dir):
+        self._messenger.info('Checking compatibility of Berkeley DB versions...')
+        db_root = os.path.join(abs_temp_dir, 'dbtest')
+        self._executor.check_call([
+                COMMAND_RPM,
+                '--initdb',
+                '--root', db_root,
+                '--dbpath', '',
+                ])
+        file_command_output = self._executor.check_output([
+                COMMAND_FILE,
+                '--brief',
+                os.path.join(db_root, 'Packages'),
+                ])
+        m = _BERKLEY_DB_FORMAT_VERSION_EXTRACTOR.match(file_command_output)
+        return int(m.group('version'))
+
+    def _check_host_rpm_berkeley_db_version(self, host_rpm_berkeley_db_version):
+        chroot_rpm_berkeley_db_version = 9
+        if host_rpm_berkeley_db_version > chroot_rpm_berkeley_db_version:
+            abs_chroot_rpmdb_path = os.path.join(self._abs_target_dir, 'var/lib/rpm/')
+            self._messenger.warn('The future RPM database at %s '
+                    '(Berkeley DB file format version %d) '
+                    'will not be usable from inside the chroot '
+                    'because RPM of Fedora %s supports '
+                    'Berkeley DB file format version %d, at most.'
+                    % (abs_chroot_rpmdb_path, host_rpm_berkeley_db_version,
+                        self._releasever, chroot_rpm_berkeley_db_version)
+                    )
+
     def run(self):
         self.ensure_directories_writable()
 
@@ -158,6 +193,9 @@ class FedoraBootstrapper(DirectoryBootstrapper):
 
         abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
         try:
+            rpm_berkeley_db_version = self._determine_host_rpm_berkeley_db_version(abs_temp_dir)
+            self._check_host_rpm_berkeley_db_version(rpm_berkeley_db_version)
+
             abs_yum_home_dir = os.path.join(abs_temp_dir, 'home')
             os.mkdir(abs_yum_home_dir)
 
