@@ -201,19 +201,6 @@ class FedoraBootstrapper(DirectoryBootstrapper):
         m = _BERKLEY_DB_FORMAT_VERSION_EXTRACTOR.match(file_command_output)
         return int(m.group('version'))
 
-    def _check_host_rpm_berkeley_db_version(self, host_rpm_berkeley_db_version):
-        chroot_rpm_berkeley_db_version = 9
-        if host_rpm_berkeley_db_version > chroot_rpm_berkeley_db_version:
-            abs_chroot_rpmdb_path = os.path.join(self._abs_target_dir, 'var/lib/rpm/')
-            self._messenger.warn('The future RPM database at %s '
-                    '(Berkeley DB file format version %d) '
-                    'will not be usable from inside the chroot '
-                    'because RPM of Fedora %s supports '
-                    'Berkeley DB file format version %d, at most.'
-                    % (abs_chroot_rpmdb_path, host_rpm_berkeley_db_version,
-                        self._releasever, chroot_rpm_berkeley_db_version)
-                    )
-
     def _repair_var_lib_rpm(self, rpm_berkeley_db_version):
         self._messenger.info('Repairing RPM package database...')
         for db_dump_command in _get_db_dump_command_names(rpm_berkeley_db_version):
@@ -267,7 +254,6 @@ class FedoraBootstrapper(DirectoryBootstrapper):
         abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
         try:
             rpm_berkeley_db_version = self._determine_host_rpm_berkeley_db_version(abs_temp_dir)
-            self._check_host_rpm_berkeley_db_version(rpm_berkeley_db_version)
 
             abs_yum_home_dir = os.path.join(abs_temp_dir, 'home')
             os.mkdir(abs_yum_home_dir)
