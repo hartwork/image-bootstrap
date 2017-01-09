@@ -13,16 +13,48 @@ import urllib
 from textwrap import dedent
 
 from directory_bootstrap.distros.base import DirectoryBootstrapper
-from directory_bootstrap.shared.commands import COMMAND_FILE, COMMAND_RPM, COMMAND_YUM
+from directory_bootstrap.shared.commands import (COMMAND_CHROOT,
+        COMMAND_FILE, COMMAND_RPM, COMMAND_YUM, EXIT_COMMAND_NOT_FOUND, find_command)
 
 
 _COLLECTIONS_URL = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
 
 _BERKLEY_DB_FORMAT_VERSION_EXTRACTOR = re.compile('^Berkeley DB \\(.*, version (?P<version>[0-9]+),.*\\)$')
 
+_DB_HASH_VERSION_SUPPORTED_AT_MOST_IN = {
+    6: [(3, 0)],
+    7: [
+        (3, 1), (3, 2), (3, 3),
+        (4, 0), (4, 1), (4, 2), (4, 3), (4, 4), (4, 5)
+    ],
+    8: [],
+    9: [
+        (4, 6), (4, 7), (4, 8), (4, 9),
+        (5, 0), (5, 1), (5, 2), (5, 3),
+    ],
+    10: [
+        (6, 0), (6, 1), (6, 2),
+    ],
+}
+
 
 def _abs_filename_to_url(abs_filename):
     return 'file://%s' % urllib.pathname2url(abs_filename)
+
+
+def _get_db_dump_command_names(hash_version):
+    """
+    >>> _get_db_dump_command_names(10)
+    ['db6.2_dump', 'db6.1_dump', 'db6.0_dump', 'db_dump']
+    """
+
+    res = []
+    for k, v in sorted(_DB_HASH_VERSION_SUPPORTED_AT_MOST_IN.items()):
+        if k >= hash_version:
+            for major_minor in reversed(v):
+                res.append('db%d.%d_dump' % major_minor)
+    res.append('db_dump')
+    return res
 
 
 class FedoraBootstrapper(DirectoryBootstrapper):
@@ -44,6 +76,7 @@ class FedoraBootstrapper(DirectoryBootstrapper):
     @staticmethod
     def get_commands_to_check_for():
         return DirectoryBootstrapper.get_commands_to_check_for() + [
+                COMMAND_CHROOT,
                 COMMAND_FILE,
                 COMMAND_RPM,
                 COMMAND_YUM,
@@ -181,6 +214,46 @@ class FedoraBootstrapper(DirectoryBootstrapper):
                         self._releasever, chroot_rpm_berkeley_db_version)
                     )
 
+    def _repair_var_lib_rpm(self, rpm_berkeley_db_version):
+        self._messenger.info('Repairing RPM package database...')
+        for db_dump_command in _get_db_dump_command_names(rpm_berkeley_db_version):
+            try:
+                abs_path_db_dump = find_command(db_dump_command)
+                self._messenger.info('Checking for %s... %s' % (db_dump_command, abs_path_db_dump))
+                break
+            except OSError:
+                self._messenger.info('Checking for %s... not found' % db_dump_command)
+                pass
+        else:
+            raise OSError(EXIT_COMMAND_NOT_FOUND, 'No db*_dump command found in PATH.')
+
+        abs_path_packages = '/var/lib/rpm/Packages'
+        abs_path_temp = '%s.dump' % abs_path_packages
+
+        abs_full_path_temp = os.path.join(self._abs_target_dir, abs_path_temp.lstrip('/'))
+        abs_full_path_packages = os.path.join(self._abs_target_dir, abs_path_packages.lstrip('/'))
+
+        # Export
+        self._executor.check_call([
+                abs_path_db_dump,
+                '-f', abs_full_path_temp,
+                abs_full_path_packages,
+                ])
+
+        try:
+            os.remove(abs_full_path_packages)
+
+            # Import
+            self._executor.check_call([
+                    COMMAND_CHROOT,
+                    self._abs_target_dir,
+                    'db_load',
+                    '-f', abs_path_temp,
+                    abs_path_packages,
+                    ])
+        finally:
+            os.remove(abs_full_path_temp)
+
     def run(self):
         self.ensure_directories_writable()
 
@@ -205,6 +278,8 @@ class FedoraBootstrapper(DirectoryBootstrapper):
             self._write_yum_conf(abs_yum_conf_path, abs_gpg_public_key_filename)
 
             self._bootstrap_using_yum(abs_yum_home_dir, abs_yum_conf_path)
+
+            self._repair_var_lib_rpm(rpm_berkeley_db_version)
         finally:
             self._messenger.info('Cleaning up "%s"...' % abs_temp_dir)
             shutil.rmtree(abs_temp_dir)
