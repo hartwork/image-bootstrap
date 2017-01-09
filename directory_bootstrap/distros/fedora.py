@@ -47,7 +47,6 @@ def _get_db_dump_command_names(hash_version):
     >>> _get_db_dump_command_names(10)
     ['db6.2_dump', 'db6.1_dump', 'db6.0_dump', 'db_dump']
     """
-
     res = []
     for k, v in sorted(_DB_HASH_VERSION_SUPPORTED_AT_MOST_IN.items()):
         if k >= hash_version:
