@@ -215,19 +215,26 @@ class FedoraBootstrapper(DirectoryBootstrapper):
             raise OSError(EXIT_COMMAND_NOT_FOUND, 'No db*_dump command found in PATH.')
 
         abs_path_packages = '/var/lib/rpm/Packages'
-        abs_path_temp = '%s.dump' % abs_path_packages
-
-        abs_full_path_temp = os.path.join(self._abs_target_dir, abs_path_temp.lstrip('/'))
         abs_full_path_packages = os.path.join(self._abs_target_dir, abs_path_packages.lstrip('/'))
 
-        # Export
-        self._executor.check_call([
-                abs_path_db_dump,
-                '-f', abs_full_path_temp,
-                abs_full_path_packages,
-                ])
-
+        fd, abs_full_path_temp = tempfile.mkstemp(
+                prefix='Packages-',
+                suffix='.dump',
+                dir=os.path.dirname(abs_full_path_packages))
         try:
+            os.close(fd)
+
+            abs_path_temp = os.path.join(
+                    os.path.dirname(abs_path_packages),
+                    os.path.split(abs_full_path_temp)[-1])
+
+            # Export
+            self._executor.check_call([
+                    abs_path_db_dump,
+                    '-f', abs_full_path_temp,
+                    abs_full_path_packages,
+                    ])
+
             os.remove(abs_full_path_packages)
 
             # Import
