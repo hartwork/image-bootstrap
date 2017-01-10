@@ -56,6 +56,8 @@ def check_call__keep_trying(executor, cmd):
 
 
 def find_command(command):
+    assert not command.startswith('/')
+
     dirs = os.environ['PATH'].split(':')
     for _dir in dirs:
         abs_path = os.path.join(_dir, command)
@@ -81,7 +83,6 @@ def check_for_commands(messenger, commands_to_check_for):
                 missing_files.append(abs_path)
             continue
 
-        assert not command.startswith('/')
         try:
             abs_path = find_command(command)
         except OSError as e:
