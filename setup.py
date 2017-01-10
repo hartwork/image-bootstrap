@@ -17,7 +17,6 @@ if __name__ == '__main__':
             author='Sebastian Pipping',
             author_email='sebastian@pipping.org',
             url=GITHUB_HOME_URL,
-            download_url='%s/archive/%s.tar.gz' % (GITHUB_HOME_URL, VERSION_STR),
             install_requires=[
                 'beautifulsoup4',
                 'colorama',
