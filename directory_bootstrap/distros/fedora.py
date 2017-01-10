@@ -48,7 +48,7 @@ def _get_db_dump_command_names(hash_version):
     ['db6.2_dump', 'db6.1_dump', 'db6.0_dump', 'db_dump']
     """
     res = []
-    for k, v in sorted(_DB_HASH_VERSION_SUPPORTED_AT_MOST_IN.items()):
+    for k, v in sorted(_DB_HASH_VERSION_SUPPORTED_AT_MOST_IN.items(), reverse=True):
         if k >= hash_version:
             for major_minor in reversed(v):
                 res.append('db%d.%d_dump' % major_minor)
