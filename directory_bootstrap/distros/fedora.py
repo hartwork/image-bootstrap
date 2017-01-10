@@ -7,14 +7,15 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import tempfile
 import urllib
 
 from textwrap import dedent
 
 from directory_bootstrap.distros.base import DirectoryBootstrapper
-from directory_bootstrap.shared.commands import (COMMAND_CHROOT,
-        COMMAND_FILE, COMMAND_RPM, COMMAND_YUM, EXIT_COMMAND_NOT_FOUND, find_command)
+from directory_bootstrap.shared.commands import (COMMAND_CHROOT, COMMAND_DB_DUMP,
+        COMMAND_FILE, COMMAND_LSB_RELEASE, COMMAND_RPM, COMMAND_YUM, EXIT_COMMAND_NOT_FOUND, find_command)
 
 
 _COLLECTIONS_URL = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
@@ -52,8 +53,15 @@ def _get_db_dump_command_names(hash_version):
         if k >= hash_version:
             for major_minor in reversed(v):
                 res.append('db%d.%d_dump' % major_minor)
-    res.append('db_dump')
+    res.append(COMMAND_DB_DUMP)
     return res
+
+
+def _host_distro_lacks_unversioned_db_dump():
+    distro = subprocess.check_output([
+            COMMAND_LSB_RELEASE, '--short', '--id',
+            ]).strip()
+    return distro == 'Gentoo'
 
 
 class FedoraBootstrapper(DirectoryBootstrapper):
@@ -74,12 +82,16 @@ class FedoraBootstrapper(DirectoryBootstrapper):
 
     @staticmethod
     def get_commands_to_check_for():
-        return DirectoryBootstrapper.get_commands_to_check_for() + [
+        res = DirectoryBootstrapper.get_commands_to_check_for() + [
                 COMMAND_CHROOT,
                 COMMAND_FILE,
+                COMMAND_LSB_RELEASE,
                 COMMAND_RPM,
                 COMMAND_YUM,
                 ]
+        if not _host_distro_lacks_unversioned_db_dump():
+            res.append(COMMAND_DB_DUMP)
+        return res
 
     @classmethod
     def add_arguments_to(clazz, distro):
