@@ -1,0 +1,2 @@
+directory_bootstrap/resources/gentoo/pubring.gpg
+image_bootstrap/patches/cloud-init-0-7-6-pkgbuild.patch
