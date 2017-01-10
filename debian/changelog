@@ -1,5 +1,5 @@
-image-bootstrap (0.9.2) unstable; urgency=low
+image-bootstrap (0.9.2.1) unstable; urgency=low
 
   * Initial Release (with help from stdeb and dh_make).
 
- -- Sebastian Pipping <sebastian@pipping.org>  Tue, 10 Jan 2017 21:12:45 +0100
+ -- Sebastian Pipping <sebastian@pipping.org>  Tue, 10 Jan 2017 21:16:45 +0100
