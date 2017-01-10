@@ -29,6 +29,14 @@ if __name__ == '__main__':
             packages=[
                 p for p in find_packages() if not p.endswith('.test')
             ],
+            package_data={
+                'directory_bootstrap': [
+                    'resources/gentoo/pubring.gpg',
+                ],
+                'image_bootstrap': [
+                    'patches/cloud-init-0-7-6-pkgbuild.patch',
+                ],
+            },
             entry_points={
                 'console_scripts': [
                     'directory-bootstrap = directory_bootstrap.cli:main',
