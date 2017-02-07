@@ -257,6 +257,8 @@ class GentooStrategy(DistroStrategy):
         return '/boot/vmlinuz'
 
     def install_cloud_init_and_friends(self):
+        self._add_package_mask('app-emulation/cloud-init', '>=app-emulation/cloud-init-0.7.7')
+        self._set_package_keywords('app-emulation/cloud-init', '**')  # TODO ~arch
         self._install_package_atoms(['app-emulation/cloud-init'])
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
