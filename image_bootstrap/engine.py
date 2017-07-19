@@ -364,6 +364,17 @@ class BootstrapEngine(object):
         cmd = [
                 COMMAND_MKFS_EXT4,
                 '-F',
+        ]
+
+        if self._config.bootloader_approach == BOOTLOADER__HOST_EXTLINUX:
+            self._messenger.warn('Creating ext4 file system with '
+                    'feature "64bit" disabled '
+                    'to ensure bootability with extlinux. Please see '
+                    'https://github.com/hartwork/image-bootstrap/issues/44'
+                    ' for details.')
+            cmd += ['-O', '^64bit']
+
+        cmd += [
                 self._abs_first_partition_device,
                 ]
         self._executor.check_call(cmd)
