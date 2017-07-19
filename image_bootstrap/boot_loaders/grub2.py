@@ -101,6 +101,8 @@ class GrubTwoInstaller(object):
                 ]
             env = None
 
+        cmd.append('--target=i386-pc')  # ensure non-EFI
+
         if self._bootloader_force:
             cmd.append('--force')
 
