@@ -263,7 +263,7 @@ class BootstrapEngine(object):
             self._messenger.info('Checking %s scripts for executability...' % category)
             infos_produced = True
 
-            for basename in os.listdir(abs_scripts_dir):
+            for basename in sorted(os.listdir(abs_scripts_dir)):
                 if not self._script_should_be_run(basename):
                     continue
 
@@ -656,7 +656,7 @@ class BootstrapEngine(object):
     def _run_chroot_scripts(self):
         self._messenger.info('Running chroot scripts...')
         env = self.make_environment(tell_mountpoint=False)
-        for basename in os.listdir(self._abs_scripts_dir_chroot):
+        for basename in sorted(os.listdir(self._abs_scripts_dir_chroot)):
             if not self._script_should_be_run(basename):
                 continue
 
