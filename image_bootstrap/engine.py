@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 import time
 from textwrap import dedent
+from pkg_resources import resource_filename
 
 from directory_bootstrap.shared.byte_size import format_byte_size
 from directory_bootstrap.shared.commands import (
@@ -806,6 +807,29 @@ class BootstrapEngine(object):
 
     def _install_cloud_init_and_friends(self):
         self._distro.install_cloud_init_and_friends()
+        # Adopt fix for https://bugs.launchpad.net/cloud-init/+bug/1396362
+        # which is only present in cloud-init >= 0.7.7.
+        pkgbuild_patch_filename = resource_filename('image_bootstrap',
+                'patches/cloud-init-0-7-6-uid.patch')
+        inner_patch_filename = '/root/cloud-init-uid.patch'
+
+        self._executor.check_call([
+                COMMAND_CP, pkgbuild_patch_filename,
+                os.path.join(self._abs_mountpoint, inner_patch_filename.lstrip('/')),
+                ])
+
+        # find out where cloud-init scripts are
+        ci_path = self._executor.check_output([
+                COMMAND_CHROOT, self._abs_mountpoint,
+                'python2', '-c',
+                'import cloudinit; import sys; import os; sys.stdout.write(os.path.dirname(cloudinit.__file__))'
+                ], env=self._distro.create_chroot_env())
+
+        # patch in place
+        self._executor.check_call([
+                COMMAND_CHROOT, self._abs_mountpoint,
+                "patch", "-d", ci_path, "-Np2", "-i", inner_patch_filename
+                ], env=self._distro.create_chroot_env())
 
     def _configure_cloud_init_and_friends(self):
         self._distro.adjust_etc_cloud_cfg()
