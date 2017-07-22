@@ -23,6 +23,9 @@ class Executor(object):
                 cwd=cwd,
                 )
 
-    def check_output(self, argv):
+    def check_output(self, argv, env=None):
         self._messenger.announce_command(argv)
-        return subprocess.check_output(argv, stderr=self._default_stderr)
+        return subprocess.check_output(argv,
+                stderr=self._default_stderr,
+                env=env
+                )
