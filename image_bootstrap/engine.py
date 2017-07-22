@@ -937,7 +937,6 @@ class BootstrapEngine(object):
                             # Essentials
                             self._install_dhcp_client()
                             self._install_sudo()
-                            self._create_sudo_nopasswd_user()
                             self._install_cloud_init_and_friends()
                             self._configure_cloud_init_and_friends()
                             self._install_sshd()
@@ -947,6 +946,11 @@ class BootstrapEngine(object):
                             self._disable_clearing_tty1()
                             self._disable_pcspkr_autoloading()
                             self._intall_acpid_unless_using_systemd()
+                        # elif with vagrant support:
+                        #   ...
+                        #   self._install_sudo()
+                        #   self._create_sudo_nopasswd_user()
+                        #   ...
 
                         self.create_network_configuration()  # after DHCP client install
 
