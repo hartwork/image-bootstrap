@@ -49,6 +49,8 @@ def run_handle_errors(main_function, messenger, options):
             # Manual work to avoid list square brackets in output
             command_flat = ' '.join((messenger.escape_shell(e) for e in e.cmd))
             text = 'Command "%s" returned non-zero exit status %s' % (command_flat, e.returncode)
+        elif hasattr(e, '_ib_abs_script_filename'):
+            text = '%s (script "%s")' % (str(e), e._ib_abs_script_filename)
         else:
             text = str(e)
 

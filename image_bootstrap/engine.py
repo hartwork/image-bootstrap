@@ -65,6 +65,21 @@ _DISK_ID_COUNT_BYTES = 4
 _CONSOLE_CONFIG = 'console=tty0 console=ttyS0,115200'
 
 
+class _script_filename_telling_exceptions(object):
+    """
+    Extends raised exceptions by filename of the causing script
+    """
+    def __init__(self, abs_script_filename):
+        self._abs_script_filename = abs_script_filename
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_val is not None:
+            exc_val._ib_abs_script_filename = self._abs_script_filename
+
+
 class MachineConfig(object):
     def __init__(self,
             hostname,
@@ -488,8 +503,10 @@ class BootstrapEngine(object):
             if not self._script_should_be_run(basename):
                 continue
 
-            cmd = [os.path.join(abs_scripts_dir, basename)]
-            self._executor.check_call(cmd, env=env.copy())
+            abs_script_filename = os.path.join(abs_scripts_dir, basename)
+            cmd = [abs_script_filename]
+            with _script_filename_telling_exceptions(abs_script_filename):
+                self._executor.check_call(cmd, env=env.copy())
 
     def make_environment(self, tell_mountpoint):
         env = os.environ.copy()
@@ -660,12 +677,15 @@ class BootstrapEngine(object):
             if not self._script_should_be_run(basename):
                 continue
 
+            abs_script_filename = os.path.join(
+                    self._abs_scripts_dir_chroot, basename)
             cmd_run = [
                     COMMAND_CHROOT,
                     self._abs_mountpoint,
                     os.path.join('/', _CHROOT_SCRIPT_TARGET_DIR, basename),
                     ]
-            self._executor.check_call(cmd_run, env=env.copy())
+            with _script_filename_telling_exceptions(abs_script_filename):
+                self._executor.check_call(cmd_run, env=env.copy())
 
     def _remove_chroot_scripts(self):
         self._messenger.info('Removing chroot scripts...')
