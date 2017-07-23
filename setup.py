@@ -34,6 +34,7 @@ if __name__ == '__main__':
                 ],
                 'image_bootstrap': [
                     'patches/cloud-init-0-7-6-pkgbuild.patch',
+                    'patches/cloud-init-0-7-6-uid.patch',
                 ],
             },
             entry_points={

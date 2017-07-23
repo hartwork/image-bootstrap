@@ -1,6 +1,6 @@
 --- PKGBUILD    2016-11-17 21:46:52.836622919 +0000
 +++ PKGBUILD    2016-11-17 23:17:02.088376215 +0000
-@@ -2,29 +2,32 @@
+@@ -2,29 +2,39 @@
  # Maintainer: Daniel Wallace <danielwallace at gtmanfred dot com>
  
  pkgname=cloud-init
@@ -20,8 +20,13 @@
  options=(!emptydirs)
  # Archlinux specific cloud.cfg
 -source=(https://launchpad.net/$pkgname/trunk/$pkgver/+download/$pkgname-$pkgver.tar.gz)
-+source=(https://launchpad.net/$pkgname/trunk/$PKGVER/+download/$pkgname-$PKGVER.tar.gz)
- sha1sums=('9af02f68d68abce91463bec22b17964d1618e1da')
+-sha1sums=('9af02f68d68abce91463bec22b17964d1618e1da')
++source=(https://launchpad.net/$pkgname/trunk/$PKGVER/+download/$pkgname-$PKGVER.tar.gz
++        cloud-init-${PKGVER//./-}-uid.patch
++)
++sha1sums=('9af02f68d68abce91463bec22b17964d1618e1da'
++          SKIP
++)
  backup=(etc/cloud/cloud.cfg etc/cloud/cloud.cfg.d/05_logging.cfg)
  
  prepare(){
@@ -33,6 +38,9 @@
 +    sed -i '1s/python$/&2/' $pkgname-$PKGVER/tools/read*
 +    sed -i 's:/etc/systemd:/usr/lib/systemd:g' $pkgname-$PKGVER/setup.py
 +    sed -i 's,name: ubuntu,name: archlinux,;s,gecos: Ubuntu,gecos: Archlinux,' $srcdir/$pkgname-$PKGVER/config/cloud.cfg
++
++    cd ${pkgname}-${PKGVER}
++    patch -Np1 -i "${srcdir}"/cloud-init-${PKGVER//./-}-uid.patch
  }
  
  package() {

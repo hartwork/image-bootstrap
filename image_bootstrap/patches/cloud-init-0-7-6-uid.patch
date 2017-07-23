@@ -1,0 +1,21 @@
+From b05d0d54d29553e1fe1961ccc64da7d0b45016dd Mon Sep 17 00:00:00 2001
+From: Gerhard Muntingh <gerhard@qux.nl>
+Date: Tue, 14 Apr 2015 15:20:39 +0200
+Subject: Add functionality to fixate the uid of a newly added user.
+
+
+diff --git a/cloudinit/distros/__init__.py b/cloudinit/distros/__init__.py
+index ab874b4..b297c78 100644
+--- a/cloudinit/distros/__init__.py
++++ b/cloudinit/distros/__init__.py
+@@ -318,6 +318,7 @@ class Distro(object):
+             "gecos": '--comment',
+             "homedir": '--home',
+             "primary_group": '--gid',
++            "uid": '--uid',
+             "groups": '--groups',
+             "passwd": '--password',
+             "shell": '--shell',
+-- 
+cgit v0.10.2
+

@@ -222,15 +222,31 @@ class ArchStrategy(DistroStrategy):
         self._install_packages(['sudo'])
 
     def _install_cloud_init_0_7_6(self):
-        pkgbuild_patch_filename = resource_filename('image_bootstrap',
-                'patches/cloud-init-0-7-6-pkgbuild.patch')
-        inner_script_filename = '/root/install-cloud-init-0-7-6.sh'
-        inner_patch_filename = '/root/cloud-init-pkgbuild.patch'
+        # NOTE: The PKGBUILD patch pulls in all other patches
+        pkgbuild_patch_basename = 'cloud-init-0-7-6-pkgbuild.patch'
+        patch_basenames = (
+            pkgbuild_patch_basename,
+            'cloud-init-0-7-6-uid.patch'
+        )
 
-        self._executor.check_call([
-                COMMAND_CP, pkgbuild_patch_filename,
-                os.path.join(self._abs_mountpoint, inner_patch_filename.lstrip('/')),
-                ])
+        def _inner_abs_filename(patch_basename):
+            return '/root/%s' % patch_basename
+
+        def _outer_abs_filename(patch_basename):
+            return resource_filename(
+                    'image_bootstrap', 'patches/%s' % patch_basename)
+
+        # Copy patches over
+        for patch_basename in patch_basenames:
+            self._executor.check_call([
+                    COMMAND_CP,
+                    _outer_abs_filename(patch_basename),
+                    os.path.join(self._abs_mountpoint,
+                        _inner_abs_filename(patch_basename).lstrip('/')),
+                    ])
+
+        inner_script_filename = _inner_abs_filename(
+                'install-cloud-init-0-7-6.sh')
 
         with open(os.path.join(self._abs_mountpoint, inner_script_filename.lstrip('/')), 'w') as f:
             f.write(dedent("""\
@@ -247,6 +263,7 @@ class ArchStrategy(DistroStrategy):
                 chmod a+rw community-${COMMIT}/trunk/
                 cd community-${COMMIT}/trunk/
 
+                cp %s .
                 patch PKGBUILD %s
                 pacman --noconfirm --sync \
                         python2 python2-boto python2-cheetah \
@@ -256,7 +273,7 @@ class ArchStrategy(DistroStrategy):
                         python2-setuptools python2-yaml net-tools
                 sudo -u nobody makepkg
                 pacman --noconfirm --upgrade cloud-init-9999-1-any.pkg.tar.xz
-            """ % inner_patch_filename))
+            """ % (_inner_abs_filename('cloud-init-*.patch'), pkgbuild_patch_basename)))
             os.fchmod(f.fileno(), 0755)
 
         self._executor.check_call([
