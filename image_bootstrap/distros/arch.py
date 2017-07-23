@@ -324,6 +324,16 @@ class ArchStrategy(DistroStrategy):
     def install_kernel(self):
         pass  # Kernel installed, already
 
+    def adjust_cloud_cfg_dict(self, cloud_cfg_dict):
+        super(ArchStrategy, self).adjust_cloud_cfg_dict(cloud_cfg_dict)
+
+        # Get rid of groups cdrom, dailout, dip, netdev, plugdev, sudo.
+        # https://github.com/hartwork/image-bootstrap/issues/49#issuecomment-317191835
+        # https://bugs.archlinux.org/task/54911
+        system_info = cloud_cfg_dict.setdefault('system_info', {})
+        system_info__default_user = system_info.setdefault('default_user', {})
+        system_info__default_user['groups'] = ['adm']
+
     def uses_systemd(self):
         return True
 
