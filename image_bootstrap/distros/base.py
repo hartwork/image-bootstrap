@@ -169,6 +169,8 @@ class DistroStrategy(object):
         system_info__default_user = system_info.setdefault('default_user', {})
         system_info__default_user['name'] = self.get_cloud_username()
         system_info__default_user['gecos'] = 'Cloud-init-user'
+        system_info__default_user.setdefault('sudo',
+                                             ['ALL=(ALL) NOPASSWD:ALL'])
 
         system_info['distro'] = self.get_cloud_init_distro()
 
