@@ -97,11 +97,13 @@ class ArchBootstrapper(DirectoryBootstrapper):
                 '--batch',
             ]
 
-    def _initialize_gpg_home(self, abs_temp_dir, package_filename, package_yyyymmdd):
+    def _initialize_gpg_home(self, abs_temp_dir):
         abs_gpg_home_dir = os.path.join(abs_temp_dir, 'gpg_home')
         self._messenger.info('Initializing temporary GnuPG home at "%s"...' % abs_gpg_home_dir)
         os.mkdir(abs_gpg_home_dir, 0700)
+        return abs_gpg_home_dir
 
+    def _import_gpg_keyring(self, abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd):
         rel_archlinux_gpg_path = 'archlinux-keyring-%s/archlinux.gpg' % package_yyyymmdd
         with TarFile.open(package_filename) as tf:
             tf.extract(rel_archlinux_gpg_path, path=abs_temp_dir)
@@ -112,8 +114,6 @@ class ArchBootstrapper(DirectoryBootstrapper):
                 '--import', abs_archlinux_gpg_path,
             ]
         self._executor.check_call(cmd)
-
-        return abs_gpg_home_dir
 
     def _verify_file_gpg(self, candidate_filename, signature_filename, abs_gpg_home_dir):
         self._messenger.info('Verifying integrity of file "%s"...' % candidate_filename)
@@ -242,7 +242,8 @@ class ArchBootstrapper(DirectoryBootstrapper):
             package_sig_filename = self._download_keyring_package(package_yyyymmdd, '.sig')
             package_filename = self._download_keyring_package(package_yyyymmdd)
 
-            abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir, package_filename, package_yyyymmdd)
+            abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
+            self._import_gpg_keyring(abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd)
             self._verify_file_gpg(package_filename, package_sig_filename, abs_gpg_home_dir)
 
             image_sig_filename = self._download_image(image_yyyy_mm_dd, '.sig')
