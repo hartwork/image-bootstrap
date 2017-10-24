@@ -260,7 +260,6 @@ class ArchBootstrapper(DirectoryBootstrapper):
             package_filename = self._download_keyring_package(package_yyyymmdd)
 
             abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
-            self._import_gpg_keyring(abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd)
 
             self._messenger.info('Importing GPG keys whitelisted to sign archlinux-keyring...')
             self._import_gpg_keys(abs_gpg_home_dir, [
@@ -272,6 +271,8 @@ class ArchBootstrapper(DirectoryBootstrapper):
                 'BD84DE71F493DF6814B0167254EDC91609BC9183',  # Christian Hesse <Christi@n-Hes.se>
                 ])
             self._verify_file_gpg(package_filename, package_sig_filename, abs_gpg_home_dir)
+
+            self._import_gpg_keyring(abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd)
 
             image_sig_filename = self._download_image(image_yyyy_mm_dd, '.sig')
             image_filename = self._download_image(image_yyyy_mm_dd)
