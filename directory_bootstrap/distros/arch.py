@@ -98,10 +98,19 @@ class ArchBootstrapper(DirectoryBootstrapper):
                 '--batch',
             ]
 
+    @staticmethod
+    def _abs_keyserver_cert_filename(abs_gpg_home_dir):
+        return os.path.join(abs_gpg_home_dir, 'sks-keyservers.netCA.pem')
+
     def _initialize_gpg_home(self, abs_temp_dir):
         abs_gpg_home_dir = os.path.join(abs_temp_dir, 'gpg_home')
         self._messenger.info('Initializing temporary GnuPG home at "%s"...' % abs_gpg_home_dir)
         os.mkdir(abs_gpg_home_dir, 0700)
+
+        self.download_url_to_file(
+            'https://sks-keyservers.net/sks-keyservers.netCA.pem',
+            self._abs_keyserver_cert_filename(abs_gpg_home_dir))
+
         return abs_gpg_home_dir
 
     def _import_gpg_keyring(self, abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd):
@@ -126,17 +135,12 @@ class ArchBootstrapper(DirectoryBootstrapper):
         self._executor.check_call(cmd)
 
     def _import_gpg_keys(self, abs_gpg_home_dir, key_ids):
-        _KEYSERVER_CERT_BASENAME = 'sks-keyservers.netCA.pem'
-        _KEYSERVER_CERT_ABS_FILENAME = os.path.join(abs_gpg_home_dir,
-                                                    _KEYSERVER_CERT_BASENAME)
-        self.download_url_to_file('https://sks-keyservers.net/%s'
-            % _KEYSERVER_CERT_BASENAME, _KEYSERVER_CERT_ABS_FILENAME)
-
         for key_id in key_ids:
             cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
                     '--keyserver', 'hkps://hkps.pool.sks-keyservers.net',
                     '--keyserver-options',
-                        'ca-cert-file=%s' % _KEYSERVER_CERT_ABS_FILENAME,
+                        ('ca-cert-file=%s' %
+                            self._abs_keyserver_cert_filename(abs_gpg_home_dir)),
                     '--receive-keys', key_id,
                 ]
             self._executor.check_call(cmd)
