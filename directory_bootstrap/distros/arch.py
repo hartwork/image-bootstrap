@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
@@ -124,6 +125,22 @@ class ArchBootstrapper(DirectoryBootstrapper):
             ]
         self._executor.check_call(cmd)
 
+    def _import_gpg_keys(self, abs_gpg_home_dir, key_ids):
+        _KEYSERVER_CERT_BASENAME = 'sks-keyservers.netCA.pem'
+        _KEYSERVER_CERT_ABS_FILENAME = os.path.join(abs_gpg_home_dir,
+                                                    _KEYSERVER_CERT_BASENAME)
+        self.download_url_to_file('https://sks-keyservers.net/%s'
+            % _KEYSERVER_CERT_BASENAME, _KEYSERVER_CERT_ABS_FILENAME)
+
+        for key_id in key_ids:
+            cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
+                    '--keyserver', 'hkps://hkps.pool.sks-keyservers.net',
+                    '--keyserver-options',
+                        'ca-cert-file=%s' % _KEYSERVER_CERT_ABS_FILENAME,
+                    '--receive-keys', key_id,
+                ]
+            self._executor.check_call(cmd)
+
     def _extract_image(self, image_filename, abs_temp_dir):
         abs_pacstrap_outer_root = os.path.join(abs_temp_dir, 'pacstrap_root', '')
 
@@ -244,6 +261,16 @@ class ArchBootstrapper(DirectoryBootstrapper):
 
             abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
             self._import_gpg_keyring(abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd)
+
+            self._messenger.info('Importing GPG keys whitelisted to sign archlinux-keyring...')
+            self._import_gpg_keys(abs_gpg_home_dir, [
+                # https://git.archlinux.org/svntogit/packages.git/tree/trunk/PKGBUILD?h=packages/archlinux-keyring
+                '4AA4767BBC9C4B1D18AE28B77F2D434B9741E8AC',  # Pierre Schmitz <pierre@archlinux.de>
+                'A314827C4E4250A204CE6E13284FC34C8E4B1A25',  # Thomas Bächler <thomas@bchlr.de>
+                '86CFFCA918CF3AF47147588051E8B148A9999C34',  # Evangelos Foutras <evangelos@foutrelis.com>
+                'F3691687D867B81B51CE07D9BBE43771487328A9',  # Bartlomiej Piotrowski <b@bpiotrowski.pl>
+                'BD84DE71F493DF6814B0167254EDC91609BC9183',  # Christian Hesse <Christi@n-Hes.se>
+                ])
             self._verify_file_gpg(package_filename, package_sig_filename, abs_gpg_home_dir)
 
             image_sig_filename = self._download_image(image_yyyy_mm_dd, '.sig')
