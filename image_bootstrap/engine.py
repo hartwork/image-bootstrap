@@ -594,6 +594,7 @@ class BootstrapEngine(object):
         self._messenger.info('Writing MBR of "%s"...' % self._abs_target_path)
         cmd_mbr = [
                 COMMAND_INSTALL_MBR,
+                '--force',
                 self._abs_target_path,
                 ]
         self._executor.check_call(cmd_mbr)
