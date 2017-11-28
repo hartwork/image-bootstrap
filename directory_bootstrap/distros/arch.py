@@ -10,6 +10,7 @@ import re
 import shutil
 import tempfile
 from tarfile import TarFile
+from textwrap import dedent
 
 from directory_bootstrap.distros.base import (
         DirectoryBootstrapper, date_argparse_type)
@@ -111,6 +112,12 @@ class ArchBootstrapper(DirectoryBootstrapper):
             'https://sks-keyservers.net/sks-keyservers.netCA.pem',
             self._abs_keyserver_cert_filename(abs_gpg_home_dir))
 
+        with open(os.path.join(abs_gpg_home_dir, 'dirmngr.conf'), 'w') as f:
+            print(dedent("""\
+                keyserver hkps://hkps.pool.sks-keyservers.net
+                hkp-cacert %s
+            """ % self._abs_keyserver_cert_filename(abs_gpg_home_dir)), file=f)
+
         return abs_gpg_home_dir
 
     def _import_gpg_keyring(self, abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd):
@@ -137,10 +144,6 @@ class ArchBootstrapper(DirectoryBootstrapper):
     def _import_gpg_keys(self, abs_gpg_home_dir, key_ids):
         for key_id in key_ids:
             cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
-                    '--keyserver', 'hkps://hkps.pool.sks-keyservers.net',
-                    '--keyserver-options',
-                        ('ca-cert-file=%s' %
-                            self._abs_keyserver_cert_filename(abs_gpg_home_dir)),
                     '--receive-keys', key_id,
                 ]
             self._executor.check_call(cmd)
