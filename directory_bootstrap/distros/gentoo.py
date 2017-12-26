@@ -227,8 +227,8 @@ class GentooBootstrapper(DirectoryBootstrapper):
         if (today - date_to_check).days > self._max_age_days:
             raise _NotFreshEnoughException((year, month, day), self._max_age_days)
 
-    def _format_date_stage3_tarball_filename(self, stage3_date_triple):
-        return '%04d%02d%02d' % stage3_date_triple
+    def _format_date_stage3_tarball_filename(self, stage3_date_triple, stage3_date_extra=''):
+        return '%04d%02d%02d%s' % tuple(stage3_date_triple + (stage3_date_extra,))
 
     def _parse_snapshot_listing_date(self, snapshot_date_str):
         m = _snapshot_date_matcher.match(snapshot_date_str)
@@ -323,12 +323,12 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 self._messenger.info('Searching for available stage3 tarballs...')
                 stage3_latest_file_url = self._get_stage3_latest_file_url()
                 stage3_latest_file_content = self.get_url_content(stage3_latest_file_url)
-                stage3_date_triple = find_latest_stage3_date(stage3_latest_file_content, stage3_latest_file_url, self._architecture)
-                stage3_date_str = self._format_date_stage3_tarball_filename(stage3_date_triple)
+                stage3_date_triple, stage3_date_extra = find_latest_stage3_date(stage3_latest_file_content, stage3_latest_file_url, self._architecture)
+                stage3_date_str = self._format_date_stage3_tarball_filename(stage3_date_triple, stage3_date_extra)
                 self._messenger.info('Found "%s" to be latest.' % stage3_date_str)
                 self._require_fresh_enough(stage3_date_triple)
             else:
-                stage3_date_str = self._format_date_stage3_tarball_filename(self._stage3_date_triple_or_none)
+                stage3_date_str = self._format_date_stage3_tarball_filename(self._stage3_date_triple_or_none, '')
 
             if self._repository_date_triple_or_none is None:
                 self._messenger.info('Searching for available portage repository snapshots...')
