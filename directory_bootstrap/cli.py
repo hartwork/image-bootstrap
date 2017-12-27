@@ -7,6 +7,7 @@ from directory_bootstrap.distros.base import (
         BOOTSTRAPPER_CLASS_FIELD, add_general_directory_bootstrapping_options)
 from directory_bootstrap.distros.fedora import FedoraBootstrapper
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
+from directory_bootstrap.distros.void import VoidBootstrapper
 from directory_bootstrap.shared.executor import Executor
 from directory_bootstrap.shared.messenger import VERBOSITY_VERBOSE, Messenger
 from directory_bootstrap.shared.metadata import VERSION_STR
@@ -61,6 +62,7 @@ def _main__level_two():
             ArchBootstrapper,
             FedoraBootstrapper,
             GentooBootstrapper,
+            VoidBootstrapper,
             ):
         strategy_clazz.add_parser_to(distros)
 
