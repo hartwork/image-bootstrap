@@ -33,7 +33,7 @@ def find_latest_stage3_date(stage3_latest_file_content, stage3_latest_file_url, 
     if not matches:
         raise ValueError(message)
 
-    date_strs = list(set([m.group(1) for m in matches]))
+    date_strs = list(set([m2.group(1) for m2 in matches]))
     if len(date_strs) != 1:
         raise ValueError(message)
 
