@@ -10,7 +10,7 @@ from abc import ABCMeta, abstractmethod
 
 import directory_bootstrap.shared.loaders._requests as requests
 from directory_bootstrap.shared.commands import (
-        COMMAND_WGET, check_for_commands)
+        COMMAND_WGET, COMMAND_UNXZ, check_for_commands)
 from directory_bootstrap.shared.loaders._bs4 import BeautifulSoup
 from directory_bootstrap.shared.namespace import unshare_current_process
 
@@ -107,6 +107,29 @@ class DirectoryBootstrapper(object):
                 url,
                 ]
         self._executor.check_call(cmd)
+
+    def uncompress_xz_tarball(self, tarball_filename):
+        extension = '.xz'
+
+        if not tarball_filename.endswith(extension):
+            raise ValueError('Filename "%s" does not end with "%s"' % (tarball_filename, extension))
+
+        uncompressed_tarball_filename = tarball_filename[:-len(extension)]
+
+        if os.path.exists(uncompressed_tarball_filename):
+            self._messenger.info('Re-using cache file "%s".' % uncompressed_tarball_filename)
+        else:
+            self._messenger.info('Uncompressing file "%s"...' % tarball_filename)
+            self._executor.check_call([
+                    COMMAND_UNXZ,
+                    '--keep',
+                    tarball_filename,
+                    ])
+
+            if not os.path.exists(uncompressed_tarball_filename):
+                raise OSError(errno.ENOENT, 'File "%s" does not exists' % uncompressed_tarball_filename)
+
+        return uncompressed_tarball_filename
 
     def _ensure_directory_writable(self, abs_path, creation_mode):
         try:

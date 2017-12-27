@@ -190,29 +190,6 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 snapshot_md5sum,
                 ], cwd=cwd)
 
-    def _uncompress_tarball(self, tarball_filename):
-        extension = '.xz'
-
-        if not tarball_filename.endswith(extension):
-            raise ValueError('Filename "%s" does not end with "%s"' % (tarball_filename, extension))
-
-        uncompressed_tarball_filename = tarball_filename[:-len(extension)]
-
-        if os.path.exists(uncompressed_tarball_filename):
-            self._messenger.info('Re-using cache file "%s".' % uncompressed_tarball_filename)
-        else:
-            self._messenger.info('Uncompressing file "%s"...' % tarball_filename)
-            self._executor.check_call([
-                    COMMAND_UNXZ,
-                    '--keep',
-                    tarball_filename,
-                    ])
-
-            if not os.path.exists(uncompressed_tarball_filename):
-                raise OSError(errno.ENOENT, 'File "%s" does not exists' % uncompressed_tarball_filename)
-
-        return uncompressed_tarball_filename
-
     def _extract_tarball(self, tarball_filename, abs_target_root):
         self._messenger.info('Extracting file "%s" to "%s"...' % (tarball_filename, abs_target_root))
         self._executor.check_call([
@@ -352,7 +329,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
             self._verify_clearsigned_gpg_signature(stage3_digests_asc, stage3_digests, abs_gpg_home_dir)
             self._verify_sha512_sum(stage3_tarball, stage3_digests)
 
-            snapshot_tarball_uncompressed = self._uncompress_tarball(snapshot_tarball)
+            snapshot_tarball_uncompressed = self.uncompress_xz_tarball(snapshot_tarball)
             self._verify_md5_sum(snapshot_tarball_uncompressed, snapshot_uncompressed_md5sum)
 
             self._extract_tarball(stage3_tarball, self._abs_target_dir)
