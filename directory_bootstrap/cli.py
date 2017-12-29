@@ -5,6 +5,7 @@ import directory_bootstrap.shared.loaders._argparse as argparse
 from directory_bootstrap.distros.arch import ArchBootstrapper
 from directory_bootstrap.distros.base import (
         BOOTSTRAPPER_CLASS_FIELD, add_general_directory_bootstrapping_options)
+from directory_bootstrap.distros.centos import CentOsBootstrapper
 from directory_bootstrap.distros.fedora import FedoraBootstrapper
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.distros.void import VoidBootstrapper
@@ -60,6 +61,7 @@ def _main__level_two():
 
     for strategy_clazz in (
             ArchBootstrapper,
+            CentOsBootstrapper,
             FedoraBootstrapper,
             GentooBootstrapper,
             VoidBootstrapper,
