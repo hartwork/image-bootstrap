@@ -259,6 +259,13 @@ class GentooStrategy(DistroStrategy):
     def install_cloud_init_and_friends(self):
         self._add_package_mask('app-emulation/cloud-init', '>=app-emulation/cloud-init-0.7.6_p1212')
         self._set_package_keywords('app-emulation/cloud-init', '**')  # TODO ~arch
+
+        # Temporary workaround for need of more recent dev-libs/openssl than stable:
+        self._set_package_use_flags('dev-libs/openssl', '-bindist')
+        self._set_package_use_flags('net-misc/openssh', '-bindist')
+        self._set_package_keywords('dev-libs/openssl', '**')  # TODO ~arch
+        self._add_package_mask('dev-libs/openssl', 'dev-libs/openssl:0', invert=True)
+
         self._install_package_atoms(['app-emulation/cloud-init'])
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
