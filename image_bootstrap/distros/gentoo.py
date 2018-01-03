@@ -154,6 +154,7 @@ class GentooStrategy(DistroStrategy):
                 '--ignore-default-opts',
                 '--tree',
                 '--verbose',
+                '--verbose-conflicts',
                 '--jobs', '2',
                 ] + list(packages),
                 env=env)
