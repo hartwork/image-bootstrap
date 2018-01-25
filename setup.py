@@ -2,6 +2,9 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
+import glob
+import os
+
 from setuptools import find_packages, setup
 
 from directory_bootstrap.shared.metadata import (
@@ -31,6 +34,10 @@ if __name__ == '__main__':
             package_data={
                 'directory_bootstrap': [
                     'resources/gentoo/pubring.gpg',
+                ] + [
+                    os.path.relpath(p, 'directory_bootstrap')
+                    for p
+                    in glob.glob('directory_bootstrap/resources/arch/*.asc')
                 ],
                 'image_bootstrap': [
                     'patches/cloud-init-0-7-6-pkgbuild.patch',

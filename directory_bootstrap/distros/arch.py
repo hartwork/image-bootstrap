@@ -9,14 +9,17 @@ import os
 import re
 import shutil
 import tempfile
+from collections import namedtuple
 from tarfile import TarFile
 from textwrap import dedent
 
+import directory_bootstrap.resources.arch as resources
 from directory_bootstrap.distros.base import (
         DirectoryBootstrapper, date_argparse_type)
 from directory_bootstrap.shared.commands import (
         COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, COMMAND_UMOUNT,
         COMMAND_UNSHARE)
+from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
 from directory_bootstrap.shared.mount import try_unmounting
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
 
@@ -252,6 +255,27 @@ class ArchBootstrapper(DirectoryBootstrapper):
             abs_path = os.path.join(abs_pacstrap_inner_root, target)
             try_unmounting(self._executor, abs_path)
 
+    def _obtain_keys_allowed_to_sign_archlinux_keyring_tarball(self):
+        pkgbuild_content = self.get_url_content('https://git.archlinux.org/svntogit/packages.git/plain/trunk/PKGBUILD?h=packages/archlinux-keyring')
+        long_key_id_matcher = re.compile('\\b(?P<long_key_id>[0-9a-fA-F]{40})\\b.*# (?P<comment>.+)')
+
+        KeyInfo = namedtuple('KeyInfo', ['long_key_id', 'comment'])
+
+        inside = False
+        key_infos = []
+        for line in pkgbuild_content.split('\n'):
+            if not inside:
+                if line.startswith('validpgpkeys='):
+                    inside = True
+
+            if inside:
+                m = long_key_id_matcher.search(line)
+                if m:
+                    key_infos.append(KeyInfo(**m.groupdict()))
+                if ')' in line:
+                    break
+        return key_infos
+
     def run(self):
         self.ensure_directories_writable()
 
@@ -272,14 +296,34 @@ class ArchBootstrapper(DirectoryBootstrapper):
             abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
 
             self._messenger.info('Importing GPG keys whitelisted to sign archlinux-keyring...')
-            self._import_gpg_keys(abs_gpg_home_dir, [
+
+            key_infos = self._obtain_keys_allowed_to_sign_archlinux_keyring_tarball()
+            self._messenger.info('Keys found allowed to sign archlinux-keyring tarball:')
+            for key in sorted(key_infos, key=lambda x: (x.comment, x.long_key_id)):
+                self._messenger.info('  - %s (%s)' % (key.comment, key.long_key_id))
+            remote_key_ids = {k.long_key_id for k in key_infos}
+            on_disk_key_ids = {
                 # https://git.archlinux.org/svntogit/packages.git/tree/trunk/PKGBUILD?h=packages/archlinux-keyring
                 '4AA4767BBC9C4B1D18AE28B77F2D434B9741E8AC',  # Pierre Schmitz <pierre@archlinux.de>
                 'A314827C4E4250A204CE6E13284FC34C8E4B1A25',  # Thomas Bächler <thomas@bchlr.de>
                 '86CFFCA918CF3AF47147588051E8B148A9999C34',  # Evangelos Foutras <evangelos@foutrelis.com>
                 'F3691687D867B81B51CE07D9BBE43771487328A9',  # Bartlomiej Piotrowski <b@bpiotrowski.pl>
                 'BD84DE71F493DF6814B0167254EDC91609BC9183',  # Christian Hesse <Christi@n-Hes.se>
-                ])
+            }
+
+            load_from_web_key_ids = remote_key_ids - on_disk_key_ids
+            if not load_from_web_key_ids and remote_key_ids:
+                load_from_web_key_ids = {sorted(remote_key_ids)[0],}  # to download at least one key
+            load_from_disk_key_ids = remote_key_ids - load_from_web_key_ids
+
+            self._messenger.info('Importing GPG keys from the internet...')
+            self._import_gpg_keys(abs_gpg_home_dir, load_from_web_key_ids)
+
+            self._messenger.info('Importing GPG keys from disk...')
+            for key_id in load_from_disk_key_ids:
+                abs_key_path = resource_filename(resources.__name__, '%s.asc' % key_id)
+                self._import_gpg_key_file(abs_gpg_home_dir, abs_key_path)
+
             self._verify_file_gpg(package_filename, package_sig_filename, abs_gpg_home_dir)
 
             self._import_gpg_keyring(abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd)
