@@ -120,17 +120,20 @@ class ArchBootstrapper(DirectoryBootstrapper):
 
         return abs_gpg_home_dir
 
+    def _import_gpg_key_file(self, abs_gpg_home_dir, abs_key_path):
+        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
+                '--quiet',
+                '--import', abs_key_path,
+            ]
+        self._executor.check_call(cmd)
+
     def _import_gpg_keyring(self, abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd):
         rel_archlinux_gpg_path = 'archlinux-keyring-%s/archlinux.gpg' % package_yyyymmdd
         with TarFile.open(package_filename) as tf:
             tf.extract(rel_archlinux_gpg_path, path=abs_temp_dir)
         abs_archlinux_gpg_path = os.path.join(abs_temp_dir, rel_archlinux_gpg_path)
 
-        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
-                '--quiet',
-                '--import', abs_archlinux_gpg_path,
-            ]
-        self._executor.check_call(cmd)
+        self._import_gpg_key_file(abs_gpg_home_dir, abs_archlinux_gpg_path)
 
     def _verify_file_gpg(self, candidate_filename, signature_filename, abs_gpg_home_dir):
         self._messenger.info('Verifying integrity of file "%s"...' % candidate_filename)
