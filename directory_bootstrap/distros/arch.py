@@ -312,8 +312,6 @@ class ArchBootstrapper(DirectoryBootstrapper):
             }
 
             load_from_web_key_ids = remote_key_ids - on_disk_key_ids
-            if not load_from_web_key_ids and remote_key_ids:
-                load_from_web_key_ids = {sorted(remote_key_ids)[0],}  # to download at least one key
             load_from_disk_key_ids = remote_key_ids - load_from_web_key_ids
 
             self._messenger.info('Importing GPG keys from the internet...')
