@@ -260,7 +260,7 @@ class ArchStrategy(DistroStrategy):
                 COMMIT=adf3e2d5d311903e3a4429d50764b6add2c21e8b
                 SHA256=c29077e9f05bf6bae17b8bb4263d235278388515e6453ffae894be7e25545a40
 
-                wget https://git.archlinux.org/svntogit/community.git/snapshot/community-${COMMIT}.tar.xz
+                wget -Ocommunity-${COMMIT}.tar.xz https://github.com/hartwork/image-bootstrap/files/1670099/community-${COMMIT}.tar.xz.txt
                 sha256sum --check <(echo "${SHA256}  community-${COMMIT}.tar.xz")
                 tar xf community-${COMMIT}.tar.xz
                 chmod a+rw community-${COMMIT}/trunk/
