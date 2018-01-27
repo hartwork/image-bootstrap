@@ -145,19 +145,21 @@ class GentooStrategy(DistroStrategy):
             'DONT_MOUNT_BOOT': '1',  # sys-boot/grub
             'MAKEOPTS': '-j2',
         })
-        self._executor.check_call([
-                COMMAND_CHROOT,
-                self._abs_mountpoint,
-                'env',
-                'FEATURES=-news',
-                'emerge',
-                '--ignore-default-opts',
-                '--tree',
-                '--verbose',
-                '--verbose-conflicts',
-                '--jobs', '2',
-                ] + list(packages),
-                env=env)
+        argv = [
+            COMMAND_CHROOT,
+            self._abs_mountpoint,
+            'env',
+            'FEATURES=-news',
+            'emerge',
+            '--ignore-default-opts',
+            '--tree',
+            '--verbose',
+            '--verbose-conflicts',
+            '--jobs', '2',
+        ]
+        argv += list(packages)
+
+        self._executor.check_call(argv, env=env)
 
     def ensure_chroot_has_grub2_installed(self):
         self._set_package_use_flags(
