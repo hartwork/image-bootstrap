@@ -23,5 +23,5 @@ class TestStag3LatestParser(TestCase):
                 20150905/uclibc/stage3-amd64-uclibc-vanilla-20150905.tar.bz2 135760218
                 20150819/stage3-x32-20150819.tar.bz2 241353307
                 """)
-        year, month, day = find_latest_stage3_date(content, 'http://distfiles.gentoo.org/releases/amd64/autobuilds/latest-stage3.txt', 'amd64')
+        (year, month, day), _ = find_latest_stage3_date(content, 'http://distfiles.gentoo.org/releases/amd64/autobuilds/latest-stage3.txt', 'amd64')
         self.assertEquals((year, month, day), (2015, 10, 1))
