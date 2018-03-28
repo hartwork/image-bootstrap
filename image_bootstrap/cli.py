@@ -5,7 +5,7 @@ import os
 
 from directory_bootstrap.distros.base import \
         add_general_directory_bootstrapping_options
-from directory_bootstrap.shared.executor import Executor
+from directory_bootstrap.shared.executor import Executor, sanitize_path
 from directory_bootstrap.shared.loaders._argparse import (
         ArgumentParser, RawDescriptionHelpFormatter)
 from directory_bootstrap.shared.messenger import (
@@ -51,6 +51,8 @@ def _main__level_three(messenger, options):
         child_process_stdout = None
     else:
         child_process_stdout = open('/dev/null', 'w')
+
+    sanitize_path()
 
     executor = Executor(messenger, stdout=child_process_stdout)
 

@@ -9,7 +9,7 @@ from directory_bootstrap.distros.centos import CentOsBootstrapper
 from directory_bootstrap.distros.fedora import FedoraBootstrapper
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.distros.void import VoidBootstrapper
-from directory_bootstrap.shared.executor import Executor
+from directory_bootstrap.shared.executor import Executor, sanitize_path
 from directory_bootstrap.shared.messenger import VERBOSITY_VERBOSE, Messenger
 from directory_bootstrap.shared.metadata import VERSION_STR
 from directory_bootstrap.shared.output_control import (
@@ -23,6 +23,8 @@ def _main__level_three(messenger, options):
         child_process_stdout = None
     else:
         child_process_stdout = open('/dev/null', 'w')
+
+    sanitize_path()
 
     executor = Executor(messenger, stdout=child_process_stdout)
 
