@@ -309,6 +309,7 @@ class ArchBootstrapper(DirectoryBootstrapper):
                 '86CFFCA918CF3AF47147588051E8B148A9999C34',  # Evangelos Foutras <evangelos@foutrelis.com>
                 'F3691687D867B81B51CE07D9BBE43771487328A9',  # Bartlomiej Piotrowski <b@bpiotrowski.pl>
                 'BD84DE71F493DF6814B0167254EDC91609BC9183',  # Christian Hesse <Christi@n-Hes.se>
+                'E499C79F53C96A54E572FEE1C06086337C50773E',  # Jelle van der Waa <jelle@archlinux.org>
             }
 
             load_from_web_key_ids = remote_key_ids - on_disk_key_ids
