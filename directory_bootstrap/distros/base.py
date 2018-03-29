@@ -7,10 +7,12 @@ import errno
 import os
 import re
 from abc import ABCMeta, abstractmethod
+from textwrap import dedent
 
 import directory_bootstrap.shared.loaders._requests as requests
 from directory_bootstrap.shared.commands import (
-        COMMAND_WGET, COMMAND_UNXZ, check_for_commands)
+        COMMAND_GPG, COMMAND_WGET, COMMAND_UNSHARE, COMMAND_UNXZ,
+        check_for_commands)
 from directory_bootstrap.shared.loaders._bs4 import BeautifulSoup
 from directory_bootstrap.shared.namespace import unshare_current_process
 
@@ -21,6 +23,8 @@ _month = '(0[1-9]|1[0-2])'
 _day = '(0[1-9]|[12][0-9]|3[01])'
 
 _argparse_date_matcher = re.compile('^%s-%s-%s$' % (_year, _month, _day))
+
+_GPG_DISPLAY_KEY_FORMAT = '0xlong'
 
 
 def date_argparse_type(text):
@@ -151,3 +155,50 @@ class DirectoryBootstrapper(object):
     def ensure_directories_writable(self):
         self._ensure_directory_writable(self._abs_cache_dir, 0755)
         self._ensure_directory_writable(self._abs_target_dir, 0700)
+
+    @staticmethod
+    def _abs_keyserver_cert_filename(abs_gpg_home_dir):
+        return os.path.join(abs_gpg_home_dir, 'sks-keyservers.netCA.pem')
+
+    def _initialize_gpg_home(self, abs_temp_dir):
+        abs_gpg_home_dir = os.path.join(abs_temp_dir, 'gpg_home')
+        self._messenger.info('Initializing temporary GnuPG home at "%s"...' % abs_gpg_home_dir)
+        os.mkdir(abs_gpg_home_dir, 0700)
+
+        self.download_url_to_file(
+            'https://sks-keyservers.net/sks-keyservers.netCA.pem',
+            self._abs_keyserver_cert_filename(abs_gpg_home_dir))
+
+        with open(os.path.join(abs_gpg_home_dir, 'dirmngr.conf'), 'w') as f:
+            print(dedent("""\
+                keyserver hkps://hkps.pool.sks-keyservers.net
+                hkp-cacert %s
+            """ % self._abs_keyserver_cert_filename(abs_gpg_home_dir)), file=f)
+
+        return abs_gpg_home_dir
+
+    def _get_gpg_argv_start(self, abs_gpg_home_dir):
+        return [
+                COMMAND_UNSHARE,
+                '--fork', '--pid',  # to auto-kill started gpg-agent
+                COMMAND_GPG,
+                '--home', abs_gpg_home_dir,
+                '--keyid-format', _GPG_DISPLAY_KEY_FORMAT,
+                '--batch',
+            ]
+
+    def _import_gpg_key_file(self, abs_gpg_home_dir, abs_key_path):
+        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
+                '--quiet',
+                '--import', abs_key_path,
+            ]
+        self._executor.check_call(cmd)
+
+    def _verify_file_gpg(self, candidate_filename, signature_filename, abs_gpg_home_dir):
+        self._messenger.info('Verifying integrity of file "%s"...' % candidate_filename)
+        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
+                '--verify',
+                signature_filename,
+                candidate_filename,
+            ]
+        self._executor.check_call(cmd)

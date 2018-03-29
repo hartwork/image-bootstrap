@@ -11,7 +11,6 @@ import shutil
 import tempfile
 from collections import namedtuple
 from tarfile import TarFile
-from textwrap import dedent
 
 import directory_bootstrap.resources.arch as resources
 from directory_bootstrap.distros.base import (
@@ -24,8 +23,6 @@ from directory_bootstrap.shared.mount import try_unmounting
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
 
 SUPPORTED_ARCHITECTURES = ('i686', 'x86_64')
-
-_GPG_DISPLAY_KEY_FORMAT = '0xlong'
 
 _NON_DISK_MOUNT_TASKS = (
         ('/dev', ['-o', 'bind'], 'dev'),
@@ -92,44 +89,6 @@ class ArchBootstrapper(DirectoryBootstrapper):
         self.download_url_to_file(url, filename)
         return filename
 
-    def _get_gpg_argv_start(self, abs_gpg_home_dir):
-        return [
-                COMMAND_UNSHARE,
-                '--fork', '--pid',  # to auto-kill started gpg-agent
-                COMMAND_GPG,
-                '--home', abs_gpg_home_dir,
-                '--keyid-format', _GPG_DISPLAY_KEY_FORMAT,
-                '--batch',
-            ]
-
-    @staticmethod
-    def _abs_keyserver_cert_filename(abs_gpg_home_dir):
-        return os.path.join(abs_gpg_home_dir, 'sks-keyservers.netCA.pem')
-
-    def _initialize_gpg_home(self, abs_temp_dir):
-        abs_gpg_home_dir = os.path.join(abs_temp_dir, 'gpg_home')
-        self._messenger.info('Initializing temporary GnuPG home at "%s"...' % abs_gpg_home_dir)
-        os.mkdir(abs_gpg_home_dir, 0700)
-
-        self.download_url_to_file(
-            'https://sks-keyservers.net/sks-keyservers.netCA.pem',
-            self._abs_keyserver_cert_filename(abs_gpg_home_dir))
-
-        with open(os.path.join(abs_gpg_home_dir, 'dirmngr.conf'), 'w') as f:
-            print(dedent("""\
-                keyserver hkps://hkps.pool.sks-keyservers.net
-                hkp-cacert %s
-            """ % self._abs_keyserver_cert_filename(abs_gpg_home_dir)), file=f)
-
-        return abs_gpg_home_dir
-
-    def _import_gpg_key_file(self, abs_gpg_home_dir, abs_key_path):
-        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
-                '--quiet',
-                '--import', abs_key_path,
-            ]
-        self._executor.check_call(cmd)
-
     def _import_gpg_keyring(self, abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd):
         rel_archlinux_gpg_path = 'archlinux-keyring-%s/archlinux.gpg' % package_yyyymmdd
         with TarFile.open(package_filename) as tf:
@@ -137,15 +96,6 @@ class ArchBootstrapper(DirectoryBootstrapper):
         abs_archlinux_gpg_path = os.path.join(abs_temp_dir, rel_archlinux_gpg_path)
 
         self._import_gpg_key_file(abs_gpg_home_dir, abs_archlinux_gpg_path)
-
-    def _verify_file_gpg(self, candidate_filename, signature_filename, abs_gpg_home_dir):
-        self._messenger.info('Verifying integrity of file "%s"...' % candidate_filename)
-        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
-                '--verify',
-                signature_filename,
-                candidate_filename,
-            ]
-        self._executor.check_call(cmd)
 
     def _import_gpg_keys(self, abs_gpg_home_dir, key_ids):
         for key_id in key_ids:
