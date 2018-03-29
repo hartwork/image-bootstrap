@@ -31,7 +31,7 @@ http://docs.openstack.org/image-guide/content/ch_openstack_images.html[prepared 
 into a given _directory_ (similar to https://wiki.debian.org/Debootstrap[debootstrap]
 for Debian/Ubuntu). +
 Distributions supported by *directory-bootstrap* currently include:
-Arch Linux, CentOS, Fedora, Gentoo, and Void Linux.
+Alpine Linux, Arch Linux, CentOS, Fedora, Gentoo, and Void Linux.
 
 
 [[History]]
@@ -68,6 +68,7 @@ In comparision to grml-debootstrap, by now *image-bootstrap*
 Support for Gentoo followed, after.
 Support for Fedora chroots came into live during 33c3, late December 2016.
 Support for Void Linux and CentOS chroots came into live during 34c3, December 2017.
+Support for Alpine Linux chroots came into in March 2018.
 
 
 [[ExampleRun]]

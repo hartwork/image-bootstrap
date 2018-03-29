@@ -2,6 +2,7 @@
 # Licensed under AGPL v3 or later
 
 import directory_bootstrap.shared.loaders._argparse as argparse
+from directory_bootstrap.distros.alpine import AlpineBootstrapper
 from directory_bootstrap.distros.arch import ArchBootstrapper
 from directory_bootstrap.distros.base import (
         BOOTSTRAPPER_CLASS_FIELD, add_general_directory_bootstrapping_options)
@@ -62,6 +63,7 @@ def _main__level_two():
 
 
     for strategy_clazz in (
+            AlpineBootstrapper,
             ArchBootstrapper,
             CentOsBootstrapper,
             FedoraBootstrapper,
