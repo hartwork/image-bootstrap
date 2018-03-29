@@ -33,6 +33,7 @@ if __name__ == '__main__':
             ],
             package_data={
                 'directory_bootstrap': [
+                    'resources/alpine/ncopa.asc',
                     'resources/gentoo/pubring.gpg',
                 ] + [
                     os.path.relpath(p, 'directory_bootstrap')

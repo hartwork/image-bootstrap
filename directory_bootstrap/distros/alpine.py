@@ -4,7 +4,10 @@ import shutil
 import tempfile
 from tarfile import TarFile
 
+import directory_bootstrap.resources.alpine as resources
 from directory_bootstrap.distros.base import DirectoryBootstrapper
+from directory_bootstrap.shared.commands import COMMAND_GPG, COMMAND_UNSHARE
+from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
 
 
 SUPPORTED_ARCHITECTURES = ('i686', 'x86_64')
@@ -34,6 +37,13 @@ class AlpineBootstrapper(DirectoryBootstrapper):
 
     def wants_to_be_unshared(self):
         return True
+
+    @staticmethod
+    def get_commands_to_check_for():
+        return DirectoryBootstrapper.get_commands_to_check_for() + [
+                COMMAND_GPG,
+                COMMAND_UNSHARE,
+                ]
 
     def _determine_latest_version(self):
         downloads_page_html = self.get_url_content('https://alpinelinux.org/downloads/')
@@ -75,12 +85,27 @@ class AlpineBootstrapper(DirectoryBootstrapper):
 
         tarball_download_url = self._create_tarball_download_url(
             version_tuple, self._architecture)
+        signatur_download_url = '{}.asc'.format(tarball_download_url)
 
+        # Signature first, so we fail earlier if we do
+        abs_filename_signature = self._download_file(signatur_download_url)
         abs_filename_tarball = self._download_file(tarball_download_url)
 
-        self._messenger.info('Extracting to "{}"...'.format(self._abs_target_dir))
-        with TarFile.open(abs_filename_tarball) as tf:
-            tf.extractall(path=self._abs_target_dir)
+        abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
+        try:
+            abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
+            release_pubring_gpg = resource_filename(resources.__name__,
+                                                    'ncopa.asc')
+            self._import_gpg_key_file(abs_gpg_home_dir, release_pubring_gpg)
+            self._verify_file_gpg(abs_filename_tarball,
+                                  abs_filename_signature, abs_gpg_home_dir)
+
+            self._messenger.info('Extracting to "{}"...'.format(self._abs_target_dir))
+            with TarFile.open(abs_filename_tarball) as tf:
+                tf.extractall(path=self._abs_target_dir)
+        finally:
+            self._messenger.info('Cleaning up "{}"...'.format(abs_temp_dir))
+            shutil.rmtree(abs_temp_dir)
 
     @classmethod
     def add_arguments_to(clazz, distro):
