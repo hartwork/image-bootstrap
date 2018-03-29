@@ -188,6 +188,7 @@ class DirectoryBootstrapper(object):
             ]
 
     def _import_gpg_key_file(self, abs_gpg_home_dir, abs_key_path):
+        self._messenger.info('Importing GPG key from file "{}"...'.format(abs_key_path))
         cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
                 '--quiet',
                 '--import', abs_key_path,
