@@ -28,6 +28,9 @@ if __name__ == '__main__':
                 'setuptools',
                 'PyYAML',
             ],
+            tests_require=[
+                'pytest',
+            ],
             packages=[
                 p for p in find_packages() if not p.endswith('.test')
             ],
