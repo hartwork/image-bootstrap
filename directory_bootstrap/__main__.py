@@ -44,7 +44,7 @@ def _main__level_three(messenger, options):
 
 
 def _main__level_two():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog='directory-bootstrap')
     parser.add_argument('--version', action='version', version=VERSION_STR)
 
     add_output_control_options(parser)
@@ -87,3 +87,7 @@ def main():
         _main__level_two()
     except KeyboardInterrupt:
         pass
+
+
+if __name__ == '__main__':
+    main()

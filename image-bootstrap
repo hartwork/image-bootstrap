@@ -4,7 +4,7 @@
 
 if __name__ == '__main__':
     try:
-        from image_bootstrap.cli import main
+        from image_bootstrap.__main__ import main
     except KeyboardInterrupt:
         pass
     else:

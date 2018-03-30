@@ -50,8 +50,8 @@ if __name__ == '__main__':
             },
             entry_points={
                 'console_scripts': [
-                    'directory-bootstrap = directory_bootstrap.cli:main',
-                    'image-bootstrap = image_bootstrap.cli:main',
+                    'directory-bootstrap = directory_bootstrap.__main__:main',
+                    'image-bootstrap = image_bootstrap.__main__:main',
                 ],
             },
             classifiers=[

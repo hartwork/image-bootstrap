@@ -102,6 +102,7 @@ def _main__level_three(messenger, options):
 
 def _main__level_two():
     parser = ArgumentParser(
+            prog='image-bootstrap',
             description=DESCRIPTION,
             epilog=BANNER,
             formatter_class=RawDescriptionHelpFormatter,
@@ -180,3 +181,7 @@ def main():
         _main__level_two()
     except KeyboardInterrupt:
         pass
+
+
+if __name__ == '__main__':
+    main()
