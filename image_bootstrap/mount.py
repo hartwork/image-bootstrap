@@ -20,16 +20,23 @@ class MountFinder(object):
     def __init__(self):
         self._mount_points = []
 
+    @staticmethod
+    def _parse_line(line):
+        assert '\n' not in line
+        return _PROC_PID_MOUNTINFO_LINE.match(line).groupdict()
+
+    def _load_text(self, text):
+        for line in text.split('\n'):
+            if not line:
+                continue
+            self._mount_points.append(self._parse_line(line)['mount'])
+
     def load(self, filename=None):
         if filename is None:
             filename = '/proc/%d/mountinfo' % os.getpid()
 
-        f = open(filename)
-        for l in f:
-            line = l.rstrip()
-            m = _PROC_PID_MOUNTINFO_LINE.match(line)
-            self._mount_points.append(m.groupdict()['mount'])
-        f.close()
+        with open(filename, 'r') as f:
+            self._load_text(f.read())
 
     def _normpath_no_trailing_slash(self, abs_path):
         return os.path.normpath(abs_path)
