@@ -166,7 +166,8 @@ class DirectoryBootstrapper(object):
         os.mkdir(abs_gpg_home_dir, 0700)
 
         self.download_url_to_file(
-            'https://sks-keyservers.net/sks-keyservers.netCA.pem',
+            # This one was trouble: https://sks-keyservers.net/sks-keyservers.netCA.pem
+            'https://raw.githubusercontent.com/gpg/gnupg/master/dirmngr/sks-keyservers.netCA.pem',
             self._abs_keyserver_cert_filename(abs_gpg_home_dir))
 
         with open(os.path.join(abs_gpg_home_dir, 'dirmngr.conf'), 'w') as f:
