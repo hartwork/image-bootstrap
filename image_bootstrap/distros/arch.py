@@ -263,7 +263,7 @@ class ArchStrategy(DistroStrategy):
                 wget -Ocommunity-${COMMIT}.tar.xz https://github.com/hartwork/image-bootstrap/files/1670099/community-${COMMIT}.tar.xz.txt
                 sha256sum --check <(echo "${SHA256}  community-${COMMIT}.tar.xz")
                 tar xf community-${COMMIT}.tar.xz
-                chmod a+rw community-${COMMIT}/trunk/
+                chown nobody:nobody community-${COMMIT}/trunk/
                 cd community-${COMMIT}/trunk/
 
                 cp %s .
