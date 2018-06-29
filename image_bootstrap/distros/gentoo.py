@@ -299,6 +299,8 @@ class GentooStrategy(DistroStrategy):
             os.fchmod(f.fileno(), 0755)
 
     def install_dhcp_client(self):
+        # Static route support is broken with 7.x.x (tried 7.0.1 and 7.0.6)
+        self._add_package_mask('net-misc/dhcpcd', '>=net-misc/dhcpcd-7')
         self._install_package_atoms(['net-misc/dhcpcd'])
 
     def install_sudo(self):
