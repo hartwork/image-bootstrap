@@ -9,7 +9,7 @@ from directory_bootstrap.shared.executor import Executor, sanitize_path
 from directory_bootstrap.shared.loaders._argparse import (
         ArgumentParser, RawDescriptionHelpFormatter)
 from directory_bootstrap.shared.messenger import (
-        BANNER, VERBOSITY_VERBOSE, Messenger)
+        BANNER, VERBOSITY_VERBOSE, Messenger, fix_output_encoding)
 from directory_bootstrap.shared.metadata import DESCRIPTION, VERSION_STR
 from directory_bootstrap.shared.output_control import (
         add_output_control_options, is_color_wanted, run_handle_errors)
@@ -178,6 +178,7 @@ def _main__level_two():
 
 def main():
     try:
+        fix_output_encoding()
         _main__level_two()
     except KeyboardInterrupt:
         pass

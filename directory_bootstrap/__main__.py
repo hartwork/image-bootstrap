@@ -11,7 +11,8 @@ from directory_bootstrap.distros.fedora import FedoraBootstrapper
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.distros.void import VoidBootstrapper
 from directory_bootstrap.shared.executor import Executor, sanitize_path
-from directory_bootstrap.shared.messenger import VERBOSITY_VERBOSE, Messenger
+from directory_bootstrap.shared.messenger import (VERBOSITY_VERBOSE, Messenger,
+                                                  fix_output_encoding)
 from directory_bootstrap.shared.metadata import VERSION_STR
 from directory_bootstrap.shared.output_control import (
         add_output_control_options, is_color_wanted, run_handle_errors)
@@ -84,6 +85,7 @@ def _main__level_two():
 
 def main():
     try:
+        fix_output_encoding()
         _main__level_two()
     except KeyboardInterrupt:
         pass

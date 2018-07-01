@@ -33,6 +33,19 @@ Please report bugs at %(github_home)s.  Thank you!\
 }
 
 
+def fix_output_encoding():
+    """
+    Fixes program invocation a la "...... |& tee file.log"
+    to not end up with UnicodeEncodeError
+    """
+    if sys.stdout.encoding is None:
+        import codecs
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+    if sys.stderr.encoding is None:
+        import codecs
+        sys.stderr = codecs.getwriter('utf-8')(sys.stderr)
+
+
 class Messenger(object):
     def __init__(self, verbosity, colorize):
         self._infos_wanted = verbosity is not VERBOSITY_QUIET
