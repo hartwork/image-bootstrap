@@ -147,6 +147,12 @@ class YumBasedDirectoryBootstrapper(DirectoryBootstrapper):
                 '--brief',
                 os.path.join(db_root, 'Packages'),
                 ])
+
+        if file_command_output.startswith(', created'):
+            raise ValueError('Your version of file(1) has a bug'
+                             ' keeping it from detecting'
+                             ' the version of Berkeley DB files')
+
         m = _BERKLEY_DB_FORMAT_VERSION_EXTRACTOR.match(file_command_output)
         return int(m.group('version'))
 
