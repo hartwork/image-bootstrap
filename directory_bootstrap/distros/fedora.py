@@ -80,6 +80,6 @@ class FedoraBootstrapper(YumBasedDirectoryBootstrapper):
                 % self._releasever
         abs_gpg_public_key_filename = os.path.join(self._abs_cache_dir, rel_gpg_public_key_filename)
         self.download_url_to_file(
-                'https://pagure.io/fedora-repos/raw/master/f/%s' % rel_gpg_public_key_filename,
+                'https://src.fedoraproject.org/rpms/fedora-repos/raw/master/f/%s' % rel_gpg_public_key_filename,
                 abs_gpg_public_key_filename)
         return abs_gpg_public_key_filename
