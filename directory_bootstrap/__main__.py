@@ -88,7 +88,7 @@ def main():
         fix_output_encoding()
         _main__level_two()
     except KeyboardInterrupt:
-        pass
+        raise
 
 
 if __name__ == '__main__':
