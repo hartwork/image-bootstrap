@@ -390,6 +390,8 @@ class BootstrapEngine(object):
                     ' for details.')
             cmd += ['-O', '^64bit']
 
+        cmd += self._distro.get_extra_mkfs_ext4_options()
+
         cmd += [
                 self._abs_first_partition_device,
                 ]

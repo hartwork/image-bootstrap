@@ -40,3 +40,11 @@ class DebianStrategy(DebianBasedDistroStrategy):
             return 1 * 1024**3
         else:
             return 2 * 1024**3
+
+    def get_extra_mkfs_ext4_options(self):
+        args = super(DebianStrategy, self).get_extra_mkfs_ext4_options()
+
+        if self._release == 'jessie':
+            args += ['-O', '^metadata_csum']
+
+        return args
