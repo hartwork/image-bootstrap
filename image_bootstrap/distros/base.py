@@ -203,6 +203,9 @@ class DistroStrategy(object):
         # NOTE: Only called for distros NOT using systemd
         raise NotImplementedError()
 
+    def get_extra_mkfs_ext4_options(self):
+        return []
+
     @classmethod
     def add_parser_to(clazz, distros):
         raise NotImplementedError()
