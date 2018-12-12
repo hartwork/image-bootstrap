@@ -1,6 +1,9 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
+import signal
+import sys
+
 import directory_bootstrap.shared.loaders._argparse as argparse
 from directory_bootstrap.distros.alpine import AlpineBootstrapper
 from directory_bootstrap.distros.arch import ArchBootstrapper
@@ -88,7 +91,7 @@ def main():
         fix_output_encoding()
         _main__level_two()
     except KeyboardInterrupt:
-        pass
+        sys.exit(128 + signal.SIGINT)
 
 
 if __name__ == '__main__':

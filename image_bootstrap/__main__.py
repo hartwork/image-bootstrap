@@ -2,6 +2,8 @@
 # Licensed under AGPL v3 or later
 
 import os
+import signal
+import sys
 
 from directory_bootstrap.distros.base import \
         add_general_directory_bootstrapping_options
@@ -181,7 +183,7 @@ def main():
         fix_output_encoding()
         _main__level_two()
     except KeyboardInterrupt:
-        pass
+        sys.exit(128 + signal.SIGINT)
 
 
 if __name__ == '__main__':
