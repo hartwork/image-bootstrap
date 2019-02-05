@@ -153,7 +153,7 @@ class DistroStrategy(object):
     def install_growpart(self):
         self._messenger.info('Fetching growpart of cloud-utils...')
         self._fetch_install_chmod(
-                'https://bazaar.launchpad.net/~cloud-utils-dev/cloud-utils/trunk/download/head:/growpart-20110225134600-d84xgz6209r194ob-1/growpart',
+                'https://git.launchpad.net/cloud-utils/plain/bin/growpart?id=75cdc65ea3586a08975f662a263d766cf2dc6d6f',
                 '/usr/bin/growpart', 0755)
 
     def disable_cloud_init_syslog_fix_perms(self):
