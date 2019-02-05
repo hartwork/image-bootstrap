@@ -344,7 +344,7 @@ class ArchStrategy(DistroStrategy):
         return with_openstack
 
     def get_minimum_size_bytes(self):
-        return 2 * 1024**3
+        return 3 * 1024**3
 
     @classmethod
     def add_parser_to(clazz, distros):
