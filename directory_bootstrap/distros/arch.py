@@ -16,8 +16,8 @@ import directory_bootstrap.resources.arch as resources
 from directory_bootstrap.distros.base import (
         DirectoryBootstrapper, date_argparse_type)
 from directory_bootstrap.shared.commands import (
-        COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, COMMAND_UMOUNT,
-        COMMAND_UNSHARE)
+        COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, COMMAND_TAR,
+        COMMAND_UMOUNT, COMMAND_UNSHARE)
 from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
 from directory_bootstrap.shared.mount import try_unmounting
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
@@ -66,6 +66,7 @@ class ArchBootstrapper(DirectoryBootstrapper):
                 COMMAND_CHROOT,
                 COMMAND_GPG,
                 COMMAND_MOUNT,
+                COMMAND_TAR,
                 COMMAND_UMOUNT,
                 ]
 
@@ -109,8 +110,12 @@ class ArchBootstrapper(DirectoryBootstrapper):
 
         self._messenger.info('Extracting bootstrap image to "%s"...' % abs_pacstrap_outer_root)
         abs_pacstrap_inner_root = os.path.join(abs_pacstrap_outer_root, 'root.%s' % self._architecture)
-        with TarFile.open(image_filename) as tf:
-            tf.extractall(path=abs_pacstrap_outer_root)
+
+        os.makedirs(abs_pacstrap_outer_root)
+        self._executor.check_call([COMMAND_TAR,
+                                   'xf', image_filename,
+                                   '-C', abs_pacstrap_outer_root,
+                                   ])
 
         return abs_pacstrap_inner_root
 
