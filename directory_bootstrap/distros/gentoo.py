@@ -256,11 +256,23 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
         self._check_gpg_for_no_autostart_support(abs_gpg_home_dir)
 
-        release_pubring_gpg = resource_filename(resources.__name__, 'pubring.gpg')
-        cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
-                '--import', release_pubring_gpg,
+        self._messenger.info('Importing known GnuPG keys from disk...')
+        signatures = [  # from https://www.gentoo.org/downloads/signatures/
+            # Key Fingerprint                            # Description                                                          # Created     # Expiry
+            ('13EBBDBEDE7A12775DFDB1BABB572E0E2D182910', 'Gentoo Linux Release Engineering (Automated Weekly Release Key)',     '2009-08-25', '2020-07-01'),
+            ('DCD05B71EAB94199527F44ACDB6B8C1F96D8BF6D', 'Gentoo ebuild repository signing key (Automated Signing Key)',        '2011-11-25', '2020-07-01'),
+            ('EF9538C9E8E64311A52CDEDFA13D0EF1914E7A72', 'Gentoo repository mirrors (automated git signing key)',               '2018-05-28', '2020-07-01'),
+            ('D99EAC7379A850BCE47DA5F29E6438C817072058', 'Gentoo Linux Release Engineering (Gentoo Linux Release Signing Key)', '2004-07-20', '2020-07-01'),
+            ('ABD00913019D6354BA1D9A132839FE0D796198B1', 'Gentoo Authority Key L1',                                             '2019-04-01', '2020-07-01'),
+            ('18F703D702B1B9591373148C55D3238EC050396E', 'Gentoo Authority Key L2 for Services',                                '2019-04-01', '2020-07-01'),
+            ('2C13823B8237310FA213034930D132FF0FF50EEB', 'Gentoo Authority Key L2 for Developers',                              '2019-04-01', '2020-07-01'),
+        ]
+        for signature in signatures:
+            filename = resource_filename(resources.__name__, '{}.asc'.format(signature[0]))
+            cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
+                '--import', filename,
             ]
-        self._executor.check_call(cmd)
+            self._executor.check_call(cmd)
 
         return abs_gpg_home_dir
 

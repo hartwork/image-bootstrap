@@ -37,11 +37,10 @@ if __name__ == '__main__':
             package_data={
                 'directory_bootstrap': [
                     'resources/alpine/ncopa.asc',
-                    'resources/gentoo/pubring.gpg',
                 ] + [
                     os.path.relpath(p, 'directory_bootstrap')
                     for p
-                    in glob.glob('directory_bootstrap/resources/arch/*.asc')
+                    in glob.glob('directory_bootstrap/resources/*/*.asc')
                 ],
                 'image_bootstrap': [
                     'patches/cloud-init-0-7-6-pkgbuild.patch',
