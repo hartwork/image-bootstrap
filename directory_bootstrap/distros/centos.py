@@ -79,7 +79,10 @@ class CentOsBootstrapper(YumBasedDirectoryBootstrapper):
     def _download_release_public_key(self):
         self._messenger.info('Downloading related GnuPG public key...')
         release_major = self._releasever.split('.')[0]
-        rel_gpg_public_key_filename = 'RPM-GPG-KEY-CentOS-%s' % release_major
+        if int(release_major) > 7:
+            rel_gpg_public_key_filename = 'RPM-GPG-KEY-CentOS-Official'
+        else:
+            rel_gpg_public_key_filename = 'RPM-GPG-KEY-CentOS-%s' % release_major
         abs_gpg_public_key_filename = os.path.join(self._abs_cache_dir, rel_gpg_public_key_filename)
         self.download_url_to_file(
                 'https://www.centos.org/keys/%s' % rel_gpg_public_key_filename,
