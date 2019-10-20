@@ -325,7 +325,7 @@ class ArchStrategy(DistroStrategy):
         return '/boot/initramfs-linux.img'
 
     def install_kernel(self):
-        pass  # Kernel installed, already
+        self._install_packages(['linux'])
 
     def adjust_cloud_cfg_dict(self, cloud_cfg_dict):
         super(ArchStrategy, self).adjust_cloud_cfg_dict(cloud_cfg_dict)
