@@ -879,7 +879,7 @@ class BootstrapEngine(object):
                 blacklist pcspkr
                 """), file=f)
 
-    def _intall_acpid_unless_using_systemd(self):
+    def _install_acpid_unless_using_systemd(self):
         if not self._distro.uses_systemd():
             return self._distro.install_acpid()
 
@@ -968,7 +968,7 @@ class BootstrapEngine(object):
                             # Goodies
                             self._disable_clearing_tty1()
                             self._disable_pcspkr_autoloading()
-                            self._intall_acpid_unless_using_systemd()
+                            self._install_acpid_unless_using_systemd()
                         # elif with vagrant support:
                         #   ...
                         #   self._install_sudo()
