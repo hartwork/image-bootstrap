@@ -83,7 +83,7 @@ class VoidBootstrapper(DirectoryBootstrapper):
             self._executor.check_call([
                     xbps_install,
                     '--rootdir', self._abs_target_dir,
-                    '--repository=https://alpha.de.repo.voidlinux.org/current',
+                    '--repository=https://alpha.de.repo.voidlinux.org/current/musl',
                     '--sync', '--yes',
                     'base-system',
                     ], cwd=abs_temp_dir)
