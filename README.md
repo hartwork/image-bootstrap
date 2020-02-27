@@ -330,8 +330,8 @@ command names:
 
 general configuration:
   --cache-dir DIRECTORY
-                        directory to use for downloads (default: /var/cache
-                        /directory-bootstrap/)
+                        directory to use for downloads (default:
+                        /var/cache/directory-bootstrap/)
 
 subcommands (choice of distribution):
   Run "image-bootstrap DISTRIBUTION --help" for details on options specific to that distribution.
@@ -346,7 +346,7 @@ subcommands (choice of distribution):
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____
    / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \
   /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/
-               /___/                      v1.0.0 :: 2020-02-27  /_/
+               /___/                      v2.0.0 :: 2020-02-28  /_/
 
 Software libre licensed under AGPL v3 or later.
 Brought to you by Sebastian Pipping <sebastian@pipping.org>.
