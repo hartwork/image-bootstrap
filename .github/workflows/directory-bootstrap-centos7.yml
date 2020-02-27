@@ -60,4 +60,4 @@ jobs:
           directory-bootstrap --help         ; echo
           directory-bootstrap centos --help  ; echo
 
-          sudo $(which directory-bootstrap) --verbose --debug centos /tmp/centos7_chroot/
+          sudo PYTHONUNBUFFERED=1 $(which directory-bootstrap) --verbose --debug centos /tmp/centos7_chroot/

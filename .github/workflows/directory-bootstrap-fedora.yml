@@ -60,4 +60,4 @@ jobs:
           directory-bootstrap --help         ; echo
           directory-bootstrap fedora --help  ; echo
 
-          sudo $(which directory-bootstrap) --verbose --debug fedora /tmp/fedora_chroot/
+          sudo PYTHONUNBUFFERED=1 $(which directory-bootstrap) --verbose --debug fedora /tmp/fedora_chroot/

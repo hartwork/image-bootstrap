@@ -43,4 +43,4 @@ jobs:
           directory-bootstrap --help         ; echo
           directory-bootstrap gentoo --help  ; echo
 
-          sudo $(which directory-bootstrap) --verbose --debug gentoo /tmp/gentoo_chroot/
+          sudo PYTHONUNBUFFERED=1 $(which directory-bootstrap) --verbose --debug gentoo /tmp/gentoo_chroot/
