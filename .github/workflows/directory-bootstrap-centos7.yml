@@ -1,0 +1,63 @@
+name: Smoke test creation of CentOS 7 chroots
+
+on:
+- pull_request
+- push
+
+jobs:
+  install_and_run:
+    name: Smoke test creation of CentOS 7 chroots
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v2
+
+      - name: Cache pip
+        uses: actions/cache@v1.1.2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Set up Python 2.7
+        uses: actions/setup-python@v1.1.1
+        with:
+          python-version: 2.7
+
+      - name: Install
+        run: |-
+          set -e
+          pip install \
+            --disable-pip-version-check \
+            --user \
+            --no-warn-script-location \
+            .
+          echo "::set-env name=PATH::${HOME}/.local/bin:${PATH}"
+
+      - name: Install runtime dependencies
+        run: |-
+          set -e
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes \
+            ca-certificates \
+            db-util \
+            file \
+            lsb-release \
+            python-bs4 \
+            python-colorama \
+            python-lxml \
+            python-requests \
+            rpm \
+            wget \
+            yum
+
+      - name: Smoke test creation of CentOS 7 chroots
+        run: |-
+          set -e
+          cd /tmp  # to not be in Git clone folder
+
+          directory-bootstrap --help         ; echo
+          directory-bootstrap centos --help  ; echo
+
+          sudo $(which directory-bootstrap) --verbose --debug centos /tmp/centos7_chroot/
