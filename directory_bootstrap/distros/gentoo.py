@@ -73,10 +73,12 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
         self._gpg_supports_no_autostart = None
 
-    @staticmethod
-    def _retrieve_bounced_mirror_base_url():
+    def _retrieve_bounced_mirror_base_url(self):
+        self._messenger.info('Obtaining mirror URL from bouncer.gentoo.org...')
         response = requests.get('https://bouncer.gentoo.org/fetch/root/all/')
-        return response.url
+        mirror_url = response.url.rstrip('/')
+        self._messenger.info(f'Selected mirror {mirror_url} .')
+        return mirror_url
 
     @staticmethod
     def _extract_architecture_family(architecture):
