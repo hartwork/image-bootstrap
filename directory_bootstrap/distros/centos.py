@@ -71,6 +71,10 @@ class CentOsBootstrapper(YumBasedDirectoryBootstrapper):
                 prev = paragraph
                 continue
 
+            if mayor_version > 7:
+                # CentOS >=8 needs DNF and we only support YUM right now
+                continue
+
             version = '%s.%s.%s' % (mayor_version, m.group(1), m.group(2))
             candidates.append(version)
 

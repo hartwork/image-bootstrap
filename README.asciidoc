@@ -34,7 +34,7 @@ http://docs.openstack.org/image-guide/content/ch_openstack_images.html[prepared 
 into a given _directory_ (similar to https://wiki.debian.org/Debootstrap[debootstrap]
 for Debian/Ubuntu). +
 Distributions supported by *directory-bootstrap* currently include:
-Alpine Linux, Arch Linux, CentOS, Fedora, Gentoo, and Void Linux.
+Alpine Linux, Arch Linux, CentOS (up to 7.x), Fedora, Gentoo, and Void Linux.
 
 
 [[History]]
