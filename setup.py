@@ -15,11 +15,16 @@ if __name__ == '__main__':
     setup(
             name=PACKAGE_NAME,
             description='Command line tool for creating bootable virtual machine images',
+            long_description=open('README.md').read().decode('utf-8'),
+            long_description_content_type='text/markdown',
             license='AGPL v3 or later',
             version=VERSION_STR,
             author='Sebastian Pipping',
             author_email='sebastian@pipping.org',
             url=GITHUB_HOME_URL,
+            setup_requires=[
+                'setuptools>=38.6.0',  # for long_description_content_type
+            ],
             install_requires=[
                 'beautifulsoup4',
                 'colorama',
