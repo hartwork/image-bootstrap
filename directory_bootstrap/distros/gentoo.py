@@ -177,7 +177,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 testee_file,
                 ])
 
-        if sha512sum_output != expected_sha512sum_output:
+        if sha512sum_output != expected_sha512sum_output.encode('utf-8'):
             raise _ChecksumVerifiationFailed('SHA512', testee_file)
 
     def _verify_md5_sum(self, snapshot_tarball, snapshot_md5sum):

@@ -182,7 +182,7 @@ class BootstrapEngine(object):
 
     def _protect_against_grub_legacy(self, command):
         output = subprocess.check_output([command, '--version'])
-        if 'GRUB GRUB 0.' in output:
+        if b'GRUB GRUB 0.' in output:
             raise ValueError('Command "%s" is GRUB legacy while GRUB 2 is needed. '
                     'Please install GRUB 2 or pass --grub2-install .. on the command line.' \
                     % command)
@@ -352,7 +352,7 @@ class BootstrapEngine(object):
                 self._abs_target_path,
                 ]
         output = self._executor.check_output(cmd_list)
-        device_name = output.split('\n')[0].split(' : ')[0]
+        device_name = output.split(b'\n')[0].split(b' : ')[0].decode('utf-8')
         self._abs_first_partition_device = '/dev/mapper/%s' % device_name
 
         # NOTE: Ubuntu 15.04 does not have "-u" (issue #30)
@@ -466,7 +466,7 @@ class BootstrapEngine(object):
                 self._abs_first_partition_device,
                 ]
         output = self._executor.check_output(cmd_blkid)
-        first_partition_uuid = output.rstrip()
+        first_partition_uuid = output.rstrip().decode('utf-8')
         require_valid_uuid(first_partition_uuid)
         self._config.first_partition_uuid = first_partition_uuid
 

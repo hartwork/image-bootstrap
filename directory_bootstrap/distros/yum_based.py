@@ -14,7 +14,7 @@ from directory_bootstrap.shared.commands import (COMMAND_CHROOT, COMMAND_DB_DUMP
         COMMAND_FILE, COMMAND_LSB_RELEASE, COMMAND_RPM, COMMAND_YUM, EXIT_COMMAND_NOT_FOUND, find_command)
 
 
-_BERKLEY_DB_FORMAT_VERSION_EXTRACTOR = re.compile('^Berkeley DB \\(.*, version (?P<version>[0-9]+),.*\\)$')
+_BERKLEY_DB_FORMAT_VERSION_EXTRACTOR = re.compile(b'^Berkeley DB \\(.*, version (?P<version>[0-9]+),.*\\)$')
 
 _DB_HASH_VERSION_SUPPORTED_AT_MOST_IN = {
     6: [(3, 0)],
@@ -145,7 +145,7 @@ class YumBasedDirectoryBootstrapper(DirectoryBootstrapper):
                 os.path.join(db_root, 'Packages'),
                 ])
 
-        if file_command_output.startswith(', created'):
+        if file_command_output.startswith(b', created'):
             raise ValueError('Your version of file(1) has a bug'
                              ' keeping it from detecting'
                              ' the version of Berkeley DB files')
