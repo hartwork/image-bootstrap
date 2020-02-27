@@ -20,7 +20,7 @@ def unshare_current_process(messenger):
 
 
 def set_hostname(hostname):
-    hostname_char_p = cast(hostname, c_char_p)
+    hostname_char_p = cast(hostname.encode('utf-8'), c_char_p)
     hostname_len_size_t = _lib_c.strlen(hostname_char_p)
     ret = _lib_c.sethostname(hostname_char_p, hostname_len_size_t)
     if ret:
