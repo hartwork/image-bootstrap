@@ -95,7 +95,9 @@ class DirectoryBootstrapper(object, metaclass=ABCMeta):
         raise NotImplementedError()
 
     def get_url_content(self, url):
-        return requests.get(url).text
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.text
 
     def download_url_to_file(self, url, filename):
         if os.path.exists(filename):
