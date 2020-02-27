@@ -1,4 +1,4 @@
-name: Smoke test creation of Arch chroots
+name: Smoke test creation of CentOS 7 chroots
 
 on:
 - pull_request
@@ -6,7 +6,7 @@ on:
 
 jobs:
   install_and_run:
-    name: Smoke test creation of Arch chroots
+    name: Smoke test creation of CentOS 7 chroots
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout Git repository
@@ -35,12 +35,29 @@ jobs:
             .
           echo "::set-env name=PATH::${HOME}/.local/bin:${PATH}"
 
-      - name: Smoke test creation of Arch chroots
+      - name: Install runtime dependencies
+        run: |-
+          set -e
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes \
+            ca-certificates \
+            db-util \
+            file \
+            lsb-release \
+            python-bs4 \
+            python-colorama \
+            python-lxml \
+            python-requests \
+            rpm \
+            wget \
+            yum
+
+      - name: Smoke test creation of CentOS 7 chroots
         run: |-
           set -e
           cd /tmp  # to not be in Git clone folder
 
-          directory-bootstrap --help       ; echo
-          directory-bootstrap arch --help  ; echo
+          directory-bootstrap --help         ; echo
+          directory-bootstrap centos --help  ; echo
 
-          sudo $(which directory-bootstrap) --verbose --debug arch /tmp/arch_chroot/
+          sudo $(which directory-bootstrap) --verbose --debug centos /tmp/centos7_chroot/

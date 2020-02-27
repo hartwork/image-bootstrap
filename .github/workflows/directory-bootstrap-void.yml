@@ -43,4 +43,4 @@ jobs:
           directory-bootstrap --help       ; echo
           directory-bootstrap void --help  ; echo
 
-          sudo $(which directory-bootstrap) --verbose --debug void /tmp/gentoo_chroot/
+          sudo $(which directory-bootstrap) --verbose --debug void /tmp/void_chroot/
