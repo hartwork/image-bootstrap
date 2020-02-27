@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import os
 from textwrap import dedent
@@ -172,7 +172,7 @@ class ArchStrategy(DistroStrategy):
 
                     kill -9 "${haveged_pid}"
                     """), file=f)
-            os.fchmod(f.fileno(), 0755)
+            os.fchmod(f.fileno(), 0o755)
 
         pacman_reanimation_service = os.path.join(self._abs_mountpoint,
                 'etc/systemd/system/pacman-reanimation.service')
@@ -277,7 +277,7 @@ class ArchStrategy(DistroStrategy):
                 sudo -u nobody makepkg
                 pacman --noconfirm --upgrade cloud-init-9999-1-any.pkg.tar.xz
             """ % (_inner_abs_filename('cloud-init-*.patch'), pkgbuild_patch_basename)))
-            os.fchmod(f.fileno(), 0755)
+            os.fchmod(f.fileno(), 0o755)
 
         self._executor.check_call([
                 COMMAND_CHROOT, self._abs_mountpoint,

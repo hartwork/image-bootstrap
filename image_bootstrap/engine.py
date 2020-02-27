@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import errno
 import os
@@ -405,7 +405,7 @@ class BootstrapEngine(object):
     def _mkdir_mountpount_etc(self):
         abs_dir = os.path.join(self._abs_mountpoint, 'etc')
         self._messenger.info('Creating directory "%s"...' % abs_dir)
-        os.mkdir(abs_dir, 0755)
+        os.mkdir(abs_dir, 0o755)
 
     def _mount_disk_chroot_mounts(self):
         self._messenger.info('Mounting partitions...')
@@ -805,7 +805,7 @@ class BootstrapEngine(object):
         sudoers_path = os.path.join(self._abs_mountpoint, 'etc/sudoers.d/%s-nopasswd' % user_name)
         with open(sudoers_path, 'w') as f:
             print('%s ALL = NOPASSWD: ALL' % user_name, file=f)
-            os.fchmod(f.fileno(), 0440)
+            os.fchmod(f.fileno(), 0o440)
 
     def _install_cloud_init_and_friends(self):
         self._distro.install_cloud_init_and_friends()
@@ -863,7 +863,7 @@ class BootstrapEngine(object):
     def _disable_clearing_tty1(self):
         noclear_file_path = os.path.join(self._abs_mountpoint, 'etc/systemd/system/getty@tty1.service.d/noclear.conf')
         self._messenger.info('Disabling clearing of tty1 (file "%s")...' % noclear_file_path)
-        os.makedirs(os.path.dirname(noclear_file_path), 0755)
+        os.makedirs(os.path.dirname(noclear_file_path), 0o755)
         with open(noclear_file_path, 'w') as f:
             print(dedent("""\
                     [Service]

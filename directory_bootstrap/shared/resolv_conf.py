@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 
 def filter_copy_resolv_conf(messenger, abs_etc_resolv_conf, output_filename):

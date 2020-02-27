@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import errno
 import os
@@ -36,9 +36,7 @@ class _ArchitectureMachineMismatch(Exception):
             % (self._architecture, self._machine)
 
 
-class DebianBasedDistroStrategy(DistroStrategy):
-    __metaclass__ = ABCMeta
-
+class DebianBasedDistroStrategy(DistroStrategy, metaclass=ABCMeta):
     def __init__(self,
             messenger,
             executor,
@@ -113,7 +111,7 @@ class DebianBasedDistroStrategy(DistroStrategy):
                         #! /bin/sh
                         exit 101
                         """), file=f)
-                os.fchmod(f.fileno(), 0755)
+                os.fchmod(f.fileno(), 0o755)
 
     def run_directory_bootstrap(self, architecture, bootloader_approach):
         self._messenger.info('Bootstrapping %s "%s" into "%s"...'

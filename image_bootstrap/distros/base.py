@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import os
 from abc import ABCMeta, abstractmethod
@@ -13,9 +13,7 @@ from image_bootstrap.engine import BOOTLOADER__CHROOT_GRUB2__DRIVE
 DISTRO_CLASS_FIELD = 'distro_class'
 
 
-class DistroStrategy(object):
-    __metaclass__ = ABCMeta
-
+class DistroStrategy(object, metaclass=ABCMeta):
     def __init__(self, messenger, executor, abs_cache_dir, abs_resolv_conf):
         self._messenger = messenger
         self._executor = executor
@@ -154,7 +152,7 @@ class DistroStrategy(object):
         self._messenger.info('Fetching growpart of cloud-utils...')
         self._fetch_install_chmod(
                 'https://git.launchpad.net/cloud-utils/plain/bin/growpart?id=75cdc65ea3586a08975f662a263d766cf2dc6d6f',
-                '/usr/bin/growpart', 0755)
+                '/usr/bin/growpart', 0o755)
 
     def disable_cloud_init_syslog_fix_perms(self):
         # https://github.com/hartwork/image-bootstrap/issues/17

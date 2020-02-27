@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import errno
 import os
@@ -67,7 +67,7 @@ class GrubTwoInstaller(object):
 
         chroot_boot_grub = os.path.join(self._abs_mountpoint, 'boot', 'grub')
         try:
-            os.makedirs(chroot_boot_grub, 0755)
+            os.makedirs(chroot_boot_grub, 0o755)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise

@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import errno
 import glob
@@ -44,7 +44,7 @@ class GentooStrategy(DistroStrategy):
     def _write_etc_conf_d_hostname(self):
         etc_conf_d = os.path.join(self._abs_mountpoint, 'etc/conf.d')
         try:
-            os.makedirs(etc_conf_d, 0755)
+            os.makedirs(etc_conf_d, 0o755)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
@@ -296,7 +296,7 @@ class GentooStrategy(DistroStrategy):
                     start() { :; }
                     stop() { :; }
                     """), file=f)
-            os.fchmod(f.fileno(), 0755)
+            os.fchmod(f.fileno(), 0o755)
 
     def install_dhcp_client(self):
         # Static route support needs dhcpcd <7.0.1 or >=7.0.7
@@ -386,7 +386,7 @@ class GentooStrategy(DistroStrategy):
                 _ABS_PACKAGE_USE,
                 ):
             try:
-                os.makedirs(os.path.join(self._abs_mountpoint, chroot_abs_path.lstrip('/')), 0755)
+                os.makedirs(os.path.join(self._abs_mountpoint, chroot_abs_path.lstrip('/')), 0o755)
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     raise

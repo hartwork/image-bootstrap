@@ -1,7 +1,7 @@
 # Copyright (C) 2017 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import os
 import re
@@ -39,7 +39,7 @@ def _get_db_dump_command_names(hash_version):
     ['db6.2_dump', 'db6.1_dump', 'db6.0_dump', 'db_dump']
     """
     res = []
-    for k, v in sorted(_DB_HASH_VERSION_SUPPORTED_AT_MOST_IN.items(), reverse=True):
+    for k, v in sorted(list(_DB_HASH_VERSION_SUPPORTED_AT_MOST_IN.items()), reverse=True):
         if k >= hash_version:
             for major_minor in reversed(v):
                 res.append('db%d.%d_dump' % major_minor)

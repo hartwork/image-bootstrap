@@ -55,7 +55,7 @@ class VoidBootstrapper(DirectoryBootstrapper):
 
         self._messenger.info('Copying xbps keys to "%s"...' % abs_target_xbps_keys_path)
         try:
-            os.makedirs(abs_target_xbps_keys_path, 0755)
+            os.makedirs(abs_target_xbps_keys_path, 0o755)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise

@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import datetime
 import errno
@@ -39,7 +39,8 @@ class _ChecksumVerifiationFailed(Exception):
 
 
 class _NotFreshEnoughException(Exception):
-    def __init__(self, (year, month, day), max_age_days):
+    def __init__(self, year_month_day_tuple, max_age_days):
+        (year, month, day) = year_month_day_tuple
         super(_NotFreshEnoughException, self).__init__(
                 '%04d-%02d-%02d was more than %d days ago, rejecting as too old' \
                 % (year, month, day, max_age_days))
@@ -206,7 +207,8 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 tarball_filename,
             ], cwd=abs_target_root)
 
-    def _require_fresh_enough(self, (year, month, day)):
+    def _require_fresh_enough(self, year_month_day_tuple):
+        (year, month, day) = year_month_day_tuple
         date_to_check = datetime.date(year, month, day)
         today = datetime.date.today()
         if (today - date_to_check).days > self._max_age_days:
@@ -260,7 +262,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
         abs_gpg_home_dir = os.path.join(abs_temp_dir, 'gpg_home')
 
         self._messenger.info('Initializing temporary GnuPG home at "%s"...' % abs_gpg_home_dir)
-        os.mkdir(abs_gpg_home_dir, 0700)
+        os.mkdir(abs_gpg_home_dir, 0o700)
 
         self._check_gpg_for_no_autostart_support(abs_gpg_home_dir)
 

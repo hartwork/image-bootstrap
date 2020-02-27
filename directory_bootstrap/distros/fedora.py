@@ -1,11 +1,11 @@
 # Copyright (C) 2016 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import json
 import os
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from textwrap import dedent
 
@@ -16,7 +16,7 @@ _COLLECTIONS_URL = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
 
 
 def _abs_filename_to_url(abs_filename):
-    return 'file://%s' % urllib.pathname2url(abs_filename)
+    return 'file://%s' % urllib.request.pathname2url(abs_filename)
 
 
 class FedoraBootstrapper(YumBasedDirectoryBootstrapper):
