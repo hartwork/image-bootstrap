@@ -400,7 +400,7 @@ Moreover, if you're using Bash and you need to keep track of
 **image-bootstrap**'s exit code, be sure to run `set -o pipefail` prior to
 invoking **image-bootstrap**.
 (Please see the
-[Pipelines]/https://www.gnu.org/software/bash/manual/html_node/Pipelines.html(
+[Pipelines](https://www.gnu.org/software/bash/manual/html_node/Pipelines.html)
 section of the
 [GNU Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html)
 for more details.)
