@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
 
 import directory_bootstrap.resources.gentoo as resources
 import directory_bootstrap.shared.loaders._requests as requests
@@ -50,6 +51,14 @@ class GentooBootstrapper(DirectoryBootstrapper):
     DISTRO_KEY = 'gentoo'
     DISTRO_NAME_LONG = 'Gentoo'
 
+    _MIRROR_BLACKLIST = set((
+        # Added 2020-02-27: more than 2 weeks stale
+        'http://mirrors.163.com/gentoo',
+
+        # Added 2020-02-27: lacks structure releases/snapshots/current/
+        'https://mirror.isoc.org.il/pub/gentoo',
+    ))
+
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
                 architecture, mirror_url, max_age_days,
                 stage3_date_triple_or_none, repository_date_triple_or_none,
@@ -75,8 +84,17 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
     def _retrieve_bounced_mirror_base_url(self):
         self._messenger.info('Obtaining mirror URL from bouncer.gentoo.org...')
-        response = requests.get('https://bouncer.gentoo.org/fetch/root/all/')
-        mirror_url = response.url.rstrip('/')
+        tries = 10
+        for i in range(tries):
+            response = requests.get('https://bouncer.gentoo.org/fetch/root/all/')
+            response.raise_for_status()
+            mirror_url = response.url.rstrip('/')
+
+            if mirror_url not in self._MIRROR_BLACKLIST:
+                break
+
+            time.sleep(0.25)  # to reduce server load
+
         self._messenger.info(f'Selected mirror {mirror_url} .')
         return mirror_url
 
