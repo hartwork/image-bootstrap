@@ -345,7 +345,7 @@ class GentooStrategy(DistroStrategy):
         self._mark_all_news_as_read()
 
     def _clean_distfiles(self):
-        distfiles_abs_path = os.path.join(self._abs_mountpoint, 'usr/portage/distfiles/')
+        distfiles_abs_path = os.path.join(self._abs_mountpoint, 'var/cache/distfiles')
         self._messenger.info('Cleaning distfiles at "%s"...' % distfiles_abs_path)
         cmd = [
                 COMMAND_FIND,
