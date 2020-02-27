@@ -266,8 +266,6 @@ class GentooStrategy(DistroStrategy):
         self._set_package_use_flags('dev-libs/openssl', '-bindist')
         self._set_package_use_flags('net-misc/openssh', '-bindist')
 
-        self._add_package_mask('app-emulation/cloud-init', '>=app-emulation/cloud-init-0.7.6_p1212')
-        self._set_package_keywords('app-emulation/cloud-init', '**')  # TODO ~arch
         self._install_package_atoms(['app-emulation/cloud-init', 'net-misc/openssh'])
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
