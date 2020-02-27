@@ -1,50 +1,50 @@
-image::https://travis-ci.org/hartwork/image-bootstrap.svg?branch=master[Travis CI build status]
+[![Build Status](https://travis-ci.org/hartwork/image-bootstrap.svg?branch=master)](https://travis-ci.org/hartwork/image-bootstrap)
 
 **Table of Contents**
 
-* <<About,About>>
-* <<History,History>>
-* <<ExampleRun,Example run>>
-* <<SpeedingThingsUp,Speeding things up>>
-** <<UsingRamInsteadOfDisk,Using RAM instead of HDD/SSD>>
-** <<AptCacherNG,Apt-Cacher NG -- a cache specific to Debian/Ubuntu>>
-** <<Polipo,Polipo -- a generic HTTP cache>>
-** <<haveged,haveged -- an entropy generator>>
-* <<DebianPackage,Debian package>>
-* <<HelpOutput,Usage (`--help` output)>>
-* <<Piping, Hints on using image-bootstrap within a pipe>>
-* <<KnownLimitations,Known limitations>>
-** <<DebianWheezyLoopDevice,Installing Debian wheezy to loop devices>>
-** <<PartitionBlockTarget,Installing to partition block devices>>
+* [About](#About)
+* [History](#History)
+* [Example run](#ExampleRun)
+* [Speeding things up](#SpeedingThingsUp)
+    * [Using RAM instead of HDD/SSD](#UsingRamInsteadOfDisk)
+    * [Apt-Cacher NG -- a cache specific to Debian/Ubuntu](#AptCacherNG)
+    * [Polipo -- a generic HTTP cache](#Polipo)
+    * [haveged -- an entropy generator](#haveged)
+* [Debian package](#DebianPackage)
+* [Usage (`--help` output)](#HelpOutput)
+* [Hints on using image-bootstrap within a pipe](#Piping)
+* [Known limitations](#KnownLimitations)
+    * [Installing Debian wheezy to loop devices](#DebianWheezyLoopDevice)
+    * [Installing to partition block devices](#PartitionBlockTarget)
 
 
-[[About]]
-About
------
-Welcome to the home of *image-bootstrap* (and its little brother *directory-bootstrap*).
+<a name="About"></a>
+# About
 
-*image-bootstrap* is a command line tool to generate bootable virtual machine images
-and write them to a given _block device_. +
-Linux distributions supported by *image-bootstrap* currently include:
-Arch, Debian, Gentoo, Ubuntu. +
+Welcome to the home of **image-bootstrap** (and its little brother **image-bootstrap**).
+
+**image-bootstrap** is a command line tool to generate bootable virtual machine images
+and write them to a given _block device_.<br>
+Linux distributions supported by **image-bootstrap** currently include:
+Arch, Debian, Gentoo, Ubuntu.<br>
 When passing the `--openstack` parameter, images are
-http://docs.openstack.org/image-guide/content/ch_openstack_images.html[prepared for use with OpenStack].
+[prepared for use with OpenStack](http://docs.openstack.org/image-guide/content/ch_openstack_images.html).
 
-*directory-bootstrap* is a command line tool to install non-Debian Linux distributions
-into a given _directory_ (similar to https://wiki.debian.org/Debootstrap[debootstrap]
-for Debian/Ubuntu). +
-Distributions supported by *directory-bootstrap* currently include:
+**image-bootstrap** is a command line tool to install non-Debian Linux distributions
+into a given _directory_ (similar to [debootstrap](https://wiki.debian.org/Debootstrap)
+for Debian/Ubuntu).<br>
+Distributions supported by **image-bootstrap** currently include:
 Alpine Linux, Arch Linux, CentOS (up to 7.x), Fedora, Gentoo, and Void Linux.
 
 
-[[History]]
-History
--------
-*image-bootstrap* started out as a re-write of
-https://github.com/grml/grml-debootstrap[grml-debootstrap].
+<a name="History"></a>
+# History
+
+**image-bootstrap** started out as a re-write of
+[grml-debootstrap](https://github.com/grml/grml-debootstrap).
 Primarily, it can be used to create Debian/Ubuntu or Arch images ready to be launched as a virtual machine.
 
-In comparision to grml-debootstrap, by now *image-bootstrap*
+In comparision to grml-debootstrap, by now **image-bootstrap**
 
  * installs to block devices only,
 
@@ -61,34 +61,35 @@ In comparision to grml-debootstrap, by now *image-bootstrap*
  * has support for installing Arch Linux, Gentoo and Ubuntu (besides Debian),
 
  * is able to create
-   http://docs.openstack.org/image-guide/content/ch_openstack_images.html[OpenStack images],
+   [OpenStack images](http://docs.openstack.org/image-guide/content/ch_openstack_images.html),
 
  * is written in Python rather than Bash/mksh, and
 
  * has more friendly terminal output.
 
-*directory-bootstrap* came into life with the arrival of support for Arch Linux.
+**image-bootstrap** came into life with the arrival of support for Arch Linux.
 Support for Gentoo followed, after.
 Support for Fedora chroots came into live during 33c3, late December 2016.
 Support for Void Linux and CentOS chroots came into live during 34c3, December 2017.
 Support for Alpine Linux chroots came into in March 2018.
 
 
-[[ExampleRun]]
-Example run
------------
+<a name="ExampleRun"></a>
+# Example run
+
 The following is a complete demo of installing Debian jessie to LVM volume `/dev/vg/lv`
 and launching the resulting image using KVM.
-------------------------------------------------------------------------------------------
+
+```console
 # ${EDITOR} root_password.txt
 
 # sudo image-bootstrap --hostname jessie debian \
                                   --password-file root_password.txt /dev/vg/lv
-     _                          __             __      __               
-    (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
-   / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \ 
-  /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/ 
-               /___/                      v0.9.1 :: 2015-07-11  /_/     
+     _                          __             __      __
+    (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____
+   / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \
+  /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/
+               /___/                      v0.9.1 :: 2015-07-11  /_/
 
 Software libre licensed under AGPL v3 or later.
 Brought to you by Sebastian Pipping <sebastian@pipping.org>.
@@ -149,19 +150,19 @@ Deactivating partition devices...
 Done.
 
 # sudo kvm -hda /dev/vg/lv
-------------------------------------------------------------------------------------------
+```
 
 Without `--color never`, the output above is actually in color.
 
 
-[[SpeedingThingsUp]]
-Speeding things up
-------------------
+<a name="SpeedingThingsUp"></a>
+# Speeding things up
 
-[[UsingRamInsteadOfDisk]]
-Using RAM instead of HDD/SSD
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If you run *image-bootstrap* repeatedly and have enough RAM, you may want to
+
+<a name="UsingRamInsteadOfDisk"></a>
+## Using RAM instead of HDD/SSD
+
+If you run **image-bootstrap** repeatedly and have enough RAM, you may want to
 create images on RAM storage rather than on disk.  I use a setup with
 
  * a loop device (to have a block device)
@@ -171,7 +172,8 @@ create images on RAM storage rather than on disk.  I use a setup with
  * in a tmpfs mount (to use RAM).
 
 For example (assuming you have /tmp in RAM already):
-------------------------------------------------------------------------------------------
+
+```console
 # sudo mount -o remout,size=6g /tmp
 # truncate --size 3g /tmp/disk3g
 # LOOP_DEVICE="$(losetup --show -f /tmp/disk3g)"
@@ -181,48 +183,50 @@ For example (assuming you have /tmp in RAM already):
 
 # losetup -d "${LOOP_DEVICE}"
 # rm /tmp/disk3g
-------------------------------------------------------------------------------------------
+```
 
 
-[[AptCacherNG]]
-Apt-Cacher NG -- a cache specific to Debian/Ubuntu
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<a name="AptCacherNG"></a>
+## Apt-Cacher NG -- a cache specific to Debian/Ubuntu
+
 When creating multiple images,
-a local instance of https://www.unix-ag.uni-kl.de/~bloch/acng/[Apt-Cacher NG] and
-passing `--mirror http://localhost:3142/debian` to *image-bootstrap* may come in handy.
+a local instance of [Apt-Cacher NG](https://www.unix-ag.uni-kl.de/~bloch/acng/) and
+passing `--mirror http://localhost:3142/debian` to **image-bootstrap** may come in handy.
 
-[[Polipo]]
-Polipo -- a generic HTTP cache
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<a name="Polipo"></a>
+## Polipo -- a generic HTTP cache
+
 For a distribution-agnostic cache, using
-https://github.com/jech/polipo[Polipo] can greatly speed up consecutive runs.
-Invoke *image-bootstrap* with
-------------------------------------------------------------------------------------------
+[Polipo](https://github.com/jech/polipo) can greatly speed up consecutive runs.
+Invoke **image-bootstrap** with
+
+```console
 # http_proxy=http://127.0.0.1:8123/ image-bootstrap ...
-------------------------------------------------------------------------------------------
+```
+
 when using Polipo with default port configuration.
 
-[[haveged]]
-haveged -- an entropy generator
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<a name="haveged"></a>
+## haveged -- an entropy generator
+
 During image creation, cryptographic keys may need to be generated, e.g.
 for thr OpenSSH server, at least temporarily.  As key generation relies
 on availability of entropy, image creation may take longer in environments that
 are slow at adding to the entropy pool.
-To speed things up, running http://www.issihosts.com/haveged/[haveged]
+To speed things up, running [haveged](http://www.issihosts.com/haveged/)
 at the host system _could_ be an option, especially since all keys should be deleted
 from images, eventually. Otherwise, there is a risk of ending up with multiple
 systems having the same key allowing for attacks.
 I am unsure of the quality of entropy that haveged produces.  Use is at your own risk.
 
 
-[[DebianPackage]]
-Debian package
---------------
-As long as *image-bootstrap* as not available _in_ Debian, you can
-make an *image-bootstrap* Debian package yourself easily from Git as follows:
+<a name="DebianPackage"></a>
+# Debian package
 
-------------------------------------------------------------------------------------------
+As long as **image-bootstrap** as not available _in_ Debian, you can
+make an **image-bootstrap** Debian package yourself easily from Git as follows:
+
+```console
 # git clone https://github.com/hartwork/image-bootstrap.git
 Cloning into 'image-bootstrap'...
 [..]
@@ -235,26 +239,29 @@ image-bootstrap_0.9.1_all.deb
 
 # sudo dpkg -i image-bootstrap_0.9.1_all.deb
 [..]
-------------------------------------------------------------------------------------------
+```
 
 
-[[HelpOutput]]
-Usage (`--help` output)
------------------------
+<a name="HelpOutput"></a>
+# Usage (`--help` output)
 
 In general, the usage is:
-------------------------------------------------------------------------------------------
+
+```console
 image-bootstrap [..] DISTRIBUTION [..] DEVICE
-------------------------------------------------------------------------------------------
+```
+
 or
-------------------------------------------------------------------------------------------
+
+```console
 image-bootstrap --hostname NAME [DISTRO_AGNOSTIC] DISTRIBUTION [DISTRO_SPECIFIC] DEVICE
-------------------------------------------------------------------------------------------
+```
+
 in a bit more detail.
 
 
 A dump of the current `--help` output would be:
-------------------------------------------------------------------------------------------
+```console
 # image-bootstrap --help
 usage: image-bootstrap [-h] [--version] [--color {never,always,auto}]
                        [--debug] [--quiet] [--verbose] [--arch ARCHITECTURE]
@@ -335,20 +342,20 @@ subcommands (choice of distribution):
     gentoo              Gentoo
     ubuntu              Ubuntu
 
-     _                          __             __      __               
-    (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
-   / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \ 
-  /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/ 
-               /___/                      v0.9.1 :: 2015-07-11  /_/     
+     _                          __             __      __
+    (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____
+   / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \
+  /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/
+               /___/                      v0.9.1 :: 2015-07-11  /_/
 
 Software libre licensed under AGPL v3 or later.
 Brought to you by Sebastian Pipping <sebastian@pipping.org>.
 Please report bugs at https://github.com/hartwork/image-bootstrap.  Thank you!
-------------------------------------------------------------------------------------------
+```
 
 To show options specific to Debian, run ..
 
-------------------------------------------------------------------------------------------
+```console
 # image-bootstrap debian --help
 usage: image-bootstrap debian [-h] [--debootstrap COMMAND] [--release RELEASE]
                               [--mirror URL] [--debootstrap-opt OPTION]
@@ -367,56 +374,56 @@ optional arguments:
 command names:
   --debootstrap COMMAND
                         override debootstrap command
-------------------------------------------------------------------------------------------
+```
 
 
-[[Piping]]
-Hints on using image-bootstrap within a pipe
---------------------------------------------
-If you want to run *image-bootstrap* in a pipe to capture its output to both
-`stdout`/`stderr` to a single log file, be sure to run *image-bootstrap* in
+<a name="Piping"></a>
+# Hints on using image-bootstrap within a pipe
+
+If you want to run **image-bootstrap** in a pipe to capture its output to both
+`stdout`/`stderr` to a single log file, be sure to run **image-bootstrap** in
 unbuffered mode, e.g.:
 
-------------------------------------------------------------------------------------------
+```console
 python -u image-bootstrap [OPTIONS] 2>&1 | tee my.log
-------------------------------------------------------------------------------------------
+```
 
 The default shebang generated by python setuptools does not use `-u`. It's also
 not easily possible to have it pass `-u` since the `env` command does allow for
 for passing command parameters only in fairly recent versions. As a consequence,
 `stdout`/`stderr` won't be synchronized and error output you see in a log file
 will not exactly correspond to preceding/succeeding output on `stdout`. (See
-https://github.com/hartwork/image-bootstrap/issues/71[issue #71] for more details.)
+[issue #71](https://github.com/hartwork/image-bootstrap/issues/71) for more details.)
 
 Moreover, if you're using Bash and you need to keep track of
-*image-bootstrap*'s exit code, be sure to run `set -o pipefail` prior to
-invoking *image-bootstrap*.
+**image-bootstrap**'s exit code, be sure to run `set -o pipefail` prior to
+invoking **image-bootstrap**.
 (Please see the
-https://www.gnu.org/software/bash/manual/html_node/Pipelines.html[Pipelines]
+[Pipelines]/https://www.gnu.org/software/bash/manual/html_node/Pipelines.html(
 section of the
-https://www.gnu.org/software/bash/manual/html_node/index.html[GNU Bash Reference Manual]
+[GNU Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html)
 for more details.)
 
 
-[[KnownLimitations]]
-Known limitations
------------------
+<a name="KnownLimitations"></a>
+# Known limitations
 
-[[PartitionBlockTarget]]
-Installing Debian _wheezy_ to loop devices
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+<a name="PartitionBlockTarget"></a>
+## Installing Debian _wheezy_ to loop devices
+
 GRUB 1.99 has trouble installing to loop devices.
-As a result, using *image-bootstrap* to install e.g. Debian _wheezy_ to a loop device
+As a result, using **image-bootstrap** to install e.g. Debian _wheezy_ to a loop device
 requires
 
  . bootloader approach `host-grub2-device` or `host-grub2-drive` and
 
- . a more recent version of GRUB 2.x on the system running *image-bootstrap*.
+ . a more recent version of GRUB 2.x on the system running **image-bootstrap**.
 
 
-[[DebianWheezyLoopDevice]]
-Installing to partition block devices
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<a name="DebianWheezyLoopDevice"></a>
+## Installing to partition block devices
+
 Linux does not like partitions in partitions much.
 It can be tricked using device mapper, though.
 
@@ -427,14 +434,15 @@ The temporary target must
 
  * smaller or equal than the actualy target (for the later copy to work).
 
-------------------------------------------------------------------------------------------
+```console
 # dmsetup create dm-linear-vda4 --table "0 $(blockdev --getsz /dev/vda4) linear /dev/vda4 0"
 # image-bootstrap --openstack arch /dev/mapper/dm-linear-vda4
 # partprobe /dev/mapper/dm-linear-vda4
 # pv /dev/mapper/dm-linear-vda4p1 > /dev/vda2
 # dmsetup remove dm-linear-vda4p1
 # dmsetup remove dm-linear-vda4
-------------------------------------------------------------------------------------------
+```
+
 (`/dev/vda2` is the real target, `/dev/vda4` the temporary one.)
 
 There are other ways to achieve the same.
