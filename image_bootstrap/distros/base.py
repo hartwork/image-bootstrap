@@ -176,11 +176,11 @@ class DistroStrategy(object, metaclass=ABCMeta):
         filename = os.path.join(self._abs_mountpoint, 'etc/cloud/cloud.cfg')
         self._messenger.info('Adjusting file "%s"...' % filename)
         with open(filename, 'r') as f:
-            d = yaml.load(f.read())
+            d = yaml.safe_load(f.read())
         self.adjust_cloud_cfg_dict(d)
         with open(filename, 'w') as f:
             print('# Re-written by image-bootstrap', file=f)
-            print(yaml.dump(d, default_flow_style=False), file=f)
+            print(yaml.safe_dump(d, default_flow_style=False), file=f)
 
     @abstractmethod
     def uses_systemd(self):

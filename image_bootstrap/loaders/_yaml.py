@@ -6,7 +6,7 @@
 import sys
 
 try:
-    from yaml import dump, load
+    from yaml import safe_dump, safe_load
 except ImportError:
     print('ERROR: Please install PyYAML '
         '(https://pypi.python.org/pypi/PyYAML).  '
@@ -14,7 +14,7 @@ except ImportError:
     sys.exit(1)
 
 # Mark as used
-dump
-load
+safe_dump
+safe_load
 
 del sys
