@@ -48,10 +48,7 @@ def _get_db_dump_command_names(hash_version):
 
 
 def _host_distro_lacks_unversioned_db_dump():
-    distro = subprocess.check_output([
-            COMMAND_LSB_RELEASE, '--short', '--id',
-            ]).strip()
-    return distro == 'Gentoo'
+    return os.path.exists('/etc/gentoo-release')
 
 
 class YumBasedDirectoryBootstrapper(DirectoryBootstrapper):
