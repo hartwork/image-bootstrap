@@ -221,71 +221,8 @@ class ArchStrategy(DistroStrategy):
     def install_sudo(self):
         self._install_packages(['sudo'])
 
-    def _install_cloud_init_0_7_6(self):
-        # NOTE: The PKGBUILD patch pulls in all other patches
-        pkgbuild_patch_basename = 'cloud-init-0-7-6-pkgbuild.patch'
-        patch_basenames = (
-            pkgbuild_patch_basename,
-            'cloud-init-0-7-6-uid.patch'
-        )
-
-        def _inner_abs_filename(patch_basename):
-            return '/root/%s' % patch_basename
-
-        def _outer_abs_filename(patch_basename):
-            return resource_filename(
-                    'image_bootstrap', 'patches/%s' % patch_basename)
-
-        # Copy patches over
-        for patch_basename in patch_basenames:
-            self._executor.check_call([
-                    COMMAND_CP,
-                    _outer_abs_filename(patch_basename),
-                    os.path.join(self._abs_mountpoint,
-                        _inner_abs_filename(patch_basename).lstrip('/')),
-                    ])
-
-        inner_script_filename = _inner_abs_filename(
-                'install-cloud-init-0-7-6.sh')
-
-        with open(os.path.join(self._abs_mountpoint, inner_script_filename.lstrip('/')), 'w') as f:
-            f.write(dedent("""\
-                #! /bin/bash
-                set -e
-                PS4='# '
-                set -x
-
-                pacman --noconfirm --sync binutils fakeroot git patch sudo wget
-
-                COMMIT=adf3e2d5d311903e3a4429d50764b6add2c21e8b
-                SHA256=c29077e9f05bf6bae17b8bb4263d235278388515e6453ffae894be7e25545a40
-
-                wget -Ocommunity-${COMMIT}.tar.xz https://github.com/hartwork/image-bootstrap/files/1670099/community-${COMMIT}.tar.xz.txt
-                sha256sum --check <(echo "${SHA256}  community-${COMMIT}.tar.xz")
-                tar xf community-${COMMIT}.tar.xz
-                chown nobody:nobody community-${COMMIT}/trunk/
-                cd community-${COMMIT}/trunk/
-
-                cp %s .
-                patch PKGBUILD %s
-                pacman --noconfirm --sync \
-                        python2 python2-boto python2-cheetah \
-                        python2-configobj python2-jsonpatch \
-                        python2-jsonpointer python2-oauth \
-                        python2-prettytable python2-requests \
-                        python2-setuptools python2-yaml net-tools
-                sudo -u nobody makepkg
-                pacman --noconfirm --upgrade cloud-init-9999-1-any.pkg.tar.xz
-            """ % (_inner_abs_filename('cloud-init-*.patch'), pkgbuild_patch_basename)))
-            os.fchmod(f.fileno(), 0o755)
-
-        self._executor.check_call([
-                COMMAND_CHROOT, self._abs_mountpoint,
-                inner_script_filename,
-                ], env=self.create_chroot_env())
-
     def install_cloud_init_and_friends(self):
-        self._install_cloud_init_0_7_6()
+        self._install_packages(['cloud-init'])
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
 

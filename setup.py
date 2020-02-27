@@ -48,10 +48,6 @@ if __name__ == '__main__':
                     for p
                     in glob.glob('directory_bootstrap/resources/*/*.asc')
                 ],
-                'image_bootstrap': [
-                    'patches/cloud-init-0-7-6-pkgbuild.patch',
-                    'patches/cloud-init-0-7-6-uid.patch',
-                ],
             },
             entry_points={
                 'console_scripts': [
