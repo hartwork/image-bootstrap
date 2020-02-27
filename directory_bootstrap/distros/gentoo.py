@@ -357,7 +357,9 @@ class GentooBootstrapper(DirectoryBootstrapper):
             self._verify_md5_sum(snapshot_tarball_uncompressed, snapshot_uncompressed_md5sum)
 
             self._extract_tarball(stage3_tarball, self._abs_target_dir)
-            self._extract_tarball(snapshot_tarball_uncompressed, os.path.join(self._abs_target_dir, 'usr'))
+            abs_var_db_repos = os.path.join(self._abs_target_dir, 'var', 'db', 'repos')
+            self._extract_tarball(snapshot_tarball_uncompressed, abs_var_db_repos)
+            os.rename(os.path.join(abs_var_db_repos, 'portage'), os.path.join(abs_var_db_repos, 'gentoo'))
         finally:
             self._messenger.info('Cleaning up "%s"...' % abs_temp_dir)
             shutil.rmtree(abs_temp_dir)
