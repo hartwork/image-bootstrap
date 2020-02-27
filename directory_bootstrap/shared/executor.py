@@ -105,7 +105,7 @@ class Executor(object):
         self._messenger = messenger
         self._announce_target = stdout or sys.stdout
         self._default_stdout = stdout or sys.stdout
-        self._default_stderr = stdout or sys.stderr
+        self._default_stderr = stderr or sys.stderr
 
     def check_call(self, argv, env=None, cwd=None):
         self._messenger.announce_command(argv)
