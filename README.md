@@ -21,7 +21,7 @@
 <a name="About"></a>
 # About
 
-Welcome to the home of **image-bootstrap** (and its little brother **image-bootstrap**).
+Welcome to the home of **image-bootstrap** (and its little brother **directory-bootstrap**).
 
 **image-bootstrap** is a command line tool to generate bootable virtual machine images
 and write them to a given _block device_.<br>
@@ -30,10 +30,10 @@ Arch, Debian, Gentoo, Ubuntu.<br>
 When passing the `--openstack` parameter, images are
 [prepared for use with OpenStack](http://docs.openstack.org/image-guide/content/ch_openstack_images.html).
 
-**image-bootstrap** is a command line tool to install non-Debian Linux distributions
+**directory-bootstrap** is a command line tool to install non-Debian Linux distributions
 into a given _directory_ (similar to [debootstrap](https://wiki.debian.org/Debootstrap)
 for Debian/Ubuntu).<br>
-Distributions supported by **image-bootstrap** currently include:
+Distributions supported by **directory-bootstrap** currently include:
 Alpine Linux, Arch Linux, CentOS (up to 7.x), Fedora, Gentoo, and Void Linux.
 
 
@@ -67,7 +67,7 @@ In comparision to grml-debootstrap, by now **image-bootstrap**
 
  * has more friendly terminal output.
 
-**image-bootstrap** came into life with the arrival of support for Arch Linux.
+**directory-bootstrap** came into life with the arrival of support for Arch Linux.
 Support for Gentoo followed, after.
 Support for Fedora chroots came into live during 33c3, late December 2016.
 Support for Void Linux and CentOS chroots came into live during 34c3, December 2017.
