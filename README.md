@@ -346,7 +346,7 @@ subcommands (choice of distribution):
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____
    / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \
   /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/
-               /___/                      v0.9.1 :: 2015-07-11  /_/
+               /___/                      v1.0.0 :: 2020-02-27  /_/
 
 Software libre licensed under AGPL v3 or later.
 Brought to you by Sebastian Pipping <sebastian@pipping.org>.
@@ -365,7 +365,8 @@ optional arguments:
   --release RELEASE     specify Debian release (default: jessie)
   --mirror URL          specify Debian mirror to use (e.g.
                         http://localhost:3142/debian for a local instance of
-                        apt-cacher-ng; default: http://httpredir.debian.org/debian)
+                        apt-cacher-ng; default:
+                        http://httpredir.debian.org/debian)
   --debootstrap-opt OPTION
                         option to pass to debootstrap, in addition; can be
                         passed several times; use with --debootstrap-opt=...
