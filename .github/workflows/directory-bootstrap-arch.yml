@@ -43,4 +43,4 @@ jobs:
           directory-bootstrap --help       ; echo
           directory-bootstrap arch --help  ; echo
 
-          sudo $(which directory-bootstrap) --verbose --debug arch /tmp/gentoo_chroot/
+          sudo $(which directory-bootstrap) --verbose --debug arch /tmp/arch_chroot/
