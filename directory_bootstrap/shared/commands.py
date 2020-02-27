@@ -73,10 +73,7 @@ def check_for_commands(messenger, commands_to_check_for):
 
     missing_files = []
     missing_commands = []
-    for command in sorted(set(commands_to_check_for)):
-        if command is None:
-            continue
-
+    for command in sorted(set(c for c in commands_to_check_for if c is not None)):
         if command.startswith('/'):
             abs_path = command
             if not os.path.exists(abs_path):
