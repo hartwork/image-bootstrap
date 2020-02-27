@@ -12,6 +12,7 @@ import subprocess
 import tempfile
 
 import directory_bootstrap.resources.gentoo as resources
+import directory_bootstrap.shared.loaders._requests as requests
 from directory_bootstrap.distros.base import (
         DirectoryBootstrapper, date_argparse_type)
 from directory_bootstrap.shared.commands import (
@@ -21,7 +22,6 @@ from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
 from directory_bootstrap.tools.stage3_latest_parser import \
         find_latest_stage3_date
 
-_DEFAULT_MIRROR = 'http://distfiles.gentoo.org/'
 _GPG_DISPLAY_KEY_FORMAT = '0xlong'
 
 _year = '([2-9][0-9]{3})'
@@ -61,13 +61,21 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 )
         self._architecture = architecture
         self._architecture_family = self._extract_architecture_family(architecture)
-        self._mirror_base_url = mirror_url.rstrip('/')
+        self._mirror_base_url = (mirror_url
+                                 if mirror_url
+                                 else self._retrieve_bounced_mirror_base_url()
+                                 ).rstrip('/')
         self._max_age_days = max_age_days
         self._stage3_date_triple_or_none = stage3_date_triple_or_none
         self._repository_date_triple_or_none = repository_date_triple_or_none
         self._abs_resolv_conf = abs_resolv_conf
 
         self._gpg_supports_no_autostart = None
+
+    @staticmethod
+    def _retrieve_bounced_mirror_base_url():
+        response = requests.get('https://bouncer.gentoo.org/fetch/root/all/')
+        return response.url
 
     @staticmethod
     def _extract_architecture_family(architecture):
@@ -361,8 +369,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
         distro.add_argument('--max-age-days', type=int, metavar='DAYS', default=14,
                 help='age in days to tolerate as recent enough (security feature, default: %(default)s days)')
         distro.add_argument('--mirror', dest='mirror_url', metavar='URL',
-                default=_DEFAULT_MIRROR,
-                help='mirror to use (default: %(default)s)')
+                help='precise mirror URL to use (default: let bouncer.gentoo.org decide)')
 
     @classmethod
     def create(clazz, messenger, executor, options):
