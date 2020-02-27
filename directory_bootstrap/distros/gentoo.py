@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import datetime
 import errno
@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
 
 import directory_bootstrap.resources.gentoo as resources
 import directory_bootstrap.shared.loaders._requests as requests
@@ -39,7 +40,8 @@ class _ChecksumVerifiationFailed(Exception):
 
 
 class _NotFreshEnoughException(Exception):
-    def __init__(self, (year, month, day), max_age_days):
+    def __init__(self, year_month_day_tuple, max_age_days):
+        (year, month, day) = year_month_day_tuple
         super(_NotFreshEnoughException, self).__init__(
                 '%04d-%02d-%02d was more than %d days ago, rejecting as too old' \
                 % (year, month, day, max_age_days))
@@ -48,6 +50,14 @@ class _NotFreshEnoughException(Exception):
 class GentooBootstrapper(DirectoryBootstrapper):
     DISTRO_KEY = 'gentoo'
     DISTRO_NAME_LONG = 'Gentoo'
+
+    _MIRROR_BLACKLIST = set((
+        # Added 2020-02-27: more than 2 weeks stale
+        'http://mirrors.163.com/gentoo',
+
+        # Added 2020-02-27: lacks structure releases/snapshots/current/
+        'https://mirror.isoc.org.il/pub/gentoo',
+    ))
 
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
                 architecture, mirror_url, max_age_days,
@@ -72,10 +82,21 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
         self._gpg_supports_no_autostart = None
 
-    @staticmethod
-    def _retrieve_bounced_mirror_base_url():
-        response = requests.get('https://bouncer.gentoo.org/fetch/root/all/')
-        return response.url
+    def _retrieve_bounced_mirror_base_url(self):
+        self._messenger.info('Obtaining mirror URL from bouncer.gentoo.org...')
+        tries = 10
+        for i in range(tries):
+            response = requests.get('https://bouncer.gentoo.org/fetch/root/all/')
+            response.raise_for_status()
+            mirror_url = response.url.rstrip('/')
+
+            if mirror_url not in self._MIRROR_BLACKLIST:
+                break
+
+            time.sleep(0.25)  # to reduce server load
+
+        self._messenger.info(f'Selected mirror {mirror_url} .')
+        return mirror_url
 
     @staticmethod
     def _extract_architecture_family(architecture):
@@ -176,7 +197,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 testee_file,
                 ])
 
-        if sha512sum_output != expected_sha512sum_output:
+        if sha512sum_output != expected_sha512sum_output.encode('utf-8'):
             raise _ChecksumVerifiationFailed('SHA512', testee_file)
 
     def _verify_md5_sum(self, snapshot_tarball, snapshot_md5sum):
@@ -206,7 +227,8 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 tarball_filename,
             ], cwd=abs_target_root)
 
-    def _require_fresh_enough(self, (year, month, day)):
+    def _require_fresh_enough(self, year_month_day_tuple):
+        (year, month, day) = year_month_day_tuple
         date_to_check = datetime.date(year, month, day)
         today = datetime.date.today()
         if (today - date_to_check).days > self._max_age_days:
@@ -260,7 +282,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
         abs_gpg_home_dir = os.path.join(abs_temp_dir, 'gpg_home')
 
         self._messenger.info('Initializing temporary GnuPG home at "%s"...' % abs_gpg_home_dir)
-        os.mkdir(abs_gpg_home_dir, 0700)
+        os.mkdir(abs_gpg_home_dir, 0o700)
 
         self._check_gpg_for_no_autostart_support(abs_gpg_home_dir)
 
@@ -353,7 +375,9 @@ class GentooBootstrapper(DirectoryBootstrapper):
             self._verify_md5_sum(snapshot_tarball_uncompressed, snapshot_uncompressed_md5sum)
 
             self._extract_tarball(stage3_tarball, self._abs_target_dir)
-            self._extract_tarball(snapshot_tarball_uncompressed, os.path.join(self._abs_target_dir, 'usr'))
+            abs_var_db_repos = os.path.join(self._abs_target_dir, 'var', 'db', 'repos')
+            self._extract_tarball(snapshot_tarball_uncompressed, abs_var_db_repos)
+            os.rename(os.path.join(abs_var_db_repos, 'portage'), os.path.join(abs_var_db_repos, 'gentoo'))
         finally:
             self._messenger.info('Cleaning up "%s"...' % abs_temp_dir)
             shutil.rmtree(abs_temp_dir)

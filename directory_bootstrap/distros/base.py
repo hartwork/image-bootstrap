@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import errno
 import os
@@ -42,9 +42,7 @@ def add_general_directory_bootstrapping_options(general):
             help='directory to use for downloads (default: %(default)s)')
 
 
-class DirectoryBootstrapper(object):
-    __metaclass__ = ABCMeta
-
+class DirectoryBootstrapper(object, metaclass=ABCMeta):
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir):
         self._messenger = messenger
         self._executor = executor
@@ -97,7 +95,9 @@ class DirectoryBootstrapper(object):
         raise NotImplementedError()
 
     def get_url_content(self, url):
-        return requests.get(url).text
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.text
 
     def download_url_to_file(self, url, filename):
         if os.path.exists(filename):
@@ -153,8 +153,8 @@ class DirectoryBootstrapper(object):
             self._messenger.info('Creating directory "%s"...' % abs_path)
 
     def ensure_directories_writable(self):
-        self._ensure_directory_writable(self._abs_cache_dir, 0755)
-        self._ensure_directory_writable(self._abs_target_dir, 0700)
+        self._ensure_directory_writable(self._abs_cache_dir, 0o755)
+        self._ensure_directory_writable(self._abs_target_dir, 0o700)
 
     @staticmethod
     def _abs_keyserver_cert_filename(abs_gpg_home_dir):
@@ -163,7 +163,7 @@ class DirectoryBootstrapper(object):
     def _initialize_gpg_home(self, abs_temp_dir):
         abs_gpg_home_dir = os.path.join(abs_temp_dir, 'gpg_home')
         self._messenger.info('Initializing temporary GnuPG home at "%s"...' % abs_gpg_home_dir)
-        os.mkdir(abs_gpg_home_dir, 0700)
+        os.mkdir(abs_gpg_home_dir, 0o700)
 
         self.download_url_to_file(
             # This one was trouble: https://sks-keyservers.net/sks-keyservers.netCA.pem

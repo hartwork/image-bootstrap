@@ -37,13 +37,6 @@ def _main__level_three(messenger, options):
     bootstrapper_class = getattr(options, BOOTSTRAPPER_CLASS_FIELD)
     bootstrap = bootstrapper_class.create(messenger, executor, options)
 
-    messenger.warn('You are running a version made for (dead) Python 2.'
-                   '\n'
-                   '         '
-                   'Please upgrade to a more recent version made for Python 3.'
-                   '\n'
-                   '         Thank you!')
-
     bootstrap.check_for_commands()
     if bootstrap.wants_to_be_unshared():
         bootstrap.unshare()

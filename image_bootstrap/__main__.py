@@ -86,13 +86,6 @@ def _main__level_three(messenger, options):
     distro_class = getattr(options, DISTRO_CLASS_FIELD)
     bootstrap.set_distro(distro_class.create(messenger, executor, options))
 
-    messenger.warn('You are running a version made for (dead) Python 2.'
-                   '\n'
-                   '         '
-                   'Please upgrade to a more recent version made for Python 3.'
-                   '\n'
-                   '         Thank you!')
-
     bootstrap.check_release()
     bootstrap.select_bootloader()
     bootstrap.detect_grub2_install()

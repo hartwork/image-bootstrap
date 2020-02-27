@@ -1,4 +1,4 @@
-name: Smoke test creation of CentOS 7 chroots
+name: Smoke test creation of Arch OpenStack images
 
 on:
 - pull_request
@@ -6,7 +6,7 @@ on:
 
 jobs:
   install_and_run:
-    name: Smoke test creation of CentOS 7 chroots
+    name: Smoke test creation of Arch OpenStack images
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout Git repository
@@ -40,24 +40,17 @@ jobs:
           set -e
           sudo apt-get update
           sudo apt-get install --no-install-recommends --yes \
-            ca-certificates \
-            db-util \
-            file \
-            lsb-release \
-            python3-bs4 \
-            python3-colorama \
-            python3-lxml \
-            python3-requests \
-            rpm \
-            wget \
-            yum
+            kpartx
 
-      - name: Smoke test creation of CentOS 7 chroots
+      - name: Smoke test creation of Arch OpenStack images
         run: |-
           set -e
           cd /tmp  # to not be in Git clone folder
 
-          directory-bootstrap --help         ; echo
-          directory-bootstrap centos --help  ; echo
+          image-bootstrap --help       ; echo
+          image-bootstrap arch --help  ; echo
 
-          sudo PYTHONUNBUFFERED=1 $(which directory-bootstrap) --verbose --debug centos /tmp/centos7_chroot/
+          truncate --size 3g /tmp/disk
+          LOOP_DEV="$(sudo losetup --show --find -f /tmp/disk | tee /dev/stderr)"
+
+          sudo PYTHONUNBUFFERED=1 $(which image-bootstrap) --verbose --debug --openstack arch ${LOOP_DEV}

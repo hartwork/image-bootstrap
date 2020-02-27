@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import re
 import sys

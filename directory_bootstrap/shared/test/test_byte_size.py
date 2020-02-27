@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 from unittest import TestCase
 
@@ -27,4 +27,4 @@ class TestByteSizeFormatter(TestCase):
                 (1024**4, '1 TiB'),
                 ):
             received = format_byte_size(size_bytes)
-            self.assertEquals(received, expected)
+            self.assertEqual(received, expected)

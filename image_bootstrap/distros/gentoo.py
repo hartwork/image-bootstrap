@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import errno
 import glob
@@ -44,7 +44,7 @@ class GentooStrategy(DistroStrategy):
     def _write_etc_conf_d_hostname(self):
         etc_conf_d = os.path.join(self._abs_mountpoint, 'etc/conf.d')
         try:
-            os.makedirs(etc_conf_d, 0755)
+            os.makedirs(etc_conf_d, 0o755)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
@@ -266,8 +266,6 @@ class GentooStrategy(DistroStrategy):
         self._set_package_use_flags('dev-libs/openssl', '-bindist')
         self._set_package_use_flags('net-misc/openssh', '-bindist')
 
-        self._add_package_mask('app-emulation/cloud-init', '>=app-emulation/cloud-init-0.7.6_p1212')
-        self._set_package_keywords('app-emulation/cloud-init', '**')  # TODO ~arch
         self._install_package_atoms(['app-emulation/cloud-init', 'net-misc/openssh'])
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
@@ -296,7 +294,7 @@ class GentooStrategy(DistroStrategy):
                     start() { :; }
                     stop() { :; }
                     """), file=f)
-            os.fchmod(f.fileno(), 0755)
+            os.fchmod(f.fileno(), 0o755)
 
     def install_dhcp_client(self):
         # Static route support needs dhcpcd <7.0.1 or >=7.0.7
@@ -347,7 +345,7 @@ class GentooStrategy(DistroStrategy):
         self._mark_all_news_as_read()
 
     def _clean_distfiles(self):
-        distfiles_abs_path = os.path.join(self._abs_mountpoint, 'usr/portage/distfiles/')
+        distfiles_abs_path = os.path.join(self._abs_mountpoint, 'var/cache/distfiles')
         self._messenger.info('Cleaning distfiles at "%s"...' % distfiles_abs_path)
         cmd = [
                 COMMAND_FIND,
@@ -386,7 +384,7 @@ class GentooStrategy(DistroStrategy):
                 _ABS_PACKAGE_USE,
                 ):
             try:
-                os.makedirs(os.path.join(self._abs_mountpoint, chroot_abs_path.lstrip('/')), 0755)
+                os.makedirs(os.path.join(self._abs_mountpoint, chroot_abs_path.lstrip('/')), 0o755)
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     raise

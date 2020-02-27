@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import errno
 import os
@@ -182,7 +182,7 @@ class BootstrapEngine(object):
 
     def _protect_against_grub_legacy(self, command):
         output = subprocess.check_output([command, '--version'])
-        if 'GRUB GRUB 0.' in output:
+        if b'GRUB GRUB 0.' in output:
             raise ValueError('Command "%s" is GRUB legacy while GRUB 2 is needed. '
                     'Please install GRUB 2 or pass --grub2-install .. on the command line.' \
                     % command)
@@ -352,7 +352,7 @@ class BootstrapEngine(object):
                 self._abs_target_path,
                 ]
         output = self._executor.check_output(cmd_list)
-        device_name = output.split('\n')[0].split(' : ')[0]
+        device_name = output.split(b'\n')[0].split(b' : ')[0].decode('utf-8')
         self._abs_first_partition_device = '/dev/mapper/%s' % device_name
 
         # NOTE: Ubuntu 15.04 does not have "-u" (issue #30)
@@ -405,7 +405,7 @@ class BootstrapEngine(object):
     def _mkdir_mountpount_etc(self):
         abs_dir = os.path.join(self._abs_mountpoint, 'etc')
         self._messenger.info('Creating directory "%s"...' % abs_dir)
-        os.mkdir(abs_dir, 0755)
+        os.mkdir(abs_dir, 0o755)
 
     def _mount_disk_chroot_mounts(self):
         self._messenger.info('Mounting partitions...')
@@ -466,7 +466,7 @@ class BootstrapEngine(object):
                 self._abs_first_partition_device,
                 ]
         output = self._executor.check_output(cmd_blkid)
-        first_partition_uuid = output.rstrip()
+        first_partition_uuid = output.rstrip().decode('utf-8')
         require_valid_uuid(first_partition_uuid)
         self._config.first_partition_uuid = first_partition_uuid
 
@@ -805,7 +805,7 @@ class BootstrapEngine(object):
         sudoers_path = os.path.join(self._abs_mountpoint, 'etc/sudoers.d/%s-nopasswd' % user_name)
         with open(sudoers_path, 'w') as f:
             print('%s ALL = NOPASSWD: ALL' % user_name, file=f)
-            os.fchmod(f.fileno(), 0440)
+            os.fchmod(f.fileno(), 0o440)
 
     def _install_cloud_init_and_friends(self):
         self._distro.install_cloud_init_and_friends()
@@ -863,7 +863,7 @@ class BootstrapEngine(object):
     def _disable_clearing_tty1(self):
         noclear_file_path = os.path.join(self._abs_mountpoint, 'etc/systemd/system/getty@tty1.service.d/noclear.conf')
         self._messenger.info('Disabling clearing of tty1 (file "%s")...' % noclear_file_path)
-        os.makedirs(os.path.dirname(noclear_file_path), 0755)
+        os.makedirs(os.path.dirname(noclear_file_path), 0o755)
         with open(noclear_file_path, 'w') as f:
             print(dedent("""\
                     [Service]

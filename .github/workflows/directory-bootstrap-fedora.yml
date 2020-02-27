@@ -20,10 +20,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Set up Python 2.7
+      - name: Set up Python 3.6
         uses: actions/setup-python@v1.1.1
         with:
-          python-version: 2.7
+          python-version: 3.6
 
       - name: Install
         run: |-
@@ -44,10 +44,10 @@ jobs:
             db-util \
             file \
             lsb-release \
-            python-bs4 \
-            python-colorama \
-            python-lxml \
-            python-requests \
+            python3-bs4 \
+            python3-colorama \
+            python3-lxml \
+            python3-requests \
             rpm \
             wget \
             yum
@@ -60,4 +60,4 @@ jobs:
           directory-bootstrap --help         ; echo
           directory-bootstrap fedora --help  ; echo
 
-          sudo $(which directory-bootstrap) --verbose --debug fedora /tmp/fedora_chroot/
+          sudo PYTHONUNBUFFERED=1 $(which directory-bootstrap) --verbose --debug fedora /tmp/fedora_chroot/

@@ -20,10 +20,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Set up Python 2.7
+      - name: Set up Python 3.6
         uses: actions/setup-python@v1.1.1
         with:
-          python-version: 2.7
+          python-version: 3.6
 
       - name: Install
         run: |-
@@ -43,4 +43,4 @@ jobs:
           directory-bootstrap --help       ; echo
           directory-bootstrap arch --help  ; echo
 
-          sudo $(which directory-bootstrap) --verbose --debug arch /tmp/arch_chroot/
+          sudo PYTHONUNBUFFERED=1 $(which directory-bootstrap) --verbose --debug arch /tmp/arch_chroot/

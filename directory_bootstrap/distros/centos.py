@@ -1,11 +1,11 @@
 # Copyright (C) 2016 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 import os
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from textwrap import dedent
 
@@ -14,7 +14,7 @@ from directory_bootstrap.shared.loaders._bs4 import BeautifulSoup
 
 
 def _abs_filename_to_url(abs_filename):
-    return 'file://%s' % urllib.pathname2url(abs_filename)
+    return 'file://%s' % urllib.request.pathname2url(abs_filename)
 
 
 class CentOsBootstrapper(YumBasedDirectoryBootstrapper):

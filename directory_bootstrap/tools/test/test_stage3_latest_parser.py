@@ -1,7 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under AGPL v3 or later
 
-from __future__ import print_function
+
 
 from textwrap import dedent
 from unittest import TestCase
@@ -24,4 +24,4 @@ class TestStag3LatestParser(TestCase):
                 20150819/stage3-x32-20150819.tar.bz2 241353307
                 """)
         (year, month, day), _ = find_latest_stage3_date(content, 'http://distfiles.gentoo.org/releases/amd64/autobuilds/latest-stage3.txt', 'amd64')
-        self.assertEquals((year, month, day), (2015, 10, 1))
+        self.assertEqual((year, month, day), (2015, 10, 1))
