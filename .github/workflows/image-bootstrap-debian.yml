@@ -1,0 +1,60 @@
+name: Smoke test creation of Debian OpenStack images
+
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: '0 16 * * 5'  # Every Friday 4pm
+
+jobs:
+  install_and_run:
+    name: Smoke test creation of Debian OpenStack images
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v2
+
+      - name: Cache pip
+        uses: actions/cache@v1.1.2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v1.1.1
+        with:
+          python-version: 3.6
+
+      - name: Install
+        run: |-
+          set -e
+          pip install \
+            --disable-pip-version-check \
+            --user \
+            --no-warn-script-location \
+            .
+          echo "::set-env name=PATH::${HOME}/.local/bin:${PATH}"
+
+      - name: Install runtime dependencies
+        run: |-
+          set -e
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes \
+            debian-archive-keyring \
+            debootstrap \
+            kpartx
+
+      - name: Smoke test creation of Debian OpenStack images
+        run: |-
+          set -e
+          cd /tmp  # to not be in Git clone folder
+
+          image-bootstrap --help       ; echo
+          image-bootstrap debian --help  ; echo
+
+          truncate --size 2g /tmp/disk
+          LOOP_DEV="$(sudo losetup --show --find -f /tmp/disk | tee /dev/stderr)"
+
+          sudo PYTHONUNBUFFERED=1 $(which image-bootstrap) --verbose --debug --openstack debian ${LOOP_DEV}
