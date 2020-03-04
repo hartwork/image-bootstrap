@@ -73,7 +73,7 @@ class DebianBasedDistroStrategy(DistroStrategy, metaclass=ABCMeta):
 
     def check_architecture(self, architecture):
         uname_output = subprocess.check_output([COMMAND_UNAME, '-m'])
-        host_machine = uname_output.rstrip()
+        host_machine = uname_output.rstrip().decode('utf-8')
 
         trouble = False
         if architecture == 'amd64' and host_machine != 'x86_64':
