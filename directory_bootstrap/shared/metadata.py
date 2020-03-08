@@ -7,8 +7,8 @@ GITHUB_HOME_URL = 'https://github.com/hartwork/image-bootstrap'
 
 DESCRIPTION = 'Command line tool for creating bootable virtual machine images'
 
-_VERSION = (2, 0, 1)
+_VERSION = (2, 0, 2)
 VERSION_STR = '.'.join((str(e) for e in _VERSION))
 
-_RELEASE_DATE = (2020, 3, 4)
+_RELEASE_DATE = (2020, 3, 8)
 RELEASE_DATE_STR = '-'.join(('%02d' % e for e in _RELEASE_DATE))
