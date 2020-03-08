@@ -22,7 +22,7 @@ if __name__ == '__main__':
             author='Sebastian Pipping',
             author_email='sebastian@pipping.org',
             url=GITHUB_HOME_URL,
-            python_requires='>=3',
+            python_requires='>=3.6',
             setup_requires=[
                 'setuptools>=38.6.0',  # for long_description_content_type
             ],
