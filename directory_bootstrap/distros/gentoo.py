@@ -54,6 +54,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
     _MIRROR_BLACKLIST = set((
         # Added 2020-02-27: more than 2 weeks stale
         'http://mirrors.163.com/gentoo',
+        'https://mirrors.163.com/gentoo',
 
         # Added 2020-02-27: lacks structure releases/snapshots/current/
         'https://mirror.isoc.org.il/pub/gentoo',
