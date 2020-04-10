@@ -112,10 +112,16 @@ class Executor(object):
         subprocess.check_call(argv,
                 stdout=self._default_stdout,
                 stderr=self._default_stderr,
-                env=env,
+                env=self._without_pythonpath(env),
                 cwd=cwd,
                 )
 
     def check_output(self, argv):
         self._messenger.announce_command(argv)
         return subprocess.check_output(argv, stderr=self._default_stderr)
+
+    def _without_pythonpath(self, env):
+        if env is None:
+            env = os.environ
+
+        return {k: v for k, v in env.items() if k != 'PYTHONPATH'}
