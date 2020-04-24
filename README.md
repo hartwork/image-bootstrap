@@ -34,7 +34,7 @@ When passing the `--openstack` parameter, images are
 into a given _directory_ (similar to [debootstrap](https://wiki.debian.org/Debootstrap)
 for Debian/Ubuntu).<br>
 Distributions supported by **directory-bootstrap** currently include:
-Alpine Linux, Arch Linux, CentOS (up to 7.x), Fedora, Gentoo, and Void Linux.
+Alpine Linux, Arch Linux, CentOS (up to 7.x), Gentoo, and Void Linux.
 
 
 <a name="History"></a>
@@ -69,7 +69,6 @@ In comparision to grml-debootstrap, by now **image-bootstrap**
 
 **directory-bootstrap** came into life with the arrival of support for Arch Linux.
 Support for Gentoo followed, after.
-Support for Fedora chroots came into live during 33c3, late December 2016.
 Support for Void Linux and CentOS chroots came into live during 34c3, December 2017.
 Support for Alpine Linux chroots came into in March 2018.
 
