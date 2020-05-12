@@ -181,6 +181,17 @@ class ArchBootstrapper(DirectoryBootstrapper):
                 ]
         self._executor.check_call(cmd, env=env)
 
+    def _fix_root_login_at(self, abs_chroot_dir):
+        abs_chroot_etc_shadown = os.path.join(abs_chroot_dir, 'etc', 'shadow')
+        self._messenger.info('Securing root account at "%s"...' % abs_chroot_etc_shadown)
+        env = self._make_chroot_env()
+        cmd = [
+            COMMAND_CHROOT,
+            abs_chroot_dir,
+            'usermod', '-p', '*', 'root',
+        ]
+        self._executor.check_call(cmd, env=env)
+
     def _mount_disk_chroot_mounts(self, abs_pacstrap_target_dir):
         self._executor.check_call([
                 COMMAND_MOUNT,
@@ -304,6 +315,7 @@ class ArchBootstrapper(DirectoryBootstrapper):
                 try:
                     self._initialize_pacman_keyring(abs_pacstrap_inner_root)
                     self._run_pacstrap(abs_pacstrap_inner_root, rel_pacstrap_target_dir)
+                    self._fix_root_login_at(abs_pacstrap_target_dir)
                 finally:
                     self._unmount_nondisk_chroot_mounts(abs_pacstrap_inner_root)
             finally:
