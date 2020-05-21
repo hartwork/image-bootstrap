@@ -441,7 +441,7 @@ class BootstrapEngine(object):
         env = self.make_environment(tell_mountpoint=False)
         self._messenger.announce_command(cmd)
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, env=env)
-        p.stdin.write('root:%s' % self._config.root_password)
+        p.stdin.write(('root:%s' % self._config.root_password).encode('utf-8'))
         p.stdin.close()
         p.wait()
         if p.returncode:
