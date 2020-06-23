@@ -209,7 +209,7 @@ when using Polipo with default port configuration.
 ## haveged -- an entropy generator
 
 During image creation, cryptographic keys may need to be generated, e.g.
-for thr OpenSSH server, at least temporarily.  As key generation relies
+for the OpenSSH server, at least temporarily.  As key generation relies
 on availability of entropy, image creation may take longer in environments that
 are slow at adding to the entropy pool.
 To speed things up, running [haveged](http://www.issihosts.com/haveged/)
