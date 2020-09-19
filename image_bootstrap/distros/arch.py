@@ -222,6 +222,8 @@ class ArchStrategy(DistroStrategy):
         self._install_packages(['sudo'])
 
     def install_cloud_init_and_friends(self):
+        # hostname
+        self._install_packages(['inetutils'])
         self._install_packages(['cloud-init'])
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
