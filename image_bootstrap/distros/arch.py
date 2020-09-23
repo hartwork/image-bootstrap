@@ -226,6 +226,14 @@ class ArchStrategy(DistroStrategy):
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
 
+        # cloud-unit makes use of command "hostname"
+        # that is provided by package "inetutils" in Arch but the
+        # cloud-init packaging lacks a runtime dependency on inetutils,
+        # see Arch bug https://bugs.archlinux.org/task/67941 .
+        # Installing inetutils ourselves helps while waiting for a fix in Arch.
+        # See also: https://github.com/hartwork/image-bootstrap/pull/90
+        self._install_packages(['inetutils'])
+
     def get_cloud_init_datasource_cfg_path(self):
         return '/etc/cloud/cloud.cfg.d/90_datasource.cfg'
 
