@@ -35,7 +35,7 @@ jobs:
             --user \
             --no-warn-script-location \
             .
-          echo "::set-env name=PATH::${HOME}/.local/bin:${PATH}"
+          echo "PATH=${HOME}/.local/bin:${PATH}" >> "${GITHUB_ENV}"
 
       - name: Smoke test creation of Void chroots
         run: |-
