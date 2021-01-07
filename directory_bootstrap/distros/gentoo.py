@@ -52,12 +52,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
     DISTRO_NAME_LONG = 'Gentoo'
 
     _MIRROR_BLACKLIST = set((
-        # Added 2020-02-27: more than 2 weeks stale
-        'http://mirrors.163.com/gentoo',
-        'https://mirrors.163.com/gentoo',
-
-        # Added 2020-02-27: lacks structure releases/snapshots/current/
-        'https://mirror.isoc.org.il/pub/gentoo',
+        # All previous entries removed
     ))
 
     def __init__(self, messenger, executor, abs_target_dir, abs_cache_dir,
