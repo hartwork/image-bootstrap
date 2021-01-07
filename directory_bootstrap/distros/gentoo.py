@@ -127,8 +127,11 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 self._architecture_family,
                 )
 
-    def _get_portage_snapshot_listing_url(self):
+    def _get_old_portage_snapshot_listing_url(self):
         return '%s/releases/snapshots/current/' % self._mirror_base_url
+
+    def _get_new_portage_snapshot_listing_url(self):
+        return '%s/snapshots/' % self._mirror_base_url
 
     def _find_latest_snapshot_date(self, snapshot_listing):
         return self.extract_latest_date(snapshot_listing, _snapshot_date_matcher)
@@ -149,7 +152,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
         return res
 
-    def _download_snapshot(self, snapshot_date_str):
+    def _download_snapshot(self, snapshot_date_str, snapshot_listing_url):
         res = [None, None, None, None]
         for target_index, basename in (
                 (1, 'portage-%s.tar.xz.gpgsig' % snapshot_date_str),
@@ -158,8 +161,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 (0, 'portage-%s.tar.xz' % snapshot_date_str),
                 ):
             filename = os.path.join(self._abs_cache_dir, basename)
-            url = '%s/releases/snapshots/current/%s' \
-                    % (self._mirror_base_url, basename)
+            url = snapshot_listing_url + basename
             self.download_url_to_file(url, filename)
 
             assert res[target_index] is None
@@ -352,7 +354,12 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
             if self._repository_date_triple_or_none is None:
                 self._messenger.info('Searching for available portage repository snapshots...')
-                snapshot_listing = self.get_url_content(self._get_portage_snapshot_listing_url())
+                try:
+                    snapshot_listing_url = self._get_old_portage_snapshot_listing_url()
+                    snapshot_listing = self.get_url_content(snapshot_listing_url)
+                except requests.exceptions.HTTPError:
+                    snapshot_listing_url = self._get_new_portage_snapshot_listing_url()
+                    snapshot_listing = self.get_url_content(snapshot_listing_url)
                 snapshot_date_str = self._find_latest_snapshot_date(snapshot_listing)
                 self._messenger.info('Found "%s" to be latest.' % snapshot_date_str)
                 self._require_fresh_enough(self._parse_snapshot_listing_date(snapshot_date_str))
@@ -361,7 +368,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
             self._messenger.info('Downloading portage repository snapshot...')
             snapshot_tarball, snapshot_gpgsig, snapshot_md5sum, snapshot_uncompressed_md5sum \
-                    = self._download_snapshot(snapshot_date_str)
+                    = self._download_snapshot(snapshot_date_str, snapshot_listing_url)
             self._verify_detachted_gpg_signature(snapshot_tarball, snapshot_gpgsig, abs_gpg_home_dir)
             self._verify_md5_sum(snapshot_tarball, snapshot_md5sum)
 
