@@ -229,7 +229,6 @@ class GentooStrategy(DistroStrategy):
     def generate_initramfs_from_inside_chroot(self):
         kernel_version_str = self._get_installed_kernel_version()
 
-        self._set_package_keywords('sys-kernel/dracut', '**')  # TODO ~arch
         self._install_package_atoms(['sys-kernel/dracut'])
         # NOTE: Pass kernel version to Dracut so it does not end up
         #       picking that of the host (rather than the chroot) from uname
