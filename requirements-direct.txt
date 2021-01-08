@@ -2,5 +2,5 @@ beautifulsoup4==4.6.0
 colorama==0.4.4
 lxml==4.6.2
 pytest==3.5.0
-PyYAML==4.2b4
+PyYAML==5.3.1
 requests==2.25.1
