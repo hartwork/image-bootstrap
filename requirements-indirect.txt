@@ -5,6 +5,6 @@ funcsigs==1.0.2
 idna==3.1
 more-itertools==4.1.0
 pluggy==0.13.1
-py==1.5.3
+py==1.10.0
 six==1.15.0
 urllib3==1.26.2
