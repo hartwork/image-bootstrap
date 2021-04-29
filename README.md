@@ -173,7 +173,7 @@ create images on RAM storage rather than on disk.  I use a setup with
 For example (assuming you have /tmp in RAM already):
 
 ```console
-# sudo mount -o remout,size=6g /tmp
+# sudo mount -o remount,size=6g /tmp
 # truncate --size 3g /tmp/disk3g
 # LOOP_DEVICE="$(losetup --show -f /tmp/disk3g)"
 
