@@ -222,7 +222,7 @@ class ArchBootstrapper(DirectoryBootstrapper):
             try_unmounting(self._executor, abs_path)
 
     def _obtain_keys_allowed_to_sign_archlinux_keyring_tarball(self):
-        pkgbuild_content = self.get_url_content('https://git.archlinux.org/svntogit/packages.git/plain/trunk/PKGBUILD?h=packages/archlinux-keyring')
+        pkgbuild_content = self.get_url_content('https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/archlinux-keyring/trunk/PKGBUILD')
         long_key_id_matcher = re.compile('\\b(?P<long_key_id>[0-9a-fA-F]{40})\\b.*# (?P<comment>.+)')
 
         KeyInfo = namedtuple('KeyInfo', ['long_key_id', 'comment'])
@@ -269,7 +269,7 @@ class ArchBootstrapper(DirectoryBootstrapper):
                 self._messenger.info('  - %s (%s)' % (key.comment, key.long_key_id))
             remote_key_ids = {k.long_key_id for k in key_infos}
             on_disk_key_ids = {
-                # https://git.archlinux.org/svntogit/packages.git/tree/trunk/PKGBUILD?h=packages/archlinux-keyring
+                # https://github.com/archlinux/svntogit-packages/blob/packages/archlinux-keyring/trunk/PKGBUILD
                 '4AA4767BBC9C4B1D18AE28B77F2D434B9741E8AC',  # Pierre Schmitz <pierre@archlinux.de>
                 'A314827C4E4250A204CE6E13284FC34C8E4B1A25',  # Thomas Bächler <thomas@bchlr.de>
                 '86CFFCA918CF3AF47147588051E8B148A9999C34',  # Evangelos Foutras <evangelos@foutrelis.com>
