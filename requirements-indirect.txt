@@ -4,7 +4,7 @@ chardet==4.0.0
 funcsigs==1.0.2
 idna==3.2
 more-itertools==8.8.0
-pluggy==0.13.1
+pluggy==1.0.0
 py==1.10.0
 six==1.16.0
 urllib3==1.26.6
