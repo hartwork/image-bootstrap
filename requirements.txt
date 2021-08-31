@@ -10,10 +10,16 @@ requests==2.26.0
 attrs==21.2.0
 certifi==2021.5.30
 chardet==4.0.0
+charset-normalizer==2.0.4
 funcsigs==1.0.2
 idna==3.2
+iniconfig==1.1.1
 more-itertools==8.8.0
+packaging==21.0
 pluggy==1.0.0
 py==1.10.0
+pyparsing==2.4.7
 six==1.16.0
+soupsieve==2.2.1
+toml==0.10.2
 urllib3==1.26.6
