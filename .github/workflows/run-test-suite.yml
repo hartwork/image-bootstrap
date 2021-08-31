@@ -26,7 +26,9 @@ jobs:
             --disable-pip-version-check \
             --no-warn-script-location \
             .[tests]
+          pip check
           pip uninstall --yes image-bootstrap
+          diff -u0 <(pip freeze | sort -f) <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f)
 
       - name: Smoke test creation of Ubuntu OpenStack images
         run: |-
