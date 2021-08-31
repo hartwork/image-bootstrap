@@ -29,7 +29,6 @@ jobs:
 
       - name: Install
         run: |-
-          set -e
           pip install \
             --disable-pip-version-check \
             --user \
@@ -39,7 +38,6 @@ jobs:
 
       - name: Install runtime dependencies
         run: |-
-          set -e
           sudo apt-get update
           sudo apt-get install --no-install-recommends --yes \
             ca-certificates \
@@ -56,7 +54,6 @@ jobs:
 
       - name: Smoke test creation of CentOS 7 chroots
         run: |-
-          set -e
           cd /tmp  # to not be in Git clone folder
 
           directory-bootstrap --help         ; echo

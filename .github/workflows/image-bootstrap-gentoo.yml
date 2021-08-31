@@ -29,7 +29,6 @@ jobs:
 
       - name: Install
         run: |-
-          set -e
           pip install \
             --disable-pip-version-check \
             --user \
@@ -39,14 +38,12 @@ jobs:
 
       - name: Install runtime dependencies
         run: |-
-          set -e
           sudo apt-get update
           sudo apt-get install --no-install-recommends --yes \
             kpartx
 
       - name: Smoke test creation of Gentoo OpenStack images
         run: |-
-          set -e
           cd /tmp  # to not be in Git clone folder
 
           image-bootstrap --help         ; echo
