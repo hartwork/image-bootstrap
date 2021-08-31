@@ -495,7 +495,7 @@ class BootstrapEngine(object):
         self._messenger.info('Post-processing GRUB config...')
         cmd_sed = [
                 COMMAND_SED,
-                's,root=[^ ]\+,root=UUID=%s,g' % self._config.first_partition_uuid,
+                r's,root=[^ ]\+,root=UUID=%s,g' % self._config.first_partition_uuid,
                 '-i', os.path.join(self._abs_mountpoint, 'boot', 'grub', 'grub.cfg'),
                 ]
         self._executor.check_call(cmd_sed)

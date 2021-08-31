@@ -15,7 +15,7 @@ _NEEDS_ESCAPING = re.compile('([!`"\'$ \\\\{}()?*&<>;])')
 VERBOSITY_QUIET = object()
 VERBOSITY_VERBOSE = object()
 
-BANNER = """\
+BANNER = r"""\
      _                          __             __      __               
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
    / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \ 
