@@ -29,15 +29,18 @@ jobs:
 
       - name: Install
         run: |-
+          python -m venv venv/
+          source venv/bin/activate
           pip install \
             --disable-pip-version-check \
-            --user \
             --no-warn-script-location \
             .
-          echo "PATH=${HOME}/.local/bin:${PATH}" >> "${GITHUB_ENV}"
+          pip check
+          diff -u0 <(pip freeze | fgrep -v image-bootstrap | sort -f) <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f)
 
       - name: Smoke test creation of Gentoo chroots
         run: |-
+          source venv/bin/activate
           cd /tmp  # to not be in Git clone folder
 
           directory-bootstrap --help         ; echo

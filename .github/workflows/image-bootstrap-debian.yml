@@ -29,12 +29,14 @@ jobs:
 
       - name: Install
         run: |-
+          python -m venv venv/
+          source venv/bin/activate
           pip install \
             --disable-pip-version-check \
-            --user \
             --no-warn-script-location \
             .
-          echo "PATH=${HOME}/.local/bin:${PATH}" >> "${GITHUB_ENV}"
+          pip check
+          diff -u0 <(pip freeze | fgrep -v image-bootstrap | sort -f) <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f)
 
       - name: Install runtime dependencies
         run: |-
@@ -46,6 +48,7 @@ jobs:
 
       - name: Smoke test creation of Debian OpenStack images
         run: |-
+          source venv/bin/activate
           cd /tmp  # to not be in Git clone folder
 
           image-bootstrap --help       ; echo
