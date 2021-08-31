@@ -131,11 +131,11 @@ class GentooBootstrapper(DirectoryBootstrapper):
     def _find_latest_snapshot_date(self, snapshot_listing):
         return self.extract_latest_date(snapshot_listing, _snapshot_date_matcher)
 
-    def _download_stage3(self, stage3_date_str):
+    def _download_stage3(self, stage3_date_str, arch_flavor):
         res = [None, None]
         for target_index, basename in (
-                (1, 'stage3-%s-%s.tar.xz.DIGESTS.asc' % (self._architecture, stage3_date_str)),
-                (0, 'stage3-%s-%s.tar.xz' % (self._architecture, stage3_date_str)),
+                (1, 'stage3-%s%s-%s.tar.xz.DIGESTS.asc' % (self._architecture, arch_flavor, stage3_date_str)),
+                (0, 'stage3-%s%s-%s.tar.xz' % (self._architecture, arch_flavor, stage3_date_str)),
                 ):
             filename = os.path.join(self._abs_cache_dir, basename)
             url = '%s/releases/%s/autobuilds/%s/%s' \
@@ -340,12 +340,13 @@ class GentooBootstrapper(DirectoryBootstrapper):
                 self._messenger.info('Searching for available stage3 tarballs...')
                 stage3_latest_file_url = self._get_stage3_latest_file_url()
                 stage3_latest_file_content = self.get_url_content(stage3_latest_file_url)
-                stage3_date_triple, stage3_date_extra = find_latest_stage3_date(stage3_latest_file_content, stage3_latest_file_url, self._architecture)
+                stage3_date_triple, stage3_date_extra, stage3_flavor = find_latest_stage3_date(stage3_latest_file_content, stage3_latest_file_url, self._architecture)
                 stage3_date_str = self._format_date_stage3_tarball_filename(stage3_date_triple, stage3_date_extra)
                 self._messenger.info('Found "%s" to be latest.' % stage3_date_str)
                 self._require_fresh_enough(stage3_date_triple)
             else:
                 stage3_date_str = self._format_date_stage3_tarball_filename(self._stage3_date_triple_or_none, '')
+                stage3_flavor = ''
 
             if self._repository_date_triple_or_none is None:
                 self._messenger.info('Searching for available portage repository snapshots...')
@@ -369,7 +370,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
 
             self._messenger.info('Downloading stage3 tarball...')
             stage3_tarball, stage3_digests_asc \
-                    = self._download_stage3(stage3_date_str)
+                    = self._download_stage3(stage3_date_str, arch_flavor=stage3_flavor)
             stage3_digests = os.path.join(abs_temp_dir, os.path.basename(stage3_digests_asc)[:-len('.asc')])
             self._verify_clearsigned_gpg_signature(stage3_digests_asc, stage3_digests, abs_gpg_home_dir)
             self._verify_sha512_sum(stage3_tarball, stage3_digests)
