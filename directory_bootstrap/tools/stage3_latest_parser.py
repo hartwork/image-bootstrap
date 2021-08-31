@@ -34,4 +34,4 @@ def find_latest_stage3_date(stage3_latest_file_content, stage3_latest_file_url, 
         raise ValueError(message)
 
     m = sorted(matches, key=lambda e: e.group(1))[-1]  # i.e. most recent
-    return (int(m.group(2)), int(m.group(3)), int(m.group(4))), m.group(5), m.group('flavor')
+    return (int(m.group(2)), int(m.group(3)), int(m.group(4))), m.group(5), m.group('flavor') or ''
