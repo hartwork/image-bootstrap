@@ -10,6 +10,14 @@ from setuptools import find_packages, setup
 from directory_bootstrap.shared.metadata import (
         GITHUB_HOME_URL, PACKAGE_NAME, VERSION_STR)
 
+_tests_require = [
+    'pytest',
+]
+
+_extras_require = {
+    'tests': _tests_require,
+}
+
 
 if __name__ == '__main__':
     setup(
@@ -34,9 +42,8 @@ if __name__ == '__main__':
                 'setuptools',
                 'PyYAML',
             ],
-            tests_require=[
-                'pytest',
-            ],
+            tests_require=_tests_require,
+            extras_require=_extras_require,
             packages=[
                 p for p in find_packages() if not p.endswith('.test')
             ],

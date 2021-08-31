@@ -55,7 +55,7 @@ class CentOsBootstrapper(YumBasedDirectoryBootstrapper):
         html = self.get_url_content('https://wiki.centos.org/Download')
         soup = BeautifulSoup(html, 'lxml')
 
-        minor_version_matcher = re.compile('^ ?([0-9]+) \(([0-9]+)\) ?$')
+        minor_version_matcher = re.compile(r'^ ?([0-9]+) \(([0-9]+)\) ?$')
 
         candidates = []
         prev = None
