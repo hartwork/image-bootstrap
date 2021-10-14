@@ -3,7 +3,7 @@ beautifulsoup4==4.10.0
 colorama==0.4.4
 lxml==4.6.3
 pytest==6.2.5
-PyYAML==5.4.1
+PyYAML==6.0
 requests==2.26.0
 
 # Indirect
