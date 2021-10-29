@@ -512,7 +512,7 @@ class BootstrapEngine(object):
 
     def make_environment(self, tell_mountpoint):
         env = os.environ.copy()
-        for key in ('LANG', 'LANGUAGE'):
+        for key in ('LANG', 'LANGUAGE', 'TMPDIR'):
             env.pop(key, None)
 
         assert self._config.hostname is not None
