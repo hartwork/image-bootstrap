@@ -42,7 +42,8 @@ jobs:
           sudo apt-get install --no-install-recommends --yes \
             debian-archive-keyring \
             debootstrap \
-            kpartx
+            kpartx \
+            qemu-utils
 
       - name: Smoke test creation of Debian OpenStack images
         run: |-
@@ -53,5 +54,20 @@ jobs:
 
           truncate --size 2g /tmp/disk
           LOOP_DEV="$(sudo losetup --show --find -f /tmp/disk | tee /dev/stderr)"
+          echo "LOOP_DEV=${LOOP_DEV}" >> "${GITHUB_ENV}"
 
           sudo PYTHONUNBUFFERED=1 $(which image-bootstrap) --verbose --debug --openstack debian ${LOOP_DEV}
+
+      - name: Create .qcow2 image from loop device
+        run: |-
+          set -eux
+          git fetch --force --tags --unshallow origin  # for "git describe"
+          img_base_name="debian-openstack-$(date '+%Y-%m-%d-%H-%M')-image-bootstrap-$(git describe --tags).qcow2"
+          sudo qemu-img convert -f raw -O qcow2 "${LOOP_DEV}" "${img_base_name}"
+          ls -lh "${img_base_name}"
+
+      - uses: actions/upload-artifact@v2.3.1
+        with:
+          name: debian-chroot-qcow2
+          path: '*.qcow2'
+          if-no-files-found: error
