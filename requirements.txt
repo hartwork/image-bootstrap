@@ -2,7 +2,7 @@
 beautifulsoup4==4.10.0
 colorama==0.4.4
 lxml==4.7.1
-pytest==6.2.5
+pytest==7.0.0
 PyYAML==6.0
 requests==2.27.1
 
@@ -18,7 +18,7 @@ pluggy==1.0.0
 py==1.11.0
 pyparsing==3.0.7
 soupsieve==2.3.1
-toml==0.10.2
+tomli==2.0.0
 typing-extensions==4.0.1
 urllib3==1.26.8
 zipp==3.7.0
