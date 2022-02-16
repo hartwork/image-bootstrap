@@ -25,9 +25,9 @@ jobs:
           pip install \
             --disable-pip-version-check \
             --no-warn-script-location \
-            .[tests]
+            -r requirements.txt
           pip check
-          pip uninstall --yes image-bootstrap
+          # Ensure that even indirect dependencies are fully pinned
           diff -u0 <(pip freeze | sort -f) <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f)
 
       - name: Smoke test creation of Ubuntu OpenStack images
