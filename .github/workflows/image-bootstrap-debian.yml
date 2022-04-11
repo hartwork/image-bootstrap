@@ -66,7 +66,7 @@ jobs:
           sudo qemu-img convert -f raw -O qcow2 "${LOOP_DEV}" "${img_base_name}"
           ls -lh "${img_base_name}"
 
-      - uses: actions/upload-artifact@v2.3.1
+      - uses: actions/upload-artifact@v3.0.0
         with:
           name: debian-chroot-qcow2
           path: '*.qcow2'
