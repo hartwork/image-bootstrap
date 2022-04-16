@@ -394,7 +394,7 @@ class GentooStrategy(DistroStrategy):
 
     def _configure_kernel__enable_kvm_support(self):
         tasks = dedent("""\
-                # Based on linux-4.0.1/arch/x86/configs/kvm_guest.config
+                # Based on https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/kernel/configs/kvm_guest.config?h=v5.17.3
                 CONFIG_NET=y
                 CONFIG_NET_CORE=y
                 CONFIG_NETDEVICES=y
@@ -416,6 +416,7 @@ class GentooStrategy(DistroStrategy):
                 CONFIG_PARAVIRT=y
                 CONFIG_KVM_GUEST=y
                 CONFIG_VIRTIO=y
+                CONFIG_VIRTIO_MENU=y
                 CONFIG_VIRTIO_PCI=y
                 CONFIG_VIRTIO_BLK=y
                 CONFIG_VIRTIO_CONSOLE=y
@@ -423,6 +424,10 @@ class GentooStrategy(DistroStrategy):
                 CONFIG_9P_FS=y
                 CONFIG_NET_9P=y
                 CONFIG_NET_9P_VIRTIO=y
+                CONFIG_SCSI_LOWLEVEL=y
+                CONFIG_SCSI_VIRTIO=y
+                CONFIG_VIRTIO_INPUT=y
+                CONFIG_DRM_VIRTIO_GPU=y
                 """)
         for line in tasks.split('\n'):
             if not line or line.startswith('#'):
