@@ -15,7 +15,7 @@ from directory_bootstrap.shared.commands import (
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 
 _ABS_PACKAGE_USE = '/etc/portage/package.use'
-_ABS_PACKAGE_KEYWORDS = '/etc/portage/package.keywords'
+_ABS_PACKAGE_KEYWORDS = '/etc/portage/package.accept_keywords'
 _ABS_PACKAGE_MASK = '/etc/portage/package.mask'
 _ABS_PACKAGE_UNMASK = '/etc/portage/package.unmask'
 
