@@ -12,11 +12,10 @@ import tempfile
 from collections import namedtuple
 from tarfile import TarFile
 
-import directory_bootstrap.resources.arch as resources
 from directory_bootstrap.distros.base import (
         DirectoryBootstrapper, date_argparse_type)
 from directory_bootstrap.shared.commands import (
-        COMMAND_CHROOT, COMMAND_GPG, COMMAND_MOUNT, COMMAND_TAR,
+        COMMAND_CHROOT, COMMAND_MOUNT, COMMAND_TAR,
         COMMAND_UMOUNT, COMMAND_UNSHARE)
 from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
 from directory_bootstrap.shared.mount import try_unmounting
@@ -64,46 +63,20 @@ class ArchBootstrapper(DirectoryBootstrapper):
     def get_commands_to_check_for():
         return DirectoryBootstrapper.get_commands_to_check_for() + [
                 COMMAND_CHROOT,
-                COMMAND_GPG,
                 COMMAND_MOUNT,
                 COMMAND_TAR,
                 COMMAND_UMOUNT,
                 ]
 
-    def _get_keyring_listing(self):
-        self._messenger.info('Downloading keyring listing...')
-        return self.get_url_content('https://sources.archlinux.org/other/archlinux-keyring/')
-
     def _get_image_listing(self):
         self._messenger.info('Downloading image listing...')
         return self.get_url_content('https://mirrors.kernel.org/archlinux/iso/')
-
-    def _download_keyring_package(self, package_yyyymmdd, suffix=''):
-        filename = os.path.join(self._abs_cache_dir, 'archlinux-keyring-%s.tar.gz%s' % (package_yyyymmdd, suffix))
-        url = 'https://sources.archlinux.org/other/archlinux-keyring/archlinux-keyring-%s.tar.gz%s' % (package_yyyymmdd, suffix)
-        self.download_url_to_file(url, filename)
-        return filename
 
     def _download_image(self, image_yyyy_mm_dd, suffix=''):
         filename = os.path.join(self._abs_cache_dir, 'archlinux-bootstrap-%s-%s.tar.gz%s' % (image_yyyy_mm_dd, self._architecture, suffix))
         url = 'https://mirrors.kernel.org/archlinux/iso/%s/archlinux-bootstrap-%s-%s.tar.gz%s' % (image_yyyy_mm_dd, image_yyyy_mm_dd, self._architecture, suffix)
         self.download_url_to_file(url, filename)
         return filename
-
-    def _import_gpg_keyring(self, abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd):
-        rel_archlinux_gpg_path = 'archlinux-keyring-%s/archlinux.gpg' % package_yyyymmdd
-        with TarFile.open(package_filename) as tf:
-            tf.extract(rel_archlinux_gpg_path, path=abs_temp_dir)
-        abs_archlinux_gpg_path = os.path.join(abs_temp_dir, rel_archlinux_gpg_path)
-
-        self._import_gpg_key_file(abs_gpg_home_dir, abs_archlinux_gpg_path)
-
-    def _import_gpg_keys(self, abs_gpg_home_dir, key_ids):
-        for key_id in key_ids:
-            cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
-                    '--receive-keys', key_id,
-                ]
-            self._executor.check_call(cmd)
 
     def _extract_image(self, image_filename, abs_temp_dir):
         abs_pacstrap_outer_root = os.path.join(abs_temp_dir, 'pacstrap_root', '')
@@ -221,27 +194,6 @@ class ArchBootstrapper(DirectoryBootstrapper):
             abs_path = os.path.join(abs_pacstrap_inner_root, target)
             try_unmounting(self._executor, abs_path)
 
-    def _obtain_keys_allowed_to_sign_archlinux_keyring_tarball(self):
-        pkgbuild_content = self.get_url_content('https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/archlinux-keyring/trunk/PKGBUILD')
-        long_key_id_matcher = re.compile('\\b(?P<long_key_id>[0-9a-fA-F]{40})\\b.*# (?P<comment>.+)')
-
-        KeyInfo = namedtuple('KeyInfo', ['long_key_id', 'comment'])
-
-        inside = False
-        key_infos = []
-        for line in pkgbuild_content.split('\n'):
-            if not inside:
-                if line.startswith('validpgpkeys='):
-                    inside = True
-
-            if inside:
-                m = long_key_id_matcher.search(line)
-                if m:
-                    key_infos.append(KeyInfo(**m.groupdict()))
-                if ')' in line:
-                    break
-        return key_infos
-
     def run(self):
         self.ensure_directories_writable()
 
@@ -253,51 +205,7 @@ class ArchBootstrapper(DirectoryBootstrapper):
             else:
                 image_yyyy_mm_dd = '%04s.%02d.%02d' % self._image_date_triple_or_none
 
-            keyring_listing_html = self._get_keyring_listing()
-            package_yyyymmdd = self.extract_latest_date(keyring_listing_html, _keyring_package_date_matcher)
-
-            package_sig_filename = self._download_keyring_package(package_yyyymmdd, '.sig')
-            package_filename = self._download_keyring_package(package_yyyymmdd)
-
-            abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
-
-            self._messenger.info('Importing GPG keys whitelisted to sign archlinux-keyring...')
-
-            key_infos = self._obtain_keys_allowed_to_sign_archlinux_keyring_tarball()
-            self._messenger.info('Keys found allowed to sign archlinux-keyring tarball:')
-            for key in sorted(key_infos, key=lambda x: (x.comment, x.long_key_id)):
-                self._messenger.info('  - %s (%s)' % (key.comment, key.long_key_id))
-            remote_key_ids = {k.long_key_id for k in key_infos}
-            on_disk_key_ids = {
-                # https://github.com/archlinux/svntogit-packages/blob/packages/archlinux-keyring/trunk/PKGBUILD
-                '4AA4767BBC9C4B1D18AE28B77F2D434B9741E8AC',  # Pierre Schmitz <pierre@archlinux.de>
-                'A314827C4E4250A204CE6E13284FC34C8E4B1A25',  # Thomas Bächler <thomas@bchlr.de>
-                '86CFFCA918CF3AF47147588051E8B148A9999C34',  # Evangelos Foutras <evangelos@foutrelis.com>
-                'F3691687D867B81B51CE07D9BBE43771487328A9',  # Bartlomiej Piotrowski <b@bpiotrowski.pl>
-                'BD84DE71F493DF6814B0167254EDC91609BC9183',  # Christian Hesse <Christi@n-Hes.se>
-                'CFA6AF15E5C74149FC1D8C086D1655C14CE1C13E',  # Florian Pritz <bluewind@xinu.at>
-                'E499C79F53C96A54E572FEE1C06086337C50773E',  # Jelle van der Waa <jelle@archlinux.org>
-            }
-
-            load_from_web_key_ids = remote_key_ids - on_disk_key_ids
-            load_from_disk_key_ids = remote_key_ids - load_from_web_key_ids
-
-            self._messenger.info('Importing GPG keys from the internet...')
-            self._import_gpg_keys(abs_gpg_home_dir, load_from_web_key_ids)
-
-            self._messenger.info('Importing GPG keys from disk...')
-            for key_id in load_from_disk_key_ids:
-                abs_key_path = resource_filename(resources.__name__, '%s.asc' % key_id)
-                self._import_gpg_key_file(abs_gpg_home_dir, abs_key_path)
-
-            self._verify_file_gpg(package_filename, package_sig_filename, abs_gpg_home_dir)
-
-            self._import_gpg_keyring(abs_temp_dir, abs_gpg_home_dir, package_filename, package_yyyymmdd)
-
-            image_sig_filename = self._download_image(image_yyyy_mm_dd, '.sig')
             image_filename = self._download_image(image_yyyy_mm_dd)
-            self._verify_file_gpg(image_filename, image_sig_filename, abs_gpg_home_dir)
-
 
             abs_pacstrap_inner_root = self._extract_image(image_filename, abs_temp_dir)
             self._adjust_pacman_mirror_list(abs_pacstrap_inner_root)
