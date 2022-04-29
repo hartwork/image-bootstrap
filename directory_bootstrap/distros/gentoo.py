@@ -134,7 +134,7 @@ class GentooBootstrapper(DirectoryBootstrapper):
     def _download_stage3(self, stage3_date_str, arch_flavor):
         res = [None, None]
         for target_index, basename in (
-                (1, 'stage3-%s%s-%s.tar.xz.DIGESTS.asc' % (self._architecture, arch_flavor, stage3_date_str)),
+                (1, 'stage3-%s%s-%s.tar.xz.DIGESTS' % (self._architecture, arch_flavor, stage3_date_str)),
                 (0, 'stage3-%s%s-%s.tar.xz' % (self._architecture, arch_flavor, stage3_date_str)),
                 ):
             filename = os.path.join(self._abs_cache_dir, basename)
