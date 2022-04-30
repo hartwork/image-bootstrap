@@ -21,4 +21,4 @@ soupsieve==2.3.1
 tomli==2.0.1
 typing-extensions==4.1.1
 urllib3==1.26.8
-zipp==3.7.0
+zipp==3.8.0
