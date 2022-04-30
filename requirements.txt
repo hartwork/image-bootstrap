@@ -19,6 +19,6 @@ py==1.11.0
 pyparsing==3.0.7
 soupsieve==2.3.1
 tomli==2.0.1
-typing-extensions==4.1.1
+typing-extensions==4.2.0
 urllib3==1.26.9
 zipp==3.8.0
