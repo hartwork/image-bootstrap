@@ -15,7 +15,7 @@ from directory_bootstrap.shared.commands import (
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 
 _ABS_PACKAGE_USE = '/etc/portage/package.use'
-_ABS_PACKAGE_KEYWORDS = '/etc/portage/package.keywords'
+_ABS_PACKAGE_KEYWORDS = '/etc/portage/package.accept_keywords'
 _ABS_PACKAGE_MASK = '/etc/portage/package.mask'
 _ABS_PACKAGE_UNMASK = '/etc/portage/package.unmask'
 
@@ -292,9 +292,6 @@ class GentooStrategy(DistroStrategy):
             os.fchmod(f.fileno(), 0o755)
 
     def install_dhcp_client(self):
-        # Static route support needs dhcpcd <7.0.1 or >=7.0.7
-        # so we unlock >=7.0.7 here (see https://bugs.gentoo.org/659626)
-        self._set_package_keywords('<net-misc/dhcpcd-9999', '**')  # TODO ~arch
         self._install_package_atoms(['net-misc/dhcpcd'])
 
     def install_sudo(self):
@@ -394,7 +391,7 @@ class GentooStrategy(DistroStrategy):
 
     def _configure_kernel__enable_kvm_support(self):
         tasks = dedent("""\
-                # Based on linux-4.0.1/arch/x86/configs/kvm_guest.config
+                # Based on https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/kernel/configs/kvm_guest.config?h=v5.17.3
                 CONFIG_NET=y
                 CONFIG_NET_CORE=y
                 CONFIG_NETDEVICES=y
@@ -416,6 +413,7 @@ class GentooStrategy(DistroStrategy):
                 CONFIG_PARAVIRT=y
                 CONFIG_KVM_GUEST=y
                 CONFIG_VIRTIO=y
+                CONFIG_VIRTIO_MENU=y
                 CONFIG_VIRTIO_PCI=y
                 CONFIG_VIRTIO_BLK=y
                 CONFIG_VIRTIO_CONSOLE=y
@@ -423,6 +421,10 @@ class GentooStrategy(DistroStrategy):
                 CONFIG_9P_FS=y
                 CONFIG_NET_9P=y
                 CONFIG_NET_9P_VIRTIO=y
+                CONFIG_SCSI_LOWLEVEL=y
+                CONFIG_SCSI_VIRTIO=y
+                CONFIG_VIRTIO_INPUT=y
+                CONFIG_DRM_VIRTIO_GPU=y
                 """)
         for line in tasks.split('\n'):
             if not line or line.startswith('#'):
@@ -484,7 +486,7 @@ class GentooStrategy(DistroStrategy):
         return False
 
     def get_minimum_size_bytes(self):
-        return 7 * 1024**3
+        return 5 * 1024**3
 
     def install_acpid(self):
         self._install_package_atoms(['sys-power/acpid'])
