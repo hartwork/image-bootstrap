@@ -8,7 +8,7 @@ requests==2.27.1
 
 # Indirect
 attrs==21.4.0
-certifi==2021.10.8
+certifi==2022.5.18
 charset-normalizer==2.0.12
 idna==3.3
 importlib-metadata==4.11.3
