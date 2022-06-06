@@ -10,6 +10,7 @@ import stat
 import subprocess
 import tempfile
 import time
+from contextlib import suppress
 from textwrap import dedent
 
 from directory_bootstrap.shared.byte_size import format_byte_size
@@ -871,7 +872,11 @@ class BootstrapEngine(object):
                     """), file=f)
 
     def _disable_pcspkr_autoloading(self):
-        file_name = os.path.join(self._abs_mountpoint, 'etc/modprobe.d/pcspkr_no_autoload.conf')
+        abs_modprobe_d = os.path.join(self._abs_mountpoint, 'etc/modprobe.d')
+        with suppress(FileExistsError):
+            os.mkdir(abs_modprobe_d, 0o755)
+
+        file_name = os.path.join(abs_modprobe_d, 'pcspkr_no_autoload.conf')
         self._messenger.info('Disabling auto-loading of pcspkr kernel module...')
         with open(file_name, 'w') as f:
             print(dedent("""\
