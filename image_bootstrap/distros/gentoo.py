@@ -261,6 +261,10 @@ class GentooStrategy(DistroStrategy):
         return '/boot/vmlinuz'
 
     def install_cloud_init_and_friends(self):
+        # NOTE This will make virtual/rust pull in dev-lang/rust-bin
+        #      instead of dev-lang/rust (which asked for "11520 MiB disk space")
+        self._add_package_mask('dev-lang/rust')
+
         self._install_package_atoms(['app-emulation/cloud-init', 'net-misc/openssh'])
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
