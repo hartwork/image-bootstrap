@@ -5,6 +5,7 @@
 
 import os
 from abc import ABCMeta, abstractmethod
+from contextlib import suppress
 
 import image_bootstrap.loaders._yaml as yaml
 from directory_bootstrap.shared.commands import COMMAND_WGET
@@ -156,7 +157,9 @@ class DistroStrategy(object, metaclass=ABCMeta):
 
     def disable_cloud_init_syslog_fix_perms(self):
         # https://github.com/hartwork/image-bootstrap/issues/17
-        filename = os.path.join(self._abs_mountpoint, 'etc/cloud/cloud.cfg.d/00_syslog_fix_perms.cfg')
+        abs_cloud_cfg_d = os.path.join(self._abs_mountpoint, 'etc/cloud/cloud.cfg.d')
+        os.makedirs(abs_cloud_cfg_d, 0o755, exist_ok=True)
+        filename = os.path.join(abs_cloud_cfg_d, '00_syslog_fix_perms.cfg')
         self._messenger.info('Writing file "%s"...' % filename)
         with open(filename, 'w') as f:
             print('syslog_fix_perms: null', file=f)
@@ -173,7 +176,10 @@ class DistroStrategy(object, metaclass=ABCMeta):
         system_info['distro'] = self.get_cloud_init_distro()
 
     def adjust_etc_cloud_cfg(self):
-        filename = os.path.join(self._abs_mountpoint, 'etc/cloud/cloud.cfg')
+        abs_etc_cloud = os.path.join(self._abs_mountpoint, 'etc/cloud')
+        with suppress(FileExistsError):
+            os.mkdir(abs_etc_cloud, 0o755)
+        filename = os.path.join(abs_etc_cloud, 'cloud.cfg')
         self._messenger.info('Adjusting file "%s"...' % filename)
         with open(filename, 'r') as f:
             d = yaml.safe_load(f.read())
