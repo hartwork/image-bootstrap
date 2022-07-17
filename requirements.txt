@@ -1,7 +1,7 @@
 # Direct
 beautifulsoup4==4.11.1
 colorama==0.4.4
-lxml==4.8.0
+lxml==4.9.1
 pytest==7.1.2
 PyYAML==6.0
 requests==2.27.1
@@ -21,4 +21,4 @@ soupsieve==2.3.2.post1
 tomli==2.0.1
 typing_extensions==4.2.0
 urllib3==1.26.9
-zipp==3.8.0
+zipp==3.8.1
