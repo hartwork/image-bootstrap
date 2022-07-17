@@ -1,6 +1,6 @@
 # Direct
 beautifulsoup4==4.11.1
-colorama==0.4.4
+colorama==0.4.5
 lxml==4.9.1
 pytest==7.1.2
 PyYAML==6.0
