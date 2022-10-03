@@ -11,7 +11,7 @@ attrs==22.1.0
 certifi==2022.9.24
 charset-normalizer==2.1.1
 idna==3.4
-importlib-metadata==4.12.0
+importlib-metadata==5.0.0
 iniconfig==1.1.1
 packaging==21.3
 pluggy==1.0.0
