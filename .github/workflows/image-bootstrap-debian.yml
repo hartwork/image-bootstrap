@@ -72,6 +72,6 @@ jobs:
 
       - uses: actions/upload-artifact@v3.1.0
         with:
-          name: debian-chroot-qcow2
+          name: debian-openstack-qcow2
           path: '*.qcow2'
           if-no-files-found: error
