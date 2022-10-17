@@ -14,7 +14,6 @@
 * [Usage (`--help` output)](#HelpOutput)
 * [Hints on using image-bootstrap within a pipe](#Piping)
 * [Known limitations](#KnownLimitations)
-    * [Installing Debian wheezy to loop devices](#DebianWheezyLoopDevice)
     * [Installing to partition block devices](#PartitionBlockTarget)
 
 
@@ -76,13 +75,13 @@ Support for Alpine Linux chroots came into in March 2018.
 <a name="ExampleRun"></a>
 # Example run
 
-The following is a complete demo of installing Debian jessie to LVM volume `/dev/vg/lv`
+The following is a complete demo of installing Debian stretch to LVM volume `/dev/vg/lv`
 and launching the resulting image using KVM.
 
 ```console
 # ${EDITOR} root_password.txt
 
-# sudo image-bootstrap --hostname jessie debian \
+# sudo image-bootstrap --hostname stretch debian \
                                   --password-file root_password.txt /dev/vg/lv
      _                          __             __      __
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____
@@ -127,7 +126,7 @@ Mounting partitions...
 Creating directory "/mnt/tmpFczeFl/etc"...
 Writing file "/mnt/tmpFczeFl/etc/hostname"...
 Writing file "/mnt/tmpFczeFl/etc/resolv.conf" (based on file "/etc/resolv.conf")...
-Bootstrapping Debian "jessie" into "/mnt/tmpFczeFl"...
+Bootstrapping Debian "stretch" into "/mnt/tmpFczeFl"...
 Writing file "/mnt/tmpFczeFl/etc/hostname"...
 Writing file "/mnt/tmpFczeFl/etc/resolv.conf" (based on file "/etc/resolv.conf")...
 Writing file "/mnt/tmpFczeFl/etc/fstab"...
@@ -361,7 +360,7 @@ usage: image-bootstrap debian [-h] [--debootstrap COMMAND] [--release RELEASE]
 
 optional arguments:
   -h, --help            show this help message and exit
-  --release RELEASE     specify Debian release (default: jessie)
+  --release RELEASE     specify Debian release (default: stretch)
   --mirror URL          specify Debian mirror to use (e.g.
                         http://localhost:3142/debian for a local instance of
                         apt-cacher-ng; default:
@@ -410,18 +409,6 @@ for more details.)
 
 
 <a name="PartitionBlockTarget"></a>
-## Installing Debian _wheezy_ to loop devices
-
-GRUB 1.99 has trouble installing to loop devices.
-As a result, using **image-bootstrap** to install e.g. Debian _wheezy_ to a loop device
-requires
-
- . bootloader approach `host-grub2-device` or `host-grub2-drive` and
-
- . a more recent version of GRUB 2.x on the system running **image-bootstrap**.
-
-
-<a name="DebianWheezyLoopDevice"></a>
 ## Installing to partition block devices
 
 Linux does not like partitions in partitions much.
