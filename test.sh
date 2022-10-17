@@ -51,10 +51,8 @@ set -e
 
 BUILD arch-openstack \
 	--openstack arch
-BUILD debian-wheezy \
-	--bootloader host-grub2-drive debian --release wheezy --mirror "${DEBIAN_MIRROR_URL}"
-BUILD debian-jessie-openstack \
-	--openstack debian --release jessie --mirror "${DEBIAN_MIRROR_URL}"
+BUILD debian-stretch-openstack \
+	--openstack debian --release stretch --mirror "${DEBIAN_MIRROR_URL}"
 BUILD ubuntu-vivid \
 	ubuntu --release vivid
 

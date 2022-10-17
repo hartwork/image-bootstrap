@@ -10,14 +10,17 @@ class DebianStrategy(DebianBasedDistroStrategy):
     DISTRO_KEY = 'debian'
     DISTRO_NAME_SHORT = 'Debian'
     DISTRO_NAME_LONG = 'Debian GNU/Linux'
-    DEFAULT_RELEASE = 'jessie'
+    DEFAULT_RELEASE = 'stretch'
     DEFAULT_MIRROR_URL = 'http://httpredir.debian.org/debian'
     APT_CACHER_NG_URL = 'http://localhost:3142/debian'
 
     def check_release(self):
         if self._release in ('stable', 'testing'):
-            raise ValueError('For Debian releases, please use names like "jessie" rather than "%s".'
+            raise ValueError('For Debian releases, please use names like "stretch" rather than "%s".'
                 % self._release)
+
+        if self._release in ('wheezy', 'jessie'):
+            raise ValueError('Release "%s" is no longer supported.' % self._release)
 
     def get_kernel_package_name(self, architecture):
         if architecture == 'i386':
@@ -29,22 +32,15 @@ class DebianStrategy(DebianBasedDistroStrategy):
         self._install_packages(['cloud-init', 'cloud-utils', 'cloud-initramfs-growroot'])
 
     def uses_systemd(self):
-        # NOTE: assumes not supporting anything older than wheezy
-        return self._release != 'wheezy'
+        return True
 
     def uses_systemd_resolved(self, with_openstack):
         return False
 
     def get_minimum_size_bytes(self):
-        if self._release == 'wheezy':
-            return 1 * 1024**3
-        else:
-            return 2 * 1024**3
+        return 2 * 1024**3
 
     def get_extra_mkfs_ext4_options(self):
         args = super(DebianStrategy, self).get_extra_mkfs_ext4_options()
-
-        if self._release == 'jessie':
-            args += ['-O', '^metadata_csum']
-
+        args += ['-O', '^metadata_csum']
         return args
