@@ -28,7 +28,9 @@ jobs:
             -r requirements.txt
           pip3 check
           # Ensure that even indirect dependencies are fully pinned
-          diff -u0 <(pip3 freeze | sort -f) <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f)
+          diff -u0 \
+            <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f) \
+            <(pip3 freeze | sort -f)
 
       - name: Smoke test creation of Ubuntu OpenStack images
         run: |-
