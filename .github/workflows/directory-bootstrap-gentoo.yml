@@ -29,12 +29,9 @@ jobs:
 
       - name: Install
         run: |-
-          pip install \
+          sudo pip3 install \
             --disable-pip-version-check \
-            --user \
-            --no-warn-script-location \
             .
-          echo "PATH=${HOME}/.local/bin:${PATH}" >> "${GITHUB_ENV}"
 
       - name: Smoke test creation of Gentoo chroots
         run: |-
@@ -43,7 +40,7 @@ jobs:
           directory-bootstrap --help         ; echo
           directory-bootstrap gentoo --help  ; echo
 
-          sudo PYTHONUNBUFFERED=1 $(which directory-bootstrap) --verbose --debug gentoo /tmp/gentoo_chroot/
+          sudo PYTHONUNBUFFERED=1 directory-bootstrap --verbose --debug gentoo /tmp/gentoo_chroot/
 
       - name: Create .tar archive
         run: |-
