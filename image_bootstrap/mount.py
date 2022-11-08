@@ -23,7 +23,10 @@ class MountFinder(object):
     @staticmethod
     def _parse_line(line):
         assert '\n' not in line
-        return _PROC_PID_MOUNTINFO_LINE.match(line).groupdict()
+        match = _PROC_PID_MOUNTINFO_LINE.match(line)
+        if match is None:
+            raise ValueError(f'Unexpected line format: {line!r}')
+        return match.groupdict()
 
     def _load_text(self, text):
         for line in text.split('\n'):
