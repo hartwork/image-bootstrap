@@ -9,7 +9,7 @@ on:
 jobs:
   install_and_run:
     name: Smoke test creation of Ubuntu OpenStack images
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout Git repository
         uses: actions/checkout@v3
@@ -29,12 +29,9 @@ jobs:
 
       - name: Install
         run: |-
-          pip install \
+          sudo pip3 install \
             --disable-pip-version-check \
-            --user \
-            --no-warn-script-location \
             .
-          echo "PATH=${HOME}/.local/bin:${PATH}" >> "${GITHUB_ENV}"
 
       - name: Install runtime dependencies
         run: |-
@@ -58,7 +55,7 @@ jobs:
           LOOP_DEV="$(sudo losetup --show --find -f /tmp/disk | tee /dev/stderr)"
           echo "LOOP_DEV=${LOOP_DEV}" >> "${GITHUB_ENV}"
 
-          sudo PYTHONUNBUFFERED=1 $(which image-bootstrap) --verbose --debug --openstack ubuntu ${LOOP_DEV}
+          sudo PYTHONUNBUFFERED=1 image-bootstrap --verbose --debug --openstack ubuntu ${LOOP_DEV}
 
       - name: Create .qcow2 image from loop device
         run: |-

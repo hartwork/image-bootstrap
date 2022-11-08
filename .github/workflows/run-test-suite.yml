@@ -9,7 +9,7 @@ on:
 jobs:
   install_and_run:
     name: Run the test suite
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 
@@ -20,15 +20,17 @@ jobs:
 
       - name: Install test dependencies
         run: |-
-          python -m venv venv/
+          python3 -m venv venv/
           source venv/bin/activate
-          pip install \
+          pip3 install \
             --disable-pip-version-check \
             --no-warn-script-location \
             -r requirements.txt
-          pip check
+          pip3 check
           # Ensure that even indirect dependencies are fully pinned
-          diff -u0 <(pip freeze | sort -f) <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f)
+          diff -u0 \
+            <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f) \
+            <(pip3 freeze | sort -f)
 
       - name: Smoke test creation of Ubuntu OpenStack images
         run: |-

@@ -9,7 +9,6 @@ from directory_bootstrap.distros.alpine import AlpineBootstrapper
 from directory_bootstrap.distros.arch import ArchBootstrapper
 from directory_bootstrap.distros.base import (
         BOOTSTRAPPER_CLASS_FIELD, add_general_directory_bootstrapping_options)
-from directory_bootstrap.distros.centos import CentOsBootstrapper
 from directory_bootstrap.distros.gentoo import GentooBootstrapper
 from directory_bootstrap.distros.void import VoidBootstrapper
 from directory_bootstrap.shared.executor import Executor, sanitize_path
@@ -68,7 +67,6 @@ def _main__level_two():
     for strategy_clazz in (
             AlpineBootstrapper,
             ArchBootstrapper,
-            CentOsBootstrapper,
             GentooBootstrapper,
             VoidBootstrapper,
             ):
