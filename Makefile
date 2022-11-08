@@ -5,7 +5,7 @@
 PREFIX = /usr/local
 DESTDIR = /
 
-PYTHON = python
+PYTHON = python3
 
 all:
 
