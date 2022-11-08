@@ -11,7 +11,7 @@ _PROC_PID_MOUNTINFO_LINE = re.compile(
         '^(?P<mount_id>[0-9]+) '
         '(?P<parent_id>[0-9]+) '
         '(?P<major>[0-9]+):(?P<minor>[0-9]+) '
-        '(?P<root>(?:/|net:)[^ ]*) '
+        '(?P<root>(?:/|mnt:|net:)[^ ]*) '
         '(?P<mount>/[^ ]*) '  # Spaces are encoded as "\040"
         '.+$')
 
