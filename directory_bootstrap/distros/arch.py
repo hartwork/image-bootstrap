@@ -142,6 +142,33 @@ class ArchBootstrapper(DirectoryBootstrapper):
         after = datetime.datetime.now()
         self._messenger.info('Took %d seconds.' % (after - before).total_seconds())
 
+    def _sync_archlinux_keyring(self, abs_pacstrap_inner_root):
+        # NOTE: Motivation is to evade pacman's inspection of two
+        #       non-existing mountpoints "/var/cache/pacman/pkg/" and "/"
+        self._messenger.info('Disabling CheckSpace for chroot pacman...')
+        env = self._make_chroot_env()
+        cmd = [
+                COMMAND_CHROOT,
+                abs_pacstrap_inner_root,
+                'sed',
+                's/^CheckSpace/#CheckSpace/',
+                '-i',
+                '/etc/pacman.conf',
+                ]
+        self._executor.check_call(cmd, env=env)
+
+        self._messenger.info('Syncing package archlinux-keyring...')
+        cmd = [
+                COMMAND_UNSHARE,
+                '--fork', '--pid',  # to auto-kill started gpg-agent
+                COMMAND_CHROOT,
+                abs_pacstrap_inner_root,
+                'pacman',
+                '--sync', '--refresh', '--noconfirm',
+                'archlinux-keyring',
+                ]
+        self._executor.check_call(cmd, env=env)
+
     def _run_pacstrap(self, abs_pacstrap_inner_root, rel_pacstrap_target_dir):
         self._messenger.info('Pacstrapping into "%s"...'
                 % (os.path.join(abs_pacstrap_inner_root, rel_pacstrap_target_dir)))
@@ -222,6 +249,7 @@ class ArchBootstrapper(DirectoryBootstrapper):
                 self._mount_nondisk_chroot_mounts(abs_pacstrap_inner_root)
                 try:
                     self._initialize_pacman_keyring(abs_pacstrap_inner_root)
+                    self._sync_archlinux_keyring(abs_pacstrap_inner_root)
                     self._run_pacstrap(abs_pacstrap_inner_root, rel_pacstrap_target_dir)
                     self._fix_root_login_at(abs_pacstrap_target_dir)
                 finally:
