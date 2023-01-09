@@ -61,7 +61,7 @@ jobs:
           sudo qemu-img convert -f raw -O qcow2 "${LOOP_DEV}" "${img_base_name}"
           ls -lh "${img_base_name}"
 
-      - uses: actions/upload-artifact@v3.1.1
+      - uses: actions/upload-artifact@v3.1.2
         with:
           name: gentoo-openstack-qcow2
           path: '*.qcow2'
