@@ -51,7 +51,7 @@ jobs:
           ( cd /tmp/gentoo_chroot/ && sudo tar c . ) | xz -T "$(nproc)" > "${chroot_base_name}"
           ls -lh "${chroot_base_name}"
 
-      - uses: actions/upload-artifact@v3.1.1
+      - uses: actions/upload-artifact@v3.1.2
         with:
           name: gentoo-chroot-qcow2
           path: '*.tar.xz'
