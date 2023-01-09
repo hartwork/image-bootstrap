@@ -13,7 +13,7 @@ charset-normalizer==2.1.1
 exceptiongroup==1.1.0
 idna==3.4
 importlib-metadata==6.0.0
-iniconfig==1.1.1
+iniconfig==2.0.0
 packaging==22.0
 pluggy==1.0.0
 pyparsing==3.0.9
