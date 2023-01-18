@@ -26,7 +26,7 @@ SUPPORTED_ARCHITECTURES = ('i686', 'x86_64')
 _NON_DISK_MOUNT_TASKS = (
         ('/dev', ['-o', 'bind'], 'dev'),
         ('/dev/pts', ['-o', 'bind'], 'dev/pts'),  # for gpgme
-        ('PROC', ['-t', 'proc'], 'proc'),  # for pacstrap mountpoint detection
+        ('proc', ['-t', 'proc'], 'proc'),  # for pacstrap mountpoint detection
         )
 
 

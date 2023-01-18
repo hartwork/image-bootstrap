@@ -55,8 +55,8 @@ _CHROOT_SCRIPT_TARGET_DIR = 'root/chroot-scripts/'
 _NON_DISK_MOUNT_TASKS = (
         ('/dev', ['-o', 'bind'], 'dev'),
         ('/dev/pts', ['-o', 'bind'], 'dev/pts'),
-        ('TMPFS', ['-t', 'tmpfs', '-o', 'mode=1777'], 'dev/shm'),
-        ('PROC', ['-t', 'proc'], 'proc'),
+        ('tmpfs', ['-t', 'tmpfs', '-o', 'mode=1777'], 'dev/shm'),
+        ('proc', ['-t', 'proc'], 'proc'),
         ('/sys', ['-o', 'bind'], 'sys'),
         )
 
