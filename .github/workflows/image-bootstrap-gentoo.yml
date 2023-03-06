@@ -47,7 +47,7 @@ jobs:
           image-bootstrap --help         ; echo
           image-bootstrap gentoo --help  ; echo
 
-          truncate --size 7g /tmp/disk
+          truncate --size 8g /tmp/disk
           LOOP_DEV="$(sudo losetup --show --find -f /tmp/disk | tee /dev/stderr)"
           echo "LOOP_DEV=${LOOP_DEV}" >> "${GITHUB_ENV}"
 
