@@ -480,7 +480,7 @@ class GentooStrategy(DistroStrategy):
                 COMMAND_CHROOT, self._abs_mountpoint,
                 'make',
                 '-C', '/usr/src/linux',
-                'modules_install', 'install',
+                'modules_install', 'install', 'clean',
                 ], env=self.create_chroot_env())
 
     def uses_systemd(self):
