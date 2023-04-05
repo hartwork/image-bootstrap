@@ -47,6 +47,15 @@ jobs:
           image-bootstrap --help         ; echo
           image-bootstrap gentoo --help  ; echo
 
+          free -g
+          df -H /tmp/
+          mount | grep /tmp
+
+          # Require more than 7 GiB free RAM
+          [[ "$(free -g | grep Mem: | awk '{print $4}' | tee /dev/stderr)" -gt 7 ]]
+
+          exit 1
+
           truncate --size 7g /tmp/disk
           LOOP_DEV="$(sudo losetup --show --find -f /tmp/disk | tee /dev/stderr)"
           echo "LOOP_DEV=${LOOP_DEV}" >> "${GITHUB_ENV}"
