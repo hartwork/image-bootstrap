@@ -17,7 +17,7 @@ iniconfig==2.0.0
 packaging==23.1
 pluggy==1.0.0
 pyparsing==3.0.9
-soupsieve==2.4
+soupsieve==2.4.1
 tomli==2.0.1
 typing_extensions==4.5.0
 urllib3==1.26.15
