@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
 
       - name: Cache pip
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8  # v3.3.1
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}
@@ -23,7 +23,7 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Set up Python 3.7
-        uses: actions/setup-python@v4.5.0
+        uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435  # v4.5.0
         with:
           python-version: 3.7
 
@@ -61,7 +61,7 @@ jobs:
           sudo qemu-img convert -f raw -O qcow2 "${LOOP_DEV}" "${img_base_name}"
           ls -lh "${img_base_name}"
 
-      - uses: actions/upload-artifact@v3.1.2
+      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce  # v3.1.2
         with:
           name: arch-openstack-qcow2
           path: '*.qcow2'
