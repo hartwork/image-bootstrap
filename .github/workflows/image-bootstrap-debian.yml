@@ -13,9 +13,9 @@ jobs:
       matrix:
         debian_release:
           # https://www.debian.org/releases/
-          - stretch
           - buster
           - bullseye
+          - bookworm
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Git repository
