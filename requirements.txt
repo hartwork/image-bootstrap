@@ -4,7 +4,7 @@ colorama==0.4.6
 lxml==4.9.2
 pytest==7.3.1
 PyYAML==6.0
-requests==2.29.0
+requests==2.30.0
 
 # Indirect
 attrs==23.1.0
@@ -20,5 +20,5 @@ pyparsing==3.0.9
 soupsieve==2.4.1
 tomli==2.0.1
 typing_extensions==4.5.0
-urllib3==1.26.15
+urllib3==2.0.2
 zipp==3.15.0
