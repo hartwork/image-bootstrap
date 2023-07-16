@@ -85,10 +85,10 @@ class AlpineBootstrapper(DirectoryBootstrapper):
 
         tarball_download_url = self._create_tarball_download_url(
             version_tuple, self._architecture)
-        signatur_download_url = '{}.asc'.format(tarball_download_url)
+        signature_download_url = '{}.asc'.format(tarball_download_url)
 
         # Signature first, so we fail earlier if we do
-        abs_filename_signature = self._download_file(signatur_download_url)
+        abs_filename_signature = self._download_file(signature_download_url)
         abs_filename_tarball = self._download_file(tarball_download_url)
 
         abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
