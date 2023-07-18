@@ -43,7 +43,7 @@ Alpine Linux, Arch Linux, Gentoo, and Void Linux.
 [grml-debootstrap](https://github.com/grml/grml-debootstrap).
 Primarily, it can be used to create Debian/Ubuntu or Arch images ready to be launched as a virtual machine.
 
-In comparision to grml-debootstrap, by now **image-bootstrap**
+In comparison to grml-debootstrap, by now **image-bootstrap**
 
  * installs to block devices only,
 
@@ -419,7 +419,7 @@ The temporary target must
 
  * be 2 GiB in space or more (to hold the whole distribution) and
 
- * smaller or equal than the actualy target (for the later copy to work).
+ * smaller or equal than the actually target (for the later copy to work).
 
 ```console
 # dmsetup create dm-linear-vda4 --table "0 $(blockdev --getsz /dev/vda4) linear /dev/vda4 0"

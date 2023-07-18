@@ -27,8 +27,8 @@ iface eth0 inet dhcp
 
 
 class _ArchitectureMachineMismatch(Exception):
-    def __init__(self, architecure, machine):
-        self._architecture = architecure
+    def __init__(self, architecture, machine):
+        self._architecture = architecture
         self._machine = machine
 
     def __str__(self):
