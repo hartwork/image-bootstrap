@@ -44,7 +44,7 @@ class VoidBootstrapper(DirectoryBootstrapper):
 
     def _download_static_image(self):
         basename = 'xbps-static-latest.%s-musl.tar.xz' % self._architecture
-        url = 'https://alpha.de.repo.voidlinux.org/static/%s' % basename
+        url = 'https://repo-default.voidlinux.org/static/%s' % basename
         abs_filename = os.path.join(self._abs_cache_dir, basename)
         self.download_url_to_file(url, abs_filename)
         return self.uncompress_xz_tarball(abs_filename)
@@ -83,7 +83,7 @@ class VoidBootstrapper(DirectoryBootstrapper):
             self._executor.check_call([
                     xbps_install,
                     '--rootdir', self._abs_target_dir,
-                    '--repository=https://alpha.de.repo.voidlinux.org/current/musl',
+                    '--repository=https://repo-default.voidlinux.org/current/musl',
                     '--sync', '--yes',
                     'base-system',
                     ], cwd=abs_temp_dir)
