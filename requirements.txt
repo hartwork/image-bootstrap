@@ -12,7 +12,7 @@ certifi==2024.2.2
 charset-normalizer==3.3.2
 exceptiongroup==1.2.0
 idna==3.6
-importlib-metadata==7.0.2
+importlib_metadata==7.0.2
 iniconfig==2.0.0
 packaging==23.2
 pluggy==1.4.0
