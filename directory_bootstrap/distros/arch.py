@@ -73,8 +73,8 @@ class ArchBootstrapper(DirectoryBootstrapper):
         return self.get_url_content('https://mirrors.kernel.org/archlinux/iso/')
 
     def _download_image(self, image_yyyy_mm_dd, suffix=''):
-        filename = os.path.join(self._abs_cache_dir, 'archlinux-bootstrap-%s-%s.tar.gz%s' % (image_yyyy_mm_dd, self._architecture, suffix))
-        url = 'https://mirrors.kernel.org/archlinux/iso/%s/archlinux-bootstrap-%s-%s.tar.gz%s' % (image_yyyy_mm_dd, image_yyyy_mm_dd, self._architecture, suffix)
+        filename = os.path.join(self._abs_cache_dir, 'archlinux-bootstrap-%s-%s.tar.zst%s' % (image_yyyy_mm_dd, self._architecture, suffix))
+        url = 'https://mirrors.kernel.org/archlinux/iso/%s/archlinux-bootstrap-%s-%s.tar.zst%s' % (image_yyyy_mm_dd, image_yyyy_mm_dd, self._architecture, suffix)
         self.download_url_to_file(url, filename)
         return filename
 
