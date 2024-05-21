@@ -4,7 +4,7 @@ colorama==0.4.6
 lxml==5.1.0
 pytest==8.1.1
 PyYAML==6.0.1
-requests==2.31.0
+requests==2.32.1
 
 # Indirect
 attrs==23.2.0
