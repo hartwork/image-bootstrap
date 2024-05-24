@@ -478,9 +478,17 @@ class GentooStrategy(DistroStrategy):
                 ], env=self.create_chroot_env())
         self._executor.check_call([
                 COMMAND_CHROOT, self._abs_mountpoint,
+                'ln', '-s', 'MISSING', '/boot/vmlinuz',
+                ], env=self.create_chroot_env())
+        self._executor.check_call([
+                COMMAND_CHROOT, self._abs_mountpoint,
                 'make',
                 '-C', '/usr/src/linux',
                 'modules_install', 'install', 'clean',
+                ], env=self.create_chroot_env())
+        self._executor.check_call([
+                COMMAND_CHROOT, self._abs_mountpoint,
+                'rm', '-f', '/boot/vmlinuz.old',
                 ], env=self.create_chroot_env())
 
     def uses_systemd(self):
