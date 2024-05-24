@@ -457,7 +457,7 @@ class GentooStrategy(DistroStrategy):
     def install_kernel(self):
         self._set_package_keywords('sys-kernel/vanilla-sources', '**')  # TODO ~arch
         self._set_package_use_flags('sys-kernel/vanilla-sources', 'symlink')
-        self._install_package_atoms(['sys-kernel/vanilla-sources'])
+        self._install_package_atoms(['sys-kernel/vanilla-sources', 'sys-kernel/installkernel'])
         self._executor.check_call([
                 COMMAND_CHROOT, self._abs_mountpoint,
                 'make', '-C', '/usr/src/linux', 'defconfig',
@@ -478,9 +478,17 @@ class GentooStrategy(DistroStrategy):
                 ], env=self.create_chroot_env())
         self._executor.check_call([
                 COMMAND_CHROOT, self._abs_mountpoint,
+                'ln', '-s', 'MISSING', '/boot/vmlinuz',
+                ], env=self.create_chroot_env())
+        self._executor.check_call([
+                COMMAND_CHROOT, self._abs_mountpoint,
                 'make',
                 '-C', '/usr/src/linux',
                 'modules_install', 'install', 'clean',
+                ], env=self.create_chroot_env())
+        self._executor.check_call([
+                COMMAND_CHROOT, self._abs_mountpoint,
+                'rm', '-f', '/boot/vmlinuz.old',
                 ], env=self.create_chroot_env())
 
     def uses_systemd(self):
