@@ -274,6 +274,8 @@ class GentooStrategy(DistroStrategy):
         #      instead of dev-lang/rust (which asked for "11520 MiB disk space")
         self._add_package_mask('dev-lang/rust')
 
+        self._set_package_keywords('app-emulation/cloud-init', f'~{_HOST_ARCH}')
+
         self._install_package_atoms(['app-emulation/cloud-init', 'net-misc/openssh'])
         self.disable_cloud_init_syslog_fix_perms()
         self.install_growpart()
