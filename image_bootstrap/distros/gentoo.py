@@ -6,6 +6,7 @@
 import errno
 import glob
 import os
+import platform
 import shutil
 from textwrap import dedent
 
@@ -18,6 +19,14 @@ _ABS_PACKAGE_USE = '/etc/portage/package.use'
 _ABS_PACKAGE_KEYWORDS = '/etc/portage/package.accept_keywords'
 _ABS_PACKAGE_MASK = '/etc/portage/package.mask'
 _ABS_PACKAGE_UNMASK = '/etc/portage/package.unmask'
+
+_ARCH_OF_PLATFORM = {
+    # TODO more arches here
+    'x86_64': 'amd64',
+}
+
+_HOST_PLATFORM = platform.machine()
+_HOST_ARCH = _ARCH_OF_PLATFORM.get(_HOST_PLATFORM, _HOST_PLATFORM)
 
 
 class GentooStrategy(DistroStrategy):
@@ -455,7 +464,7 @@ class GentooStrategy(DistroStrategy):
                 ], env=self.create_chroot_env())
 
     def install_kernel(self):
-        self._set_package_keywords('sys-kernel/vanilla-sources', '**')  # TODO ~arch
+        self._set_package_keywords('sys-kernel/vanilla-sources', f'~{_HOST_ARCH}')
         self._set_package_use_flags('sys-kernel/vanilla-sources', 'symlink')
         self._install_package_atoms(['sys-kernel/vanilla-sources', 'sys-kernel/installkernel'])
         self._executor.check_call([
