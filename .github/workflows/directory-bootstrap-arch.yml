@@ -51,7 +51,7 @@ jobs:
           ( cd /tmp/arch_chroot/ && sudo tar c . ) | xz -T "$(nproc)" > "${chroot_base_name}"
           ls -lh "${chroot_base_name}"
 
-      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808  # v4.3.3
+      - uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b  # v4.3.4
         with:
           name: arch-chroot-qcow2
           path: '*.tar.xz'
