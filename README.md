@@ -1,4 +1,21 @@
-[![Build Status](https://travis-ci.org/hartwork/image-bootstrap.svg?branch=master)](https://travis-ci.org/hartwork/image-bootstrap)
+[![Run the test suite](https://github.com/hartwork/image-bootstrap/actions/workflows/run-test-suite.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/run-test-suite.yml)
+<br/>
+[![Smoke test creation of Alpine chroots](https://github.com/hartwork/image-bootstrap/actions/workflows/directory-bootstrap-alpine.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/directory-bootstrap-alpine.yml)
+<br/>
+[![Smoke test creation of Arch chroots](https://github.com/hartwork/image-bootstrap/actions/workflows/directory-bootstrap-arch.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/directory-bootstrap-arch.yml)
+<br/>
+[![Smoke test creation of Arch OpenStack images](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-arch.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-arch.yml)
+<br/>
+[![Smoke test creation of Debian OpenStack images](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-debian.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-debian.yml)
+<br/>
+[![Smoke test creation of Gentoo chroots](https://github.com/hartwork/image-bootstrap/actions/workflows/directory-bootstrap-gentoo.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/directory-bootstrap-gentoo.yml)
+<br/>
+[![Smoke test creation of Gentoo OpenStack images](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-gentoo.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-gentoo.yml)
+<br/>
+[![Smoke test creation of Ubuntu OpenStack images](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-ubuntu.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-ubuntu.yml)
+<br/>
+[![Smoke test creation of Void chroots](https://github.com/hartwork/image-bootstrap/actions/workflows/directory-bootstrap-void.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/directory-bootstrap-void.yml)
+
 
 **Table of Contents**
 
