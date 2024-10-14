@@ -151,7 +151,10 @@ class ArchBootstrapper(DirectoryBootstrapper):
                 COMMAND_CHROOT,
                 abs_pacstrap_inner_root,
                 'sed',
+                '-e',
                 's/^CheckSpace/#CheckSpace/',
+                '-e',
+                's/^DownloadUser/#DownloadUser/',
                 '-i',
                 '/etc/pacman.conf',
                 ]
