@@ -258,7 +258,7 @@ class ArchStrategy(DistroStrategy):
                 'systemd-resolved',  # for nameserver IPs from DHCP
                 'sshd',
                 'cloud-init-local',
-                'cloud-init',
+                'cloud-init-network',
                 'cloud-config',
                 'cloud-final',
                 ])
