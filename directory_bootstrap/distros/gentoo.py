@@ -5,6 +5,7 @@
 
 import datetime
 import errno
+import importlib.resources
 import os
 import re
 import shutil
@@ -19,7 +20,6 @@ from directory_bootstrap.distros.base import (
 from directory_bootstrap.shared.commands import (
         COMMAND_GPG, COMMAND_MD5SUM, COMMAND_SHA512SUM, COMMAND_TAR,
         COMMAND_UNXZ)
-from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
 from directory_bootstrap.tools.stage3_latest_parser import \
         find_latest_stage3_date
 
@@ -296,7 +296,9 @@ class GentooBootstrapper(DirectoryBootstrapper):
             ('2C13823B8237310FA213034930D132FF0FF50EEB', 'Gentoo Authority Key L2 for Developers',                              '2019-04-01', '2020-07-01'),
         ]
         for signature in signatures:
-            filename = resource_filename(resources.__name__, '{}.asc'.format(signature[0]))
+            filename = str(importlib.resources
+                           .files(resources.__name__)
+                           .joinpath('{}.asc'.format(signature[0])))
             cmd = self._get_gpg_argv_start(abs_gpg_home_dir) + [
                 '--import', filename,
             ]

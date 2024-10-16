@@ -17,7 +17,6 @@ from directory_bootstrap.distros.base import (
 from directory_bootstrap.shared.commands import (
         COMMAND_CHROOT, COMMAND_MOUNT, COMMAND_TAR,
         COMMAND_UMOUNT, COMMAND_UNSHARE)
-from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
 from directory_bootstrap.shared.mount import try_unmounting
 from directory_bootstrap.shared.resolv_conf import filter_copy_resolv_conf
 
