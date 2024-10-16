@@ -1,3 +1,4 @@
+import importlib.resources
 import os
 import re
 import shutil
@@ -7,7 +8,6 @@ from tarfile import TarFile
 import directory_bootstrap.resources.alpine as resources
 from directory_bootstrap.distros.base import DirectoryBootstrapper
 from directory_bootstrap.shared.commands import COMMAND_GPG, COMMAND_UNSHARE
-from directory_bootstrap.shared.loaders._pkg_resources import resource_filename
 
 
 SUPPORTED_ARCHITECTURES = ('i686', 'x86_64')
@@ -94,8 +94,9 @@ class AlpineBootstrapper(DirectoryBootstrapper):
         abs_temp_dir = os.path.abspath(tempfile.mkdtemp())
         try:
             abs_gpg_home_dir = self._initialize_gpg_home(abs_temp_dir)
-            release_pubring_gpg = resource_filename(resources.__name__,
-                                                    'ncopa.asc')
+            release_pubring_gpg = str(importlib.resources
+                                      .files(resources.__name__)
+                                      .joinpath("ncopa.asc"))
             self._import_gpg_key_file(abs_gpg_home_dir, release_pubring_gpg)
             self._verify_file_gpg(abs_filename_tarball,
                                   abs_filename_signature, abs_gpg_home_dir)

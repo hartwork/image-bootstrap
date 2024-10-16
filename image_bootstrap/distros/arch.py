@@ -6,8 +6,6 @@
 import os
 from textwrap import dedent
 
-from pkg_resources import resource_filename
-
 from directory_bootstrap.distros.arch import (
         SUPPORTED_ARCHITECTURES, ArchBootstrapper)
 from directory_bootstrap.shared.commands import (
