@@ -246,8 +246,12 @@ make an **image-bootstrap** Debian package yourself easily from Git as follows:
 Cloning into 'image-bootstrap'...
 [..]
 
-# make -C image-bootstrap/ deb
+# cd image-bootstrap/
+
+# debuild -uc -us --lintian-opts --display-info
 [..]
+
+# cd ..
 
 # ls *.deb
 image-bootstrap_0.9.1_all.deb
