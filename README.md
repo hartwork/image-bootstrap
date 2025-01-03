@@ -21,6 +21,7 @@
 
 * [About](#About)
 * [History](#History)
+* [Installation](#Installation)
 * [Example run](#ExampleRun)
 * [Speeding things up](#SpeedingThingsUp)
     * [Using RAM instead of HDD/SSD](#UsingRamInsteadOfDisk)
@@ -87,6 +88,35 @@ In comparison to grml-debootstrap, by now **image-bootstrap**
 Support for Gentoo followed, after.
 Support for Void Linux ~and CentOS~ chroots came into live during 34c3, December 2017.
 Support for Alpine Linux chroots came into in March 2018.
+
+
+<a name="Installation"></a>
+# Installation
+
+
+## Via latest release from PyPI
+
+- a) `pipx install image-bootstrap`
+
+- b) `pip3 install --user --break-system-packages image-bootstrap`
+
+
+## Via Git `HEAD`
+
+- a) `pipx install git+https://github.com/hartwork/image-bootstrap`
+
+- b) `pip3 install --user --break-system-packages git+https://github.com/hartwork/image-bootstrap`
+
+
+## Extending `${PATH}`
+
+For commands `image-bootstrap` and `directory-bootstrap` to be found, you'll need to extend `${PATH}`, e.g.:
+
+```bash
+export PATH="${PATH}:${HOME}/.local/bin"  # one-time or via ~/.bashrc
+
+image-bootstrap --help
+```
 
 
 <a name="ExampleRun"></a>
