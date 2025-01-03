@@ -252,7 +252,7 @@ Cloning into 'image-bootstrap'...
 # ls *.deb
 image-bootstrap_0.9.1_all.deb
 
-# sudo dpkg -i image-bootstrap_0.9.1_all.deb
+# sudo apt install ./image-bootstrap_0.9.1_all.deb
 [..]
 ```
 
