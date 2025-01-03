@@ -37,7 +37,7 @@ jobs:
             <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f) \
             <(pip3 freeze | sort -f)
 
-      - name: Smoke test creation of Ubuntu OpenStack images
+      - name: Run the test suite
         run: |-
           source venv/bin/activate
           pytest -v --doctest-modules
