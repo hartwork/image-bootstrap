@@ -5,6 +5,7 @@ on:
   push:
   schedule:
     - cron: '0 16 * * 5'  # Every Friday 4pm
+  workflow_dispatch:
 
 jobs:
   install_and_run:
