@@ -21,6 +21,7 @@
 
 * [About](#About)
 * [History](#History)
+* [Installation](#Installation)
 * [Example run](#ExampleRun)
 * [Speeding things up](#SpeedingThingsUp)
     * [Using RAM instead of HDD/SSD](#UsingRamInsteadOfDisk)
@@ -87,6 +88,47 @@ In comparison to grml-debootstrap, by now **image-bootstrap**
 Support for Gentoo followed, after.
 Support for Void Linux ~and CentOS~ chroots came into live during 34c3, December 2017.
 Support for Alpine Linux chroots came into in March 2018.
+
+
+<a name="Installation"></a>
+# Installation
+
+There are many ways to install Python software onto your system
+and its hard to predict which option fits your environment best.
+In general there are three options:
+
+- a) install using a package of your distribution (if they have some)
+- b) install from PyPI directly (more on that below)
+- c) install from a Git clone (mostly during development)
+
+For installing the latest release from PyPI your main options are:
+
+
+## A) `pipx install`
+
+```bash
+pipx install image-bootstrap
+export PATH="${PATH}:${HOME}/.local/bin"
+image-bootstrap --help
+```
+
+
+## B) `pip3 install` + virtual environment
+
+```bash
+python3 -m venv venv/
+venv/bin/pip3 install image-bootstrap
+venv/bin/image-bootstrap --help
+```
+
+
+## C) `pip3 install [--user]` (does *not* work in Ubuntu/Debian/Gentoo/..)
+
+```bash
+pip3 install --user image-bootstrap
+export PATH="${PATH}:${HOME}/.local/bin"
+image-bootstrap --help
+```
 
 
 <a name="ExampleRun"></a>
@@ -246,13 +288,17 @@ make an **image-bootstrap** Debian package yourself easily from Git as follows:
 Cloning into 'image-bootstrap'...
 [..]
 
-# make -C image-bootstrap/ deb
+# cd image-bootstrap/
+
+# debuild -uc -us --lintian-opts --display-info
 [..]
+
+# cd ..
 
 # ls *.deb
 image-bootstrap_0.9.1_all.deb
 
-# sudo dpkg -i image-bootstrap_0.9.1_all.deb
+# sudo apt install ./image-bootstrap_0.9.1_all.deb
 [..]
 ```
 
