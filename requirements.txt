@@ -1,7 +1,7 @@
 # Direct
 beautifulsoup4==4.13.3
 colorama==0.4.6
-coverage==7.6.10
+coverage==7.6.11
 lxml==5.3.1
 pytest==8.3.4
 PyYAML==6.0.2
