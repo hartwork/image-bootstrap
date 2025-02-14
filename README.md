@@ -311,7 +311,7 @@ in a bit more detail.
 
 A dump of the current `--help` output would be:
 ```console
-# image-bootstrap --help
+# COLUMNS=80 image-bootstrap --help
 usage: image-bootstrap [-h] [--version] [--color {never,always,auto}]
                        [--debug] [--quiet] [--verbose] [--arch ARCHITECTURE]
                        [--bootloader {auto,chroot-grub2-device,chroot-grub2-drive,host-extlinux,host-grub2-device,host-grub2-drive,none}]
@@ -329,7 +329,7 @@ Command line tool for creating bootable virtual machine images
 positional arguments:
   DEVICE                block device to install to
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
 
@@ -395,7 +395,7 @@ subcommands (choice of distribution):
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____
    / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \
   /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/
-               /___/                      v2.0.0 :: 2020-02-28  /_/
+               /___/                      v2.0.5 :: 2021-01-08  /_/
 
 Software libre licensed under AGPL v3 or later.
 Brought to you by Sebastian Pipping <sebastian@pipping.org>.
