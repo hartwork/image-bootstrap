@@ -15,7 +15,7 @@ _NEEDS_ESCAPING = re.compile('([!`"\'$ \\\\{}()?*&<>;])')
 VERBOSITY_QUIET = object()
 VERBOSITY_VERBOSE = object()
 
-BANNER = r"""\
+BANNER = r"""
      _                          __             __      __               
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____  
    / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \ 
@@ -24,7 +24,7 @@ BANNER = r"""\
 
 Software libre licensed under AGPL v3 or later.
 Brought to you by Sebastian Pipping <sebastian@pipping.org>.
-Please report bugs at %(github_home)s.  Thank you!\
+Please report bugs at %(github_home)s.  Thank you!
 """ % {
     '3456789_123456789_': '%*s' \
         % (len('%(3456789_123456789_)s'),
