@@ -16,8 +16,8 @@ class DebianStrategy(DebianBasedDistroStrategy):
 
     def check_release(self):
         if self._release in ('stable', 'testing'):
-            raise ValueError('For Debian releases, please use names like "bookworm" rather than "%s".'
-                % self._release)
+            raise ValueError('For Debian releases, please use names like "%s" rather than "%s".'
+                % (self.DEFAULT_RELEASE, self._release))
 
         if self._release in ('wheezy', 'jessie', 'stretch', 'buster'):
             raise ValueError('Release "%s" is no longer supported.' % self._release)
