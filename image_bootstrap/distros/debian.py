@@ -19,7 +19,7 @@ class DebianStrategy(DebianBasedDistroStrategy):
             raise ValueError('For Debian releases, please use names like "bookworm" rather than "%s".'
                 % self._release)
 
-        if self._release in ('wheezy', 'jessie'):
+        if self._release in ('wheezy', 'jessie', 'stretch', 'buster'):
             raise ValueError('Release "%s" is no longer supported.' % self._release)
 
     def get_kernel_package_name(self, architecture):
