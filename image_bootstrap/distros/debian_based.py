@@ -17,10 +17,16 @@ from image_bootstrap.engine import (
 
 
 _ETC_NETWORK_INTERFACES_CONTENT = """\
-# interfaces(5) file used by ifup(8) and ifdown(8)
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
 auto lo
 iface lo inet loopback
 
+# The primary network interface
 allow-hotplug eth0
 iface eth0 inet dhcp
 """
