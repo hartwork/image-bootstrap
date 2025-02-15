@@ -195,6 +195,8 @@ class DistroStrategy(object, metaclass=ABCMeta):
         pass
 
     def _ensure_eth0_naming(self):
+        etc_default_grub = os.path.join(self._abs_mountpoint, 'etc/default/grub')
+        self._messenger.info('Adjusting file "%s"...' % etc_default_grub)
         self._executor.check_call([
                 COMMAND_CHROOT, self._abs_mountpoint,
                 'sed',
