@@ -200,7 +200,7 @@ class DistroStrategy(object, metaclass=ABCMeta):
         self._executor.check_call([
                 COMMAND_CHROOT, self._abs_mountpoint,
                 'sed',
-                's,#GRUB_CMDLINE_LINUX=.*",GRUB_CMDLINE_LINUX="net.ifnames=0"  # set by image-bootstrap,',
+                's,#\\?GRUB_CMDLINE_LINUX=.*",GRUB_CMDLINE_LINUX="net.ifnames=0"  # set by image-bootstrap,',
                 '-i', '/etc/default/grub',
                 ], env=self.create_chroot_env())
 
