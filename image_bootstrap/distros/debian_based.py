@@ -233,6 +233,9 @@ class DebianBasedDistroStrategy(DistroStrategy, metaclass=ABCMeta):
     def install_kernel(self):
         pass  # Kernel installed, already
 
+    def adjust_grub_defaults(self, with_openstack):
+        self._ensure_eth0_naming()
+
     def install_acpid(self):
         self._install_packages(['acpid'])
 

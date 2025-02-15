@@ -7,7 +7,7 @@ import os
 from abc import ABCMeta, abstractmethod
 
 import image_bootstrap.loaders._yaml as yaml
-from directory_bootstrap.shared.commands import COMMAND_WGET
+from directory_bootstrap.shared.commands import COMMAND_CHROOT, COMMAND_WGET
 from image_bootstrap.engine import BOOTLOADER__CHROOT_GRUB2__DRIVE
 
 DISTRO_CLASS_FIELD = 'distro_class'
@@ -193,6 +193,16 @@ class DistroStrategy(object, metaclass=ABCMeta):
     @abstractmethod
     def get_minimum_size_bytes(self):
         pass
+
+    def _ensure_eth0_naming(self):
+        etc_default_grub = os.path.join(self._abs_mountpoint, 'etc/default/grub')
+        self._messenger.info('Adjusting file "%s"...' % etc_default_grub)
+        self._executor.check_call([
+                COMMAND_CHROOT, self._abs_mountpoint,
+                'sed',
+                's,#\\?GRUB_CMDLINE_LINUX=.*",GRUB_CMDLINE_LINUX="net.ifnames=0"  # set by image-bootstrap,',
+                '-i', '/etc/default/grub',
+                ], env=self.create_chroot_env())
 
     def adjust_grub_defaults(self, with_openstack):
         pass
