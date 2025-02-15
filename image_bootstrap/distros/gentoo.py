@@ -187,14 +187,6 @@ class GentooStrategy(DistroStrategy):
                 '-i', '/etc/default/grub',
                 ], env=self.create_chroot_env())
 
-    def _ensure_eth0_naming(self):
-        self._executor.check_call([
-                COMMAND_CHROOT, self._abs_mountpoint,
-                'sed',
-                's,#GRUB_CMDLINE_LINUX=.*",GRUB_CMDLINE_LINUX="net.ifnames=0"  # set by image-bootstrap,',
-                '-i', '/etc/default/grub',
-                ], env=self.create_chroot_env())
-
     def adjust_grub_defaults(self, with_openstack):
         if with_openstack:
             self._disable_grub2_gfxmode()
