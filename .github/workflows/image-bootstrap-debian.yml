@@ -13,7 +13,6 @@ jobs:
       matrix:
         debian_release:
           # https://www.debian.org/releases/
-          - buster
           - bullseye
           - bookworm
     runs-on: ubuntu-22.04

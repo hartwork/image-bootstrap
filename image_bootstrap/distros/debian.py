@@ -10,16 +10,16 @@ class DebianStrategy(DebianBasedDistroStrategy):
     DISTRO_KEY = 'debian'
     DISTRO_NAME_SHORT = 'Debian'
     DISTRO_NAME_LONG = 'Debian GNU/Linux'
-    DEFAULT_RELEASE = 'stretch'
+    DEFAULT_RELEASE = 'bookworm'
     DEFAULT_MIRROR_URL = 'http://httpredir.debian.org/debian'
     APT_CACHER_NG_URL = 'http://localhost:3142/debian'
 
     def check_release(self):
         if self._release in ('stable', 'testing'):
-            raise ValueError('For Debian releases, please use names like "stretch" rather than "%s".'
-                % self._release)
+            raise ValueError('For Debian releases, please use names like "%s" rather than "%s".'
+                % (self.DEFAULT_RELEASE, self._release))
 
-        if self._release in ('wheezy', 'jessie'):
+        if self._release in ('wheezy', 'jessie', 'stretch', 'buster'):
             raise ValueError('Release "%s" is no longer supported.' % self._release)
 
     def get_kernel_package_name(self, architecture):
