@@ -15,7 +15,7 @@ exceptiongroup==1.2.2
 idna==3.10
 importlib_metadata==8.6.1
 iniconfig==2.1.0
-packaging==24.2
+packaging==25.0
 pluggy==1.5.0
 pyparsing==3.2.3
 soupsieve==2.6
