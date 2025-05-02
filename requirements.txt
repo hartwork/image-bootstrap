@@ -10,7 +10,7 @@ requests==2.32.3
 # Indirect
 attrs==25.3.0
 certifi==2025.4.26
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
 exceptiongroup==1.2.2
 idna==3.10
 importlib_metadata==8.7.0
