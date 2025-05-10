@@ -25,9 +25,9 @@ from image_bootstrap.engine import (
         BOOTLOADER__CHROOT_GRUB2__DRIVE, BOOTLOADER__HOST_EXTLINUX,
         BOOTLOADER__HOST_GRUB2__DEVICE, BOOTLOADER__HOST_GRUB2__DRIVE,
         BOOTLOADER__NONE, BootstrapEngine, MachineConfig)
-from image_bootstrap.types.disk_id import disk_id_type
-from image_bootstrap.types.machine_id import machine_id_type
-from image_bootstrap.types.uuid import uuid_type
+from image_bootstrap.custom_types.disk_id import disk_id_type
+from image_bootstrap.custom_types.machine_id import machine_id_type
+from image_bootstrap.custom_types.uuid import uuid_type
 
 _BOOTLOADER_APPROACHES = (
         BOOTLOADER__AUTO,

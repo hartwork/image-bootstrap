@@ -30,7 +30,7 @@ from image_bootstrap.boot_loaders.grub2 import (
         BOOTLOADER__CHROOT_GRUB2__DRIVE, BOOTLOADER__HOST_GRUB2__DEVICE,
         BOOTLOADER__HOST_GRUB2__DRIVE, GrubTwoInstaller)
 from image_bootstrap.mount import MountFinder
-from image_bootstrap.types.uuid import require_valid_uuid
+from image_bootstrap.custom_types.uuid import require_valid_uuid
 
 BOOTLOADER__AUTO = 'auto'
 BOOTLOADER__HOST_EXTLINUX = 'host-extlinux'
