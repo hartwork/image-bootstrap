@@ -22,4 +22,4 @@ soupsieve==2.7
 tomli==2.2.1
 typing_extensions==4.13.2
 urllib3==2.4.0
-zipp==3.21.0
+zipp==3.22.0
