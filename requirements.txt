@@ -9,7 +9,7 @@ requests==2.32.4
 
 # Indirect
 attrs==25.3.0
-certifi==2025.7.14
+certifi==2025.8.3
 charset-normalizer==3.4.3
 exceptiongroup==1.3.0
 idna==3.10
