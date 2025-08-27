@@ -19,7 +19,7 @@ packaging==25.0
 pluggy==1.6.0
 Pygments==2.19.2
 pyparsing==3.2.3
-soupsieve==2.7
+soupsieve==2.8
 tomli==2.2.1
 typing_extensions==4.15.0
 urllib3==2.5.0
