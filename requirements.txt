@@ -1,5 +1,5 @@
 # Direct
-beautifulsoup4==4.13.4
+beautifulsoup4==4.13.5
 colorama==0.4.6
 coverage==7.10.6
 lxml==6.0.0
