@@ -10,12 +10,13 @@ jobs:
   install_and_run:
     name: Smoke test creation of Debian OpenStack images
     strategy:
+      fail-fast: false
       matrix:
         debian_release:
           # https://www.debian.org/releases/
-          - bullseye
           - bookworm
-    runs-on: ubuntu-22.04
+          - trixie
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Git repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
