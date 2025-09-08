@@ -15,7 +15,7 @@ class DebianStrategy(DebianBasedDistroStrategy):
     APT_CACHER_NG_URL = 'http://localhost:3142/debian'
 
     def check_release(self):
-        if self._release in ('stable', 'testing'):
+        if self._release in ('oldoldstable', 'oldstable', 'stable', 'testing'):
             raise ValueError('For Debian releases, please use names like "%s" rather than "%s".'
                 % (self.DEFAULT_RELEASE, self._release))
 
