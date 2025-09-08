@@ -14,8 +14,8 @@ jobs:
       matrix:
         debian_release:
           # https://www.debian.org/releases/
-          - bullseye
           - bookworm
+          - trixie
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Git repository
