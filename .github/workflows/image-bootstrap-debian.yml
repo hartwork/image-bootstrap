@@ -10,6 +10,7 @@ jobs:
   install_and_run:
     name: Smoke test creation of Debian OpenStack images
     strategy:
+      fail-fast: false
       matrix:
         debian_release:
           # https://www.debian.org/releases/
