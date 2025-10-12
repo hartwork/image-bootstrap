@@ -4,7 +4,7 @@ colorama==0.4.6
 coverage==7.10.7
 lxml==6.0.2
 pytest==8.4.2
-PyYAML==6.0.2
+PyYAML==6.0.3
 requests==2.32.5
 
 # Indirect
