@@ -138,6 +138,17 @@ class ArchStrategy(DistroStrategy):
                 ]
         self._executor.check_call(cmd_sed)
 
+        # Workaround issue "ERROR: file not found: '/etc/vconsole.conf'"
+        abs_etc_vconsole_conf = '/etc/vconsole.conf'
+        self._messenger.info('Creating empty file "%s"...' % os.path.join(self._abs_mountpoint, abs_etc_vconsole_conf.lstrip('/')))
+        cmd_touch_etc_vconsole_conf = [
+                COMMAND_CHROOT,
+                self._abs_mountpoint,
+                'touch',
+                abs_etc_vconsole_conf,
+                ]
+        self._executor.check_call(cmd_touch_etc_vconsole_conf, env=self.create_chroot_env())
+
     def generate_initramfs_from_inside_chroot(self):
         cmd_mkinitcpio = [
                 COMMAND_CHROOT,
