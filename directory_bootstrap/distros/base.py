@@ -108,6 +108,7 @@ class DirectoryBootstrapper(object, metaclass=ABCMeta):
         cmd = [
                 COMMAND_WGET,
                 '-O%s' % filename,
+                '--progress=dot:giga',
                 url,
                 ]
         self._executor.check_call(cmd)

@@ -33,6 +33,12 @@ jobs:
             --disable-pip-version-check \
             .
 
+      - name: Install runtime dependencies
+        run: |-
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes \
+            retry
+
       - name: Smoke test creation of Gentoo chroots
         run: |-
           cd /tmp  # to not be in Git clone folder
@@ -40,7 +46,7 @@ jobs:
           directory-bootstrap --help         ; echo
           directory-bootstrap gentoo --help  ; echo
 
-          sudo PYTHONUNBUFFERED=1 directory-bootstrap --verbose --debug gentoo /tmp/gentoo_chroot/
+          sudo retry --times=5 -- env PYTHONUNBUFFERED=1 directory-bootstrap --verbose --debug gentoo /tmp/gentoo_chroot/
 
       - name: Create .tar archive
         run: |-

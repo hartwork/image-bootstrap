@@ -38,7 +38,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends --yes \
             kpartx \
-            qemu-utils
+            qemu-utils \
+            retry
 
       - name: Smoke test creation of Gentoo OpenStack images
         run: |-
@@ -54,7 +55,7 @@ jobs:
           LOOP_DEV="$(sudo losetup --show --find -f /tmp/disk | tee /dev/stderr)"
           echo "LOOP_DEV=${LOOP_DEV}" >> "${GITHUB_ENV}"
 
-          sudo PYTHONUNBUFFERED=1 image-bootstrap --verbose --debug --openstack gentoo ${LOOP_DEV}
+          sudo retry --times=5 -- env PYTHONUNBUFFERED=1 image-bootstrap --verbose --debug --openstack gentoo ${LOOP_DEV}
 
       - name: Create .qcow2 image from loop device
         run: |-
