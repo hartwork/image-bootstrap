@@ -9,8 +9,7 @@ from textwrap import dedent
 from directory_bootstrap.distros.arch import (
         SUPPORTED_ARCHITECTURES, ArchBootstrapper)
 from directory_bootstrap.shared.commands import (
-        COMMAND_CHROOT, COMMAND_CP, COMMAND_FIND, COMMAND_RM, COMMAND_SED,
-        COMMAND_WGET)
+        COMMAND_CHROOT, COMMAND_CP, COMMAND_FIND, COMMAND_RM, COMMAND_WGET)
 from image_bootstrap.distros.base import DISTRO_CLASS_FIELD, DistroStrategy
 
 
@@ -38,7 +37,6 @@ class ArchStrategy(DistroStrategy):
                 COMMAND_CP,
                 COMMAND_FIND,
                 COMMAND_RM,
-                COMMAND_SED,
                 COMMAND_WGET,
                 ]
 
@@ -129,14 +127,16 @@ class ArchStrategy(DistroStrategy):
         self._executor.check_call(cmd, env=self.create_chroot_env())
 
     def adjust_initramfs_generator_config(self):
-        abs_linux_preset = os.path.join(self._abs_mountpoint, 'etc', 'mkinitcpio.d', 'linux.preset')
-        self._messenger.info('Adjusting "%s"...' % abs_linux_preset)
+        abs_linux_preset = '/etc/mkinitcpio.d/linux.preset'
+        self._messenger.info('Adjusting "%s"...' % os.path.join(self._abs_mountpoint, abs_linux_preset.lstrip('/')))
         cmd_sed = [
-                COMMAND_SED,
+                COMMAND_CHROOT,
+                self._abs_mountpoint,
+                'sed',
                 's,^[# \\t]*default_options=.*,default_options="-S autodetect"  # set by image-bootstrap,g',
                 '-i', abs_linux_preset,
                 ]
-        self._executor.check_call(cmd_sed)
+        self._executor.check_call(cmd_sed, env=self.create_chroot_env())
 
         # Workaround issue "ERROR: file not found: '/etc/vconsole.conf'"
         abs_etc_vconsole_conf = '/etc/vconsole.conf'
