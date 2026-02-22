@@ -461,6 +461,11 @@ class GentooStrategy(DistroStrategy):
         self._set_package_keywords('sys-kernel/vanilla-sources', f'~{_HOST_ARCH}')
         self._set_package_use_flags('sys-kernel/vanilla-sources', 'symlink')
         self._install_package_atoms(['sys-kernel/vanilla-sources', 'sys-kernel/installkernel'])
+
+        # This works around issues with Linux 6.19.3:
+        # fatal error: bfd.h: No such file or directory
+        self._install_package_atoms(['sys-libs/binutils-libs'])
+
         self._executor.check_call([
                 COMMAND_CHROOT, self._abs_mountpoint,
                 'make', '-C', '/usr/src/linux', 'defconfig',
