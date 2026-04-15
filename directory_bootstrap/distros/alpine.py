@@ -52,7 +52,13 @@ class AlpineBootstrapper(DirectoryBootstrapper):
         if match is None:
             raise VersionException('Could not determine latest release version.')
 
-        return match.group('version')
+        version = match.group('version')
+
+        # Workaround mirrors missing "alpine-minirootfs-3.23.4-x86_64.tar.gz.asc" file
+        if version == "3.23.4":
+            version = "3.23.3"
+
+        return version
 
     @staticmethod
     def _parse_version(version_str):
