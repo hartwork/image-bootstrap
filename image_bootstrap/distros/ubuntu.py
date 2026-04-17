@@ -12,7 +12,7 @@ class UbuntuStrategy(DebianBasedDistroStrategy):
     DISTRO_NAME_SHORT = 'Ubuntu'
     DISTRO_NAME_LONG = 'Ubuntu'
     DEFAULT_RELEASE = 'trusty'
-    DEFAULT_MIRROR_URL = 'http://archive.ubuntu.com/ubuntu'
+    DEFAULT_MIRROR_URL = 'https://archive.ubuntu.com/ubuntu/'
     APT_CACHER_NG_URL = 'http://localhost:3142/ubuntu'
 
     def select_bootloader(self):
