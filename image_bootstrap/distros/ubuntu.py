@@ -11,7 +11,7 @@ class UbuntuStrategy(DebianBasedDistroStrategy):
     DISTRO_KEY = 'ubuntu'
     DISTRO_NAME_SHORT = 'Ubuntu'
     DISTRO_NAME_LONG = 'Ubuntu'
-    DEFAULT_RELEASE = 'trusty'
+    DEFAULT_RELEASE = 'jammy'
     DEFAULT_MIRROR_URL = 'https://archive.ubuntu.com/ubuntu/'
     APT_CACHER_NG_URL = 'http://localhost:3142/ubuntu'
 
@@ -55,8 +55,8 @@ class UbuntuStrategy(DebianBasedDistroStrategy):
         self._install_packages(['cloud-init', 'cloud-utils'])
 
     def uses_systemd(self):
-        # NOTE: assumes not supporting anything older than trusty
-        return self._release != 'trusty'
+        # NOTE: assumes not supporting anything older than release "vivid" (15.04)
+        return True
 
     def uses_systemd_resolved(self, with_openstack):
         return False
