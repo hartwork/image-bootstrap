@@ -53,8 +53,6 @@ BUILD arch-openstack \
 	--openstack arch
 BUILD debian-stretch-openstack \
 	--openstack debian --release stretch --mirror "${DEBIAN_MIRROR_URL}"
-BUILD ubuntu-vivid \
-	ubuntu --release vivid
 
 
 trap - exit

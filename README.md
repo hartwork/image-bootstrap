@@ -12,8 +12,6 @@
 <br/>
 [![Smoke test creation of Gentoo OpenStack images](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-gentoo.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-gentoo.yml)
 <br/>
-[![Smoke test creation of Ubuntu OpenStack images](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-ubuntu.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/image-bootstrap-ubuntu.yml)
-<br/>
 [![Smoke test creation of Void chroots](https://github.com/hartwork/image-bootstrap/actions/workflows/directory-bootstrap-void.yml/badge.svg)](https://github.com/hartwork/image-bootstrap/actions/workflows/directory-bootstrap-void.yml)
 
 > [!IMPORTANT]
@@ -37,7 +35,7 @@
 * [Example run](#ExampleRun)
 * [Speeding things up](#SpeedingThingsUp)
     * [Using RAM instead of HDD/SSD](#UsingRamInsteadOfDisk)
-    * [Apt-Cacher NG -- a cache specific to Debian/Ubuntu](#AptCacherNG)
+    * [Apt-Cacher NG -- a cache specific to Debian](#AptCacherNG)
     * [Polipo -- a generic HTTP cache](#Polipo)
     * [haveged -- an entropy generator](#haveged)
 * [Debian package](#DebianPackage)
@@ -55,13 +53,13 @@ Welcome to the home of **image-bootstrap** (and its little brother **directory-b
 **image-bootstrap** is a command line tool to generate bootable virtual machine images
 and write them to a given _block device_.<br>
 Linux distributions supported by **image-bootstrap** currently include:
-Arch, Debian, Gentoo, Ubuntu.<br>
+Arch, Debian, Gentoo.<br>
 When passing the `--openstack` parameter, images are
 [prepared for use with OpenStack](http://docs.openstack.org/image-guide/content/ch_openstack_images.html).
 
 **directory-bootstrap** is a command line tool to install non-Debian Linux distributions
 into a given _directory_ (similar to [debootstrap](https://wiki.debian.org/Debootstrap)
-for Debian/Ubuntu).<br>
+for Debian).<br>
 Distributions supported by **directory-bootstrap** currently include:
 Alpine Linux, Arch Linux, Gentoo, and Void Linux.
 
@@ -71,7 +69,7 @@ Alpine Linux, Arch Linux, Gentoo, and Void Linux.
 
 **image-bootstrap** started out as a re-write of
 [grml-debootstrap](https://github.com/grml/grml-debootstrap).
-Primarily, it can be used to create Debian/Ubuntu or Arch images ready to be launched as a virtual machine.
+Primarily, it can be used to create Debian or Arch images ready to be launched as a virtual machine.
 
 In comparison to grml-debootstrap, by now **image-bootstrap**
 
@@ -87,7 +85,7 @@ In comparison to grml-debootstrap, by now **image-bootstrap**
  * supports using a custom `/etc/resolv.conf` file
    (e.g. to not leak your home router model name from `/etc/resolv.conf` into the image),
 
- * has support for installing Arch Linux, Gentoo and Ubuntu (besides Debian),
+ * has support for installing Arch Linux, Gentoo (besides Debian),
 
  * is able to create
    [OpenStack images](http://docs.openstack.org/image-guide/content/ch_openstack_images.html),
@@ -244,7 +242,7 @@ For example (assuming you have /tmp in RAM already):
 
 
 <a name="AptCacherNG"></a>
-## Apt-Cacher NG -- a cache specific to Debian/Ubuntu
+## Apt-Cacher NG -- a cache specific to Debian
 
 When creating multiple images,
 a local instance of [Apt-Cacher NG](https://www.unix-ag.uni-kl.de/~bloch/acng/) and
@@ -401,7 +399,6 @@ subcommands (choice of distribution):
     arch                Arch Linux
     debian              Debian GNU/Linux
     gentoo              Gentoo
-    ubuntu              Ubuntu
 
      _                          __             __      __
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____
