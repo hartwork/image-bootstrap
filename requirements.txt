@@ -22,5 +22,5 @@ pyparsing==3.3.2
 soupsieve==2.9.2
 tomli==2.4.1
 typing_extensions==4.16.0
-urllib3==2.7.0
+urllib3==2.8.0
 zipp==4.1.0
