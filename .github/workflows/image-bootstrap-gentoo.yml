@@ -29,7 +29,10 @@ jobs:
 
       - name: Install
         run: |-
-          sudo pip3 install \
+          python3 -m venv venv/
+          source venv/bin/activate
+
+          pip3 install \
             --disable-pip-version-check \
             .
 
@@ -43,6 +46,8 @@ jobs:
 
       - name: Smoke test creation of Gentoo OpenStack images
         run: |-
+          source venv/bin/activate
+
           cd /tmp  # to not be in Git clone folder
 
           image-bootstrap --help         ; echo
@@ -55,7 +60,7 @@ jobs:
           LOOP_DEV="$(sudo losetup --show --find -f /tmp/disk | tee /dev/stderr)"
           echo "LOOP_DEV=${LOOP_DEV}" >> "${GITHUB_ENV}"
 
-          sudo retry --times=5 -- env PYTHONUNBUFFERED=1 image-bootstrap --verbose --debug --openstack gentoo ${LOOP_DEV}
+          sudo retry --times=5 -- env PYTHONUNBUFFERED=1 "$(which image-bootstrap)" --verbose --debug --openstack gentoo ${LOOP_DEV}
 
       - name: Create .qcow2 image from loop device
         run: |-

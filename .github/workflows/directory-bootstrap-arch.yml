@@ -29,18 +29,23 @@ jobs:
 
       - name: Install
         run: |-
-          sudo pip3 install \
+          python3 -m venv venv/
+          source venv/bin/activate
+
+          pip3 install \
             --disable-pip-version-check \
             .
 
       - name: Smoke test creation of Arch chroots
         run: |-
+          source venv/bin/activate
+
           cd /tmp  # to not be in Git clone folder
 
           directory-bootstrap --help       ; echo
           directory-bootstrap arch --help  ; echo
 
-          sudo PYTHONUNBUFFERED=1 directory-bootstrap --verbose --debug arch /tmp/arch_chroot/
+          sudo PYTHONUNBUFFERED=1 "$(which directory-bootstrap)" --verbose --debug arch /tmp/arch_chroot/
 
       - name: Create .tar archive
         run: |-
