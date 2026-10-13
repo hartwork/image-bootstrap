@@ -22,14 +22,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Set up Python 3.14
+      - name: Set up Python 3.15
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
-          python-version: 3.14
+          python-version: 3.15
 
       - name: Install
         run: |-
-          sudo pip3 install \
+          python3 -m venv venv/
+          source venv/bin/activate
+
+          pip3 install \
             --disable-pip-version-check \
             .
 
@@ -41,12 +44,14 @@ jobs:
 
       - name: Smoke test creation of Gentoo chroots
         run: |-
+          source venv/bin/activate
+
           cd /tmp  # to not be in Git clone folder
 
           directory-bootstrap --help         ; echo
           directory-bootstrap gentoo --help  ; echo
 
-          sudo retry --times=5 -- env PYTHONUNBUFFERED=1 directory-bootstrap --verbose --debug gentoo /tmp/gentoo_chroot/
+          sudo retry --times=5 -- env PYTHONUNBUFFERED=1 "$(which directory-bootstrap)" --verbose --debug gentoo /tmp/gentoo_chroot/
 
       - name: Create .tar archive
         run: |-

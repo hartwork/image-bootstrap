@@ -109,7 +109,7 @@ class AlpineBootstrapper(DirectoryBootstrapper):
 
             self._messenger.info('Extracting to "{}"...'.format(self._abs_target_dir))
             with TarFile.open(abs_filename_tarball) as tf:
-                tf.extractall(path=self._abs_target_dir)
+                tf.extractall(path=self._abs_target_dir, filter='fully_trusted')
         finally:
             self._messenger.info('Cleaning up "{}"...'.format(abs_temp_dir))
             shutil.rmtree(abs_temp_dir)
