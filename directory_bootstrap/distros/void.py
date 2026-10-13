@@ -74,7 +74,7 @@ class VoidBootstrapper(DirectoryBootstrapper):
         try:
             abs_static_image_filename = self._download_static_image()
             with TarFile.open(abs_static_image_filename) as tf:
-                tf.extractall(path=abs_temp_dir)
+                tf.extractall(path=abs_temp_dir, filter='fully_trusted')
 
             self._copy_keys_into_chroot(abs_temp_dir)
 
