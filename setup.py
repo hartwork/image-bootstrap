@@ -69,7 +69,6 @@ if __name__ == '__main__':
                 'Intended Audience :: Developers',
                 'Intended Audience :: End Users/Desktop',
                 'Intended Audience :: System Administrators',
-                'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
                 'Natural Language :: English',
                 'Operating System :: POSIX :: Linux',
                 'Programming Language :: Python',
