@@ -404,7 +404,7 @@ subcommands (choice of distribution):
     (_)_ _  ___ ____ ____  ___ / /  ___  ___  / /____ / /________ ____
    / /  ' \/ _ `/ _ `/ -_)/__// _ \/ _ \/ _ \/ __(_-</ __/ __/ _ `/ _ \
   /_/_/_/_/\_,_/\_, /\__/    /_.__/\___/\___/\__/___/\__/_/  \_,_/ .__/
-               /___/                      v3.0.0 :: 2025-11-08  /_/
+               /___/                      v4.0.0 :: 2026-10-15  /_/
 
 Software libre licensed under AGPL v3 or later.
 Brought to you by Sebastian Pipping <sebastian@pipping.org>.
